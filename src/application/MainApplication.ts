@@ -10,7 +10,7 @@ import ExtensionService from "@service/extensions/ExtensionService";
 
 export default class MainAppliation implements IApplication {
     app: express.Express;
-    configLoader: ConfigLoader;
+    configLoader: ConfigLoader<ConfigModel>;
     events: EventEmitter;
 
     async start() {
@@ -37,9 +37,8 @@ export default class MainAppliation implements IApplication {
     }
 
     loadConfig() {
-        this.configLoader = new ConfigLoader(path.resolve(".", "config.json"), path.resolve(".", "config.template.json"));
-        this.configLoader.exportDefault();
-        let config = this.configLoader.import();
+        this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
+        let config = this.configLoader.createTemplateAndImport(new ConfigModel());
 
         if(!config) {
             throw new Error(`Config does not exist at [${this.configLoader.configPath}]`);
@@ -49,9 +48,11 @@ export default class MainAppliation implements IApplication {
 
     onConfigLoaded(callback: (config: ConfigModel) => void) {
         this.events.on("config-loaded", callback);
+        return this;
     }
 
     onExpressStart(callback: (app: express.Express) => void) {
         this.events.on("express-loaded", callback);
+        return this;
     }
 }

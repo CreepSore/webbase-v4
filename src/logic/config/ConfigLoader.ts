@@ -1,7 +1,8 @@
 import * as fs from "fs";
+import * as path from "path";
 import ConfigModel from "./ConfigModel";
 
-export default class ConfigLoader {
+export default class ConfigLoader<T> {
     configPath: string;
     templatePath: string;
 
@@ -10,12 +11,13 @@ export default class ConfigLoader {
         this.templatePath = templatePath;
     }
 
-    import() {
-        return ConfigLoader.import(this.configPath);
+    createTemplateAndImport(model: Partial<T>) {
+        this.exportConfigTemplate(model);
+        return this.import();
     }
 
-    exportDefault() {
-        ConfigLoader.exportDefault(this.templatePath);
+    import() {
+        return ConfigLoader.import<T>(this.configPath);
     }
 
     configExists() {
@@ -26,18 +28,26 @@ export default class ConfigLoader {
         return fs.existsSync(this.templatePath);
     }
 
-    static import(path: string) {
+    exportConfigTemplate(config: Partial<T>) {
+        ConfigLoader.exportConfig(config, this.templatePath);
+    }
+
+    static import<T>(path: string) {
         if(!fs.existsSync(path)) return null;
-        let config: ConfigModel = JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
+        let config: T = JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
 
         return config;
     }
 
-    static exportDefault(path: string) {
+    static exportConfig<T>(config: Partial<T>, path: string) {
         if(fs.existsSync(path)) {
             fs.unlinkSync(path);
         }
 
         fs.writeFileSync(path, JSON.stringify(new ConfigModel(), null, 4), { encoding: "utf8" });
+    }
+
+    static createConfigPath(configName: string) {
+        return path.resolve(".", configName);
     }
 }

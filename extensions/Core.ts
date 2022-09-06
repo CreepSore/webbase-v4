@@ -12,8 +12,15 @@ export default class Testextension implements IExtension {
     };
 
     async start(executionContext: IExecutionContext) {
+        if(executionContext.contextType === "cli") return;
+
         let mainApp = executionContext.application as MainApplication;
-        mainApp.onExpressStart(app => {
+
+        mainApp
+        .onConfigLoaded(config => {
+
+        })
+        .onExpressStart(app => {
             app.get("/", (req, res) => {
                 res.write("Works!");
                 res.end();
