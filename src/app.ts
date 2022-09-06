@@ -7,6 +7,6 @@ import MainApplication from "@app/MainApplication";
         await app.start();
     }
     catch(err) {
-        console.log(`Critical error occured: [${err.message}]`);
+        console.log("[CRITICAL]", `Critical error occured: [${err.message}]`);
     }
 })();

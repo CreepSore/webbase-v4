@@ -30,6 +30,8 @@ export default class MainAppliation implements IApplication {
         this.app = express();
         this.events.emit("express-loaded", this.app);
         this.app.listen(config.port, config.hostname);
+
+        console.log("[INFO]", "Main Application Startup successful.");
     }
 
     async stop() {
