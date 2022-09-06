@@ -1,3 +1,9 @@
+## Webbase ##
+
+extensions/Custom*
+
+#############
+
 # Logs
 logs
 *.log
