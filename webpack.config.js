@@ -1,6 +1,6 @@
 let path = require("path");
 
-module.exports = function(env) {
+module.exports = function(env, argv) {
     let buildType;
     if(!env.buildtype) {
         console.warn("[WARN] No Build Type specified, defaulting to ['app']");
@@ -20,11 +20,15 @@ module.exports = function(env) {
             },
             output: {
                 path: path.resolve(__dirname, "out"),
-                filename: "[name]"
+                filename: "[name]",
+                clean: true
             },
-            devtool: "inline-source-map",
+            devtool: argv.mode === "development"? "source-map" : false,
             resolve: {
-                extensions: [".ts"]
+                extensions: [".ts", ".js"],
+                alias: {
+                    wpextensions: path.resolve(__dirname, "extensions")
+                }
             },
             module: {
                 rules: [
@@ -43,6 +47,9 @@ module.exports = function(env) {
                         }
                     }
                 ]
+            },
+            optimization: {
+                minimize: argv.mode === "productive"
             },
             plugins: [ ],
             target: "node"

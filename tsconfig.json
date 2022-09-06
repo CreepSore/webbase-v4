@@ -5,9 +5,8 @@
         "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "sourceMap": true,
-        "declaration": true,
-        "emitDeclarationOnly": true,
+        "declaration": false,
+        "noEmit": true,
         "isolatedModules": true,
         "baseUrl": "src",
         "paths": {

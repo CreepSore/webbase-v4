@@ -3,5 +3,10 @@ import MainApplication from "@app/MainApplication";
 
 (async() => {
     let app: IApplication = new MainApplication();
-    await app.start();
+    try {
+        await app.start();
+    }
+    catch(err) {
+        console.log(`Critical error occured: [${err.message}]`);
+    }
 })();
