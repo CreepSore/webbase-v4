@@ -32,7 +32,15 @@ module.exports = function(env) {
                         test: /\.(ts)$/i,
                         exclude: /(node_modules)/,
                         loader: "babel-loader",
-                        options: { presets: ["@babel/preset-env", "@babel/typescript"] }
+                        options: {
+                            plugins: [
+                                ["babel-plugin-tsconfig-paths", {
+                                    rootDir: ".",
+                                    tsconfig: "tsconfig.json",
+                                }]
+                            ],
+                            presets: ["@babel/preset-env", "@babel/typescript"]
+                        }
                     }
                 ]
             },

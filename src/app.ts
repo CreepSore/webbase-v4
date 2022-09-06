@@ -1,3 +1,7 @@
-import path from "path";
+import IApplication from "@app/IApplication";
+import MainApplication from "@app/MainApplication";
 
-console.log(path.resolve("."));
+(async() => {
+    let app: IApplication = new MainApplication();
+    await app.start();
+})();
