@@ -1,8 +1,9 @@
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import MainApplication from "@app/MainApplication";
+import ConfigModel from "@logic/config/ConfigModel";
 
-export default class Testextension implements IExtension {
+export default class Core implements IExtension {
     metadata: ExtensionMetadata = {
         name: "Core",
         version: "1.0.0",
@@ -11,6 +12,8 @@ export default class Testextension implements IExtension {
         dependencies: []
     };
 
+    mainConfig: ConfigModel;
+
     async start(executionContext: IExecutionContext) {
         if(executionContext.contextType === "cli") return;
 
@@ -18,7 +21,7 @@ export default class Testextension implements IExtension {
 
         mainApp
         .onConfigLoaded(config => {
-
+            this.mainConfig = config;
         })
         .onExpressStart(app => {
             app.get("/", (req, res) => {
