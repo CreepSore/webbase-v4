@@ -88,10 +88,10 @@ export default class ExtensionService {
         if(runStart) {
             try {
                 await node.start({...this.executionContext});
-                console.log("[INFO]", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`)
+                console.log("INFO", "ExtensionService.ts", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`)
             }
             catch(err) {
-                console.log("[ERROR]", `Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed: [${err.message}]: ${err.stack}`);
+                console.log("ERROR", "ExtensionService.ts", `Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed: [${err.message}]: ${err.stack}`);
             }
 
             for(let child of this.extensions.filter(ext => ext.metadata.resolvedDependencies.includes(node))) {
