@@ -16,23 +16,8 @@ export default class Core implements IExtension {
         dependencies: []
     };
 
-    mainConfig: ConfigModel;
-
     async start(executionContext: IExecutionContext) {
         if(executionContext.contextType === "cli") return;
-
-        let mainApp = executionContext.application as MainApplication;
-
-        mainApp
-        .onConfigLoaded(config => {
-            this.mainConfig = config;
-        })
-        .onExpressStart(app => {
-            app.get("/", (req, res) => {
-                res.write("Works!");
-                res.end();
-            });
-        });
 
         if(!fs.existsSync("logs")) {
             fs.mkdirSync("logs");

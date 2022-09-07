@@ -14,5 +14,7 @@
             "@logic/*": ["logic/*"],
             "@service/*": ["service/*"]
         }
-    }
+    },
+    "exclude": ["node_modules", "**/node_modules/*"],
+    "include": ["src/**/*.ts", "src/**/*.js", "extensions/*.ts", "extensions/*.js"]
 }
