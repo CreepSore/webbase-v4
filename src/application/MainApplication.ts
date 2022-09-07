@@ -11,6 +11,8 @@ export default class MainAppliation implements IApplication {
     extensionService: ExtensionService = new ExtensionService();
 
     async start() {
+        console.log(test);
+
         this.events = new EventEmitter();
         let config = this.loadConfig();
         this.events.emit("config-loaded", config);

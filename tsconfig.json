@@ -13,8 +13,18 @@
             "@app/*": ["application/*"],
             "@logic/*": ["logic/*"],
             "@service/*": ["service/*"]
-        }
+        },
+        "jsx": "react"
     },
     "exclude": ["node_modules", "**/node_modules/*"],
-    "include": ["src/**/*.ts", "src/**/*.js", "extensions/*.ts", "extensions/*.js"]
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.js",
+        "src/**/*.jsx",
+        "extensions/*.ts",
+        "extensions/*.tsx",
+        "extensions/*.js",
+        "extensions/*.jsx"
+    ]
 }
