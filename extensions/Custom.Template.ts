@@ -22,7 +22,7 @@ export default class CustomTemplate implements IExtension {
     events: EventEmitter = new EventEmitter();
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(false);
     }
 
     async start(executionContext: IExecutionContext) {
@@ -33,13 +33,17 @@ export default class CustomTemplate implements IExtension {
         
     }
 
-    private loadConfig() {
+    private loadConfig(errorOnNonExistingConfig: boolean = true) {
         let model = new TemplateConfig();
         if(Object.keys(model).length === 0) return model;
 
         let [cfgname, templatename] = this.generateConfigNames();
         this.configLoader = new ConfigLoader(cfgname, templatename);
         let cfg = this.configLoader.createTemplateAndImport(model);
+
+        if(!cfg && errorOnNonExistingConfig) {
+            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
+        }
 
         return cfg;
     }
