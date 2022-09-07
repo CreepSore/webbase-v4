@@ -26,24 +26,26 @@ export default class CustomTemplate implements IExtension {
     }
 
     async start(executionContext: IExecutionContext) {
-        
+        this.checkConfig();
     }
 
     async stop() {
         
     }
 
-    private loadConfig(errorOnNonExistingConfig: boolean = true) {
+    private checkConfig() {
+        if(!this.config) {
+            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
+        }
+    }
+
+    private loadConfig() {
         let model = new TemplateConfig();
         if(Object.keys(model).length === 0) return model;
 
         let [cfgname, templatename] = this.generateConfigNames();
         this.configLoader = new ConfigLoader(cfgname, templatename);
         let cfg = this.configLoader.createTemplateAndImport(model);
-
-        if(!cfg && errorOnNonExistingConfig) {
-            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
-        }
 
         return cfg;
     }
