@@ -22,7 +22,7 @@ export default class CustomTemplate implements IExtension {
     events: EventEmitter = new EventEmitter();
 
     constructor() {
-        this.config = this.loadConfig(false);
+        this.config = this.loadConfig();
     }
 
     async start(executionContext: IExecutionContext) {
