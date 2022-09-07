@@ -1,6 +1,7 @@
 ## Webbase ##
 
 extensions/Custom*
+!extensions/Custom.Template.ts
 cfg/*
 extensions/disabled.json
 

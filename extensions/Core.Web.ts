@@ -5,7 +5,6 @@ import * as express from "express";
 
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
-import ConfigModel from "@logic/config/ConfigModel";
 import ConfigLoader from "@logic/config/ConfigLoader";
 
 class CoreWebConfig {
@@ -13,7 +12,7 @@ class CoreWebConfig {
     port: number = 1325;
 }
 
-export default class Core implements IExtension {
+export default class CoreWeb implements IExtension {
     metadata: ExtensionMetadata = {
         name: "Core.Web",
         version: "1.0.0",
@@ -53,7 +52,7 @@ export default class Core implements IExtension {
         let cfg = this.configLoader.createTemplateAndImport(new CoreWebConfig());
 
         return cfg;
-    };
+    }
 
     onExpressLoaded(callback: (app: express.Express) => void) {
         this.events.on("express-loaded", callback);
