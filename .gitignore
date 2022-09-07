@@ -1,6 +1,8 @@
 ## Webbase ##
 
 extensions/Custom*
+config.json
+extensions/disabled.json
 
 #############
 

@@ -6,8 +6,8 @@
   "scripts": {
     "build": "webpack build --env buildtype=app --mode=production",
     "dbuild": "webpack build --env buildtype=app --mode=development",
-    "start": "npm run build && clear && node ./out/app.js",
-    "dstart": "npm run dbuild && clear && node ./out/app.js",
+    "start": "npm run build && (clear || cls) && node ./out/app.js",
+    "dstart": "npm run dbuild && (clear || cls) && node ./out/app.js",
     "watch": "webpack build --env buildtype=app --mode=development -w"
   },
   "author": "ehdes",

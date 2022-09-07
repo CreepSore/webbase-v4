@@ -22,20 +22,25 @@ export default class ExtensionService {
     async loadExtensions() {
         if(this.extensionsStarted) return false;
         if(!fs.existsSync(this.extensionPath)) return false;
+        let disabled = this.getDisabledExtensions();
         let extDir = fs.readdirSync(this.extensionPath);
 
-        this.extensions = (await Promise.all(extDir.map(async filename => {
-            if(!filename.endsWith(".js") && !filename.endsWith(".ts")) return null;
-            const finalPath = path.join(this.extensionPath, filename);
-            let stat = fs.statSync(finalPath);
+        this.extensions = (await Promise.all(
+            extDir
+                .filter(name => /\.(js|ts)$/.test(name) && !disabled.includes(name))
+                .map(async filename => {
+                    if(!filename.endsWith(".js") && !filename.endsWith(".ts")) return null;
+                    const finalPath = path.join(this.extensionPath, filename);
+                    let stat = fs.statSync(finalPath);
 
-            if(!stat.isFile()) return null;
+                    if(!stat.isFile()) return null;
 
-            const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + filename)).default;
+                    const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + filename)).default;
 
-            const extension: IExtension = new ImportedExtension();
-            return extension;
-        }))).filter(x => Boolean(x));
+                    const extension: IExtension = new ImportedExtension();
+                    return extension;
+                })
+        )).filter(x => Boolean(x));
 
         this.extensions.forEach(extension => {
             extension.metadata.resolvedDependencies = this.extensions.filter(ext => extension.metadata.dependencies.includes(ext.metadata.name));
@@ -98,5 +103,18 @@ export default class ExtensionService {
                 await this.startExtensionRecursive(child);
             }
         }
+    }
+
+    private getDisabledExtensions() {
+        let disabledPath = path.join(this.extensionPath, "disabled.json");
+        let disabledResult: string[] = [];
+        if(!fs.existsSync(disabledPath)) {
+            fs.writeFileSync(disabledPath, JSON.stringify(disabledResult, null, 4), "utf8");
+        }
+        else {
+            disabledResult = JSON.parse(String(fs.readFileSync(disabledPath, "utf8")));
+        }
+
+        return disabledResult;
     }
 }

@@ -25,7 +25,7 @@ module.exports = function(env, argv) {
             },
             devtool: argv.mode === "development"? "source-map" : false,
             resolve: {
-                extensions: [".ts", ".js"],
+                extensions: [".ts", ".js", ".json"],
                 alias: {
                     wpextensions: path.resolve(__dirname, "extensions")
                 }
@@ -45,6 +45,11 @@ module.exports = function(env, argv) {
                             ],
                             presets: ["@babel/preset-env", "@babel/typescript"]
                         }
+                    },
+                    {
+                        test: /\.(json)$/i,
+                        exclude: /(node_modules)/,
+                        loader: "file-loader"
                     }
                 ]
             },

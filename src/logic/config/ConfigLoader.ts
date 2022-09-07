@@ -39,15 +39,18 @@ export default class ConfigLoader<T> {
         return config;
     }
 
-    static exportConfig<T>(config: Partial<T>, path: string) {
-        if(fs.existsSync(path)) {
-            fs.unlinkSync(path);
+    static exportConfig<T>(config: Partial<T>, exportPath: string) {
+        if(fs.existsSync(exportPath)) {
+            fs.unlinkSync(exportPath);
+        }
+        if(!fs.existsSync(path.dirname(exportPath))) {
+            fs.mkdirSync(path.dirname(exportPath), {recursive: true});
         }
 
-        fs.writeFileSync(path, JSON.stringify(new ConfigModel(), null, 4), { encoding: "utf8" });
+        fs.writeFileSync(exportPath, JSON.stringify(config, null, 4), { encoding: "utf8" });
     }
 
     static createConfigPath(configName: string) {
-        return path.resolve(".", configName);
+        return path.resolve(".", "cfg", configName);
     }
 }
