@@ -1,4 +1,5 @@
 import {EventEmitter} from "events";
+import {Server} from "net";
 
 import * as express from "express";
 
@@ -23,8 +24,9 @@ export default class Core implements IExtension {
 
     config: CoreWebConfig;
     app: express.Express;
+    server: Server;
     configLoader: ConfigLoader<CoreWebConfig>;
-    events: EventEmitter;
+    events: EventEmitter = new EventEmitter();
 
     constructor() {
         this.config = this.loadConfig();
@@ -36,23 +38,24 @@ export default class Core implements IExtension {
             throw new Error(`Config not found at [${this.configLoader.configPath}]`);
         }
 
-        this.events = new EventEmitter();
-
-        this.events.emit("config-loaded", this.config);
-
         this.app = express();
         this.events.emit("express-loaded", this.app);
-        this.app.listen(this.config.port, this.config.hostname);
+        this.server = this.app.listen(this.config.port, this.config.hostname);
     }
 
     async stop() {
-
+        this.server.removeAllListeners();
+        this.server.close();
     }
 
-    loadConfig() {
+    private loadConfig() {
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("Core.Web.json"), ConfigLoader.createConfigPath("Core.Web.template.json"));
         let cfg = this.configLoader.createTemplateAndImport(new CoreWebConfig());
 
         return cfg;
     };
+
+    onExpressLoaded(callback: (app: express.Express) => void) {
+        this.events.on("express-loaded", callback);
+    }
 }

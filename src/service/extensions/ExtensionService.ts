@@ -54,19 +54,23 @@ export default class ExtensionService {
         this.extensions = [];
     }
 
-    startExtensions() {
+    async startExtensions() {
         if(this.extensionsStarted) return;
         let baseNodes = this.extensions.filter(ext => ext.metadata.dependencies.length === 0);
 
-        baseNodes.forEach(baseNode => {
-            this.startExtensionRecursive(baseNode);
-        });
+        for(let baseNode of baseNodes) {
+            await this.startExtensionRecursive(baseNode);
+        }
 
         this.extensionsStarted = true;
     }
 
-    stopExtensions() {
+    async stopExtensions() {
         if(!this.extensionsStarted) return;
+
+        for(let extension of this.extensions) {
+            await extension.stop();
+        }
 
         this.extensionsStarted = false;
     }

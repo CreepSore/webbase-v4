@@ -27,7 +27,7 @@ export default class MainAppliation implements IApplication {
     }
 
     async stop() {
-        this.extensionService.stopExtensions();
+        await this.extensionService.stopExtensions();
     }
 
     loadConfig() {
