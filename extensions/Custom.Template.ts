@@ -1,7 +1,5 @@
 import {EventEmitter} from "events";
 
-import * as express from "express";
-
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
