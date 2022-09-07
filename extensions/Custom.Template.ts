@@ -18,7 +18,7 @@ export default class CustomTemplate implements IExtension {
     };
 
     config: TemplateConfig;
-    configLoader: ConfigLoader<TemplateConfig>;
+    configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
     constructor() {
