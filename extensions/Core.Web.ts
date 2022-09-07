@@ -24,7 +24,7 @@ export default class CoreWeb implements IExtension {
     config: CoreWebConfig;
     app: express.Express;
     server: Server;
-    configLoader: ConfigLoader<CoreWebConfig>;
+    configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
     constructor() {
