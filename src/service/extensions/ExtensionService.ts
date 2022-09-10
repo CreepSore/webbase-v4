@@ -1,7 +1,7 @@
 import * as path from "path";
 import * as fs from "fs";
 
-import IExecutionContext, {IAppExecutionContext, ICliExecutionContext, IBuildExecutionContext} from "./IExecutionContext";
+import IExecutionContext, {IAppExecutionContext, ICliExecutionContext} from "./IExecutionContext";
 import IExtension, {IExtensionConstructor} from "./IExtension";
 
 export default class ExtensionService {
@@ -14,7 +14,7 @@ export default class ExtensionService {
         this.extensionPath = "./extensions/";
     }
 
-    setContextInfo(info: IAppExecutionContext|ICliExecutionContext|IBuildExecutionContext) {
+    setContextInfo(info: IAppExecutionContext|ICliExecutionContext) {
         this.executionContext = info;
         this.executionContext.extensionService = this;
     }

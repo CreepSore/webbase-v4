@@ -63,9 +63,9 @@ module.exports = function(env, argv) {
                     },
                     {
                         test: /\.(json)$/i,
-                        exclude: /(node_modules)/,
-                        loader: "file-loader"
-                    }
+                        exclude: /(node_modules)/
+                    },
+                    { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
                 ]
             },
             optimization: {
@@ -83,19 +83,15 @@ module.exports = function(env, argv) {
                 path: path.resolve(__dirname, "out"),
                 filename: "[name]"
             },
-            devtool: argv.mode === "development"? "source-map" : false,
+            devtool: argv.mode === "development" ? "source-map" : false,
             resolve: {
-                extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
-                alias: {
-                    wpextensions: path.resolve(__dirname, "extensions")
-                },
+                extensions: [".ts", ".tsx", ".js", ".jsx"],
                 modules: ['node_modules']
             },
             module: {
                 rules: [
                     {
                         test: /\.(ts|js)$/i,
-                        exclude: /(node_modules)/,
                         loader: "babel-loader",
                         options: {
                             plugins: [],
@@ -104,7 +100,6 @@ module.exports = function(env, argv) {
                     },
                     {
                         test: /\.(tsx|jsx)$/i,
-                        exclude: /(node_modules)/,
                         use: [
                             {
                                 loader: "babel-loader",
@@ -114,11 +109,7 @@ module.exports = function(env, argv) {
                             }
                         ]
                     },
-                    {
-                        test: /\.(json)$/i,
-                        exclude: /(node_modules)/,
-                        loader: "file-loader"
-                    }
+                    { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
                 ]
             },
             optimization: {
