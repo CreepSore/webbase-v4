@@ -6,6 +6,7 @@ extensions/*
 !extensions/Custom.Template.webpack.json
 cfg/*
 extensions/disabled.json
+storage.db
 
 #############
 

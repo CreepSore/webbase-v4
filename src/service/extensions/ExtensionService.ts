@@ -29,7 +29,7 @@ export default class ExtensionService {
             extDir
                 .filter(name => /\.(js|ts)$/.test(name) && !disabled.includes(name))
                 .map(async filename => {
-                    if(!filename.endsWith(".js") && !filename.endsWith(".ts")) return null;
+                    if((!filename.endsWith(".js") && !filename.endsWith(".ts")) || filename.startsWith("Custom.Template")) return null;
                     const finalPath = path.join(this.extensionPath, filename);
                     let stat = fs.statSync(finalPath);
 

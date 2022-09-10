@@ -33,6 +33,7 @@ module.exports = function(env, argv) {
                 },
                 modules: ['node_modules']
             },
+            externals: {knex: 'commonjs knex'},
             module: {
                 rules: [
                     {
@@ -46,16 +47,25 @@ module.exports = function(env, argv) {
                                     tsconfig: "tsconfig.json",
                                 }]
                             ],
-                            presets: ["@babel/preset-env", "@babel/typescript"]
+                            presets: ["@babel/typescript", ["@babel/preset-env", {
+                                targets: {
+                                    node: "17"
+                                }
+                            }]]
                         },
                     },
                     {
                         test: /\.(tsx|jsx)$/i,
+                        exclude: /(node_modules)/,
                         use: [
                             {
                                 loader: "babel-loader",
                                 options: {
-                                    presets: ["@babel/typescript", "@babel/preset-react", "@babel/preset-env"]
+                                    presets: ["@babel/typescript", "@babel/preset-react", ["@babel/preset-env", {
+                                        targets: {
+                                            node: "17"
+                                        }
+                                    }]]
                                 }
                             }
                         ],
@@ -78,7 +88,8 @@ module.exports = function(env, argv) {
     else if(buildType === "web") {
         let extPath = path.join(__dirname, "extensions");
 
-        return webpackMerge([{
+        let cfg = webpackMerge([{
+            entry: {},
             output: {
                 path: path.resolve(__dirname, "out"),
                 filename: "[name]"
@@ -92,6 +103,7 @@ module.exports = function(env, argv) {
                 rules: [
                     {
                         test: /\.(ts|js)$/i,
+                        exclude: /(node_modules)/,
                         loader: "babel-loader",
                         options: {
                             plugins: [],
@@ -100,6 +112,7 @@ module.exports = function(env, argv) {
                     },
                     {
                         test: /\.(tsx|jsx)$/i,
+                        exclude: /(node_modules)/,
                         use: [
                             {
                                 loader: "babel-loader",
@@ -109,7 +122,7 @@ module.exports = function(env, argv) {
                             }
                         ]
                     },
-                    { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
+                    { test: /\.(css)$/i, exclude: /(node_modules)/, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
                 ]
             },
             optimization: {
@@ -123,7 +136,9 @@ module.exports = function(env, argv) {
                 let data = JSON.parse(fs.readFileSync(filePath, "utf8"));
                 return data;
             })
-        ]);;
+        ]);
+
+        return cfg;
     }
     else {
         return null;

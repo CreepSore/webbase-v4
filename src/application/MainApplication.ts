@@ -3,6 +3,7 @@ import IApplication from "./IApplication";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import ConfigModel from "@logic/config/ConfigModel";
 import ExtensionService from "@service/extensions/ExtensionService";
+import IExecutionContext from "@service/extensions/IExecutionContext";
 
 export default class MainAppliation implements IApplication {
     configLoader: ConfigLoader<ConfigModel>;
@@ -20,9 +21,10 @@ export default class MainAppliation implements IApplication {
             extensionService: this.extensionService
         });
         await this.extensionService.loadExtensions();
-        this.extensionService.startExtensions();
+        await this.extensionService.startExtensions();
 
         console.log("INFO", "MainApplication.ts", "Main Application Startup successful.");
+        this.events.emit("after-startup", this.extensionService.executionContext);
     }
 
     async stop() {
@@ -41,6 +43,11 @@ export default class MainAppliation implements IApplication {
 
     onConfigLoaded(callback: (config: ConfigModel) => void) {
         this.events.on("config-loaded", callback);
+        return this;
+    }
+
+    onAfterStartup(callback: (context: IExecutionContext) => void) {
+        this.events.on("after-startup", callback);
         return this;
     }
 }
