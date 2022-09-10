@@ -1,0 +1,5 @@
+{
+    "entry": {
+        "Custom.Template.Main.js": "./extensions/Custom.Template/Custom.Template.Main.tsx"
+    }
+}

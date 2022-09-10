@@ -1,7 +1,9 @@
 ## Webbase ##
 
-extensions/Custom*
+extensions/*
+!extensions/Core*
 !extensions/Custom.Template.ts
+!extensions/Custom.Template.webpack.json
 cfg/*
 extensions/disabled.json
 

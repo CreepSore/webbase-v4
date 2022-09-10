@@ -1,4 +1,6 @@
 let path = require("path");
+let fs = require("fs");
+let {merge: webpackMerge} = require("webpack-merge");
 
 module.exports = function(env, argv) {
     let buildType;
@@ -6,7 +8,7 @@ module.exports = function(env, argv) {
         console.warn("[WARN] No Build Type specified, defaulting to ['app']");
         buildType = "app";
     }
-    else if(["app", "plugins"].includes(env.buildtype)){
+    else if(["app", "web"].includes(env.buildtype)){
         buildType = env.buildtype;
     }
     else {
@@ -28,12 +30,13 @@ module.exports = function(env, argv) {
                 extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
                 alias: {
                     wpextensions: path.resolve(__dirname, "extensions")
-                }
+                },
+                modules: ['node_modules']
             },
             module: {
                 rules: [
                     {
-                        test: /\.(ts)$/i,
+                        test: /\.(ts|js)$/i,
                         exclude: /(node_modules)/,
                         loader: "babel-loader",
                         options: {
@@ -47,25 +50,16 @@ module.exports = function(env, argv) {
                         },
                     },
                     {
-                        test: /\.(tsx|jsx)/i,
-                        exclude: /(node_modules)/,
+                        test: /\.(tsx|jsx)$/i,
                         use: [
                             {
                                 loader: "babel-loader",
                                 options: {
-                                    plugins: [
-                                        ["babel-plugin-tsconfig-paths", {
-                                            rootDir: ".",
-                                            tsconfig: "tsconfig.json",
-                                        }]
-                                    ],
-                                    presets: ["@babel/preset-env", "@babel/typescript"]
+                                    presets: ["@babel/typescript", "@babel/preset-react", "@babel/preset-env"]
                                 }
-                            },
-                            {
-                                loader: "raw-loader"
                             }
-                        ]
+                        ],
+                        type: "asset/resource"
                     },
                     {
                         test: /\.(json)$/i,
@@ -81,9 +75,64 @@ module.exports = function(env, argv) {
             target: "node"
         }
     }
-    else if(buildType === "plugins"){
-        console.error("[ERROR] Plugins are not supported yet!");
-        return null;
+    else if(buildType === "web") {
+        let extPath = path.join(__dirname, "extensions");
+
+        return webpackMerge([{
+            output: {
+                path: path.resolve(__dirname, "out"),
+                filename: "[name]"
+            },
+            devtool: argv.mode === "development"? "source-map" : false,
+            resolve: {
+                extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+                alias: {
+                    wpextensions: path.resolve(__dirname, "extensions")
+                },
+                modules: ['node_modules']
+            },
+            module: {
+                rules: [
+                    {
+                        test: /\.(ts|js)$/i,
+                        exclude: /(node_modules)/,
+                        loader: "babel-loader",
+                        options: {
+                            plugins: [],
+                            presets: ["@babel/preset-env", "@babel/typescript"]
+                        },
+                    },
+                    {
+                        test: /\.(tsx|jsx)$/i,
+                        exclude: /(node_modules)/,
+                        use: [
+                            {
+                                loader: "babel-loader",
+                                options: {
+                                    presets: ["@babel/typescript", "@babel/preset-react", "@babel/preset-env"]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        test: /\.(json)$/i,
+                        exclude: /(node_modules)/,
+                        loader: "file-loader"
+                    }
+                ]
+            },
+            optimization: {
+                minimize: argv.mode === "productive"
+            },
+            plugins: [ ],
+        }, ...fs.readdirSync(extPath)
+            .filter(file => !file.startsWith("Custom.Template") && file.endsWith("webpack.json"))
+            .map(file => {
+                let filePath = path.join(extPath, file);
+                let data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+                return data;
+            })
+        ]);;
     }
     else {
         return null;

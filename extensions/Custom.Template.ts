@@ -27,6 +27,9 @@ export default class CustomTemplate implements IExtension {
 
     async start(executionContext: IExecutionContext) {
         this.checkConfig();
+        if(executionContext.contextType === "cli") {
+            return;
+        }
     }
 
     async stop() {
