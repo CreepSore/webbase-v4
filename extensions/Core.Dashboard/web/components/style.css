@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+@layer components {
+    .user-edit-table {
+        input[type="text"] {
+            @apply font-normal;
+            @apply p-2;
+        }
+    }
+}
+

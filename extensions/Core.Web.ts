@@ -3,6 +3,8 @@ import {EventEmitter} from "events";
 import {Server} from "net";
 
 import * as express from "express";
+import * as expressSession from "express-session";
+import helmet from "helmet";
 import * as uuid from "uuid";
 
 import IExecutionContext from "@service/extensions/IExecutionContext";
@@ -12,6 +14,7 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 class CoreWebConfig {
     hostname: string = "127.0.0.1";
     port: number = 1325;
+    secret: string = "SECRET";
 }
 
 export default class CoreWeb implements IExtension {
@@ -40,6 +43,19 @@ export default class CoreWeb implements IExtension {
         }
 
         this.app = express();
+        this.app.use(helmet({
+            contentSecurityPolicy: false
+        })).use(express.json({limit: "250mb"}))
+            .use(express.urlencoded({extended: true}))
+            .use(express.raw())
+            .use(expressSession({
+                secret: this.config.secret,
+                saveUninitialized: true,
+                resave: false,
+                cookie: {
+                    maxAge: 1000 * 60 * 60 // 60 Minutes
+                }
+            }));
         this.events.emit("express-loaded", this.app);
         this.server = this.app.listen(this.config.port, this.config.hostname);
     }
@@ -78,8 +94,24 @@ export default class CoreWeb implements IExtension {
         return url;
     }
 
-    addScriptFromFile(name: string, path: string | any, url: string = `/${name}/${uuid.v4()}`) {
-        return this.addScript(name, fs.readFileSync(__dirname + "/" + path), url);
+    addScriptFromFile(name: string, path: string | any, options = {
+        url: `/js/${name}/${uuid.v4()}`,
+        readFileEveryRequest: true
+    }) {
+        if(!options.readFileEveryRequest) {
+            return this.addScript(name, fs.readFileSync(__dirname + "/" + path), options.url);
+        }
+        else {
+            this.app.get(options.url, (req, res) => {
+                res.setHeader("Content-Type", "application/javascript")
+                    .status(200)
+                    .write(fs.readFileSync(__dirname + "/" + path));
+
+                res.end();
+            });
+
+            return options.url;
+        }
     }
 
     generateReactPage(scripts: string | string[]) {

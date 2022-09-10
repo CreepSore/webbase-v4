@@ -107,7 +107,9 @@ module.exports = function(env, argv) {
                         loader: "babel-loader",
                         options: {
                             plugins: [],
-                            presets: ["@babel/preset-env", "@babel/typescript"]
+                            presets: [["@babel/preset-env", {
+                                targets: "> 0.25%, not dead"
+                            }], "@babel/typescript"]
                         },
                     },
                     {
