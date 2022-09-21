@@ -23,8 +23,11 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         });
 
         this.socket.on("data", (buf) => {
-            let dbPacket = DatabridgeTcpClientProtocol.bufferToPacket(buf);
-            this.emitter.emit("packet-received", dbPacket);
+            buf.toString("utf8").split("\n").filter(str => Boolean(str)).forEach(packetstr => {
+                let dbPacket = DatabridgeTcpClientProtocol.stringToPacket(packetstr);
+                if(!dbPacket) return;
+                this.emitter.emit("packet-received", dbPacket);
+            })
         });
 
         this.socket.on("error", err => {
@@ -79,17 +82,21 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         });
     }
 
-    static bufferToPacket(buf: Buffer) {
-        let {id, time, type, data} = JSON.parse(buf.toString("utf8"));
-        let dbPacket: IDatabridgePacket<any, any> = {
-            id,
-            time,
-            data,
-            type,
-            metadata: {}
-        };
-
-        return dbPacket;
+    static stringToPacket(str: string) {
+        try {
+            let {id, time, type, data} = JSON.parse(str);
+            let dbPacket: IDatabridgePacket<any, any> = {
+                id,
+                time,
+                data,
+                type,
+                metadata: {}
+            };
+            return dbPacket;
+        }
+        catch(err) {
+            return null;
+        }
     }
 
     static packetToString(packet: IDatabridgePacket<any, any>) {
@@ -97,6 +104,6 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         let clonedPacket: typeof packet = {};
         Object.assign(clonedPacket, packet);
         delete clonedPacket.metadata;
-        return `${JSON.stringify(clonedPacket, null, 2)}\n`;
+        return `${JSON.stringify(clonedPacket)}\n`;
     }
 }

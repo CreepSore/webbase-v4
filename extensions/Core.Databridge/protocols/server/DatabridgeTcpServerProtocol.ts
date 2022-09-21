@@ -45,8 +45,12 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
 
             this.emitter.emit("client-connected", dbSocket);
             socket.on("data", (buf) => {
-                let dbPacket = DatabridgeTcpServerProtocol.bufferToPacket(buf);
-                dbSocketEmitter.emit("packet-received", dbPacket);
+                let bufStr = buf.toString("utf8");
+                bufStr.split("\n").filter(str => Boolean(str)).forEach(packetstr => {
+                    let dbPacket = DatabridgeTcpServerProtocol.stringToPacket(packetstr);
+                    if(!dbPacket) return;
+                    dbSocketEmitter.emit("packet-received", dbPacket);
+                });
             });
 
             socket.on("error", err => {
@@ -72,17 +76,22 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
         return this;
     }
 
-    static bufferToPacket(buf: Buffer) {
-        let {id, time, type, data} = JSON.parse(buf.toString("utf8"));
-        let dbPacket: IDatabridgePacket<any, any> = {
-            id,
-            time,
-            data,
-            type,
-            metadata: {}
-        };
+    static stringToPacket(str: string) {
+        try {
+            let {id, time, type, data} = JSON.parse(str);
+            let dbPacket: IDatabridgePacket<any, any> = {
+                id,
+                time,
+                data,
+                type,
+                metadata: {}
+            };
 
-        return dbPacket;
+            return dbPacket;
+        }
+        catch (err) {
+            return null;
+        }
     }
 
     static packetToString(packet: IDatabridgePacket<any, any>) {
@@ -90,6 +99,6 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
         let clonedPacket: typeof packet = {};
         Object.assign(clonedPacket, packet);
         delete clonedPacket.metadata;
-        return `${JSON.stringify(clonedPacket, null, 2)}\n`;
+        return `${JSON.stringify(clonedPacket || {})}\n`;
     }
 }
