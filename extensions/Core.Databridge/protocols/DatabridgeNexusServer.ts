@@ -40,6 +40,10 @@ export default class DatabridgeNexusServer {
                 this.onClientConnected(client);
             });
 
+            protocol.onClientDisconnected(client => {
+                this.onClientDisconnected(client);
+            })
+
             await protocol.start();
         }));
     }
@@ -99,6 +103,12 @@ export default class DatabridgeNexusServer {
                 channel.broadcast(bcPacket, c => c !== client);
                 console.log("INFO", "NexusServer", `Client ${clientId} broadcasted to ${channel.clients.length - 1} clients.`);
             }
+        });
+    }
+
+    onClientDisconnected(client: IDatabridgeSocket) {
+        this.channels.forEach(channel => {
+            channel.unsubscribeClient(client);
         });
     }
 }

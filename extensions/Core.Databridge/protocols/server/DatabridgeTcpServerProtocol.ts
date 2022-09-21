@@ -44,6 +44,7 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
             };
 
             this.emitter.emit("client-connected", dbSocket);
+
             socket.on("data", (buf) => {
                 let bufStr = buf.toString("utf8");
                 bufStr.split("\n").filter(str => Boolean(str)).forEach(packetstr => {
@@ -55,6 +56,10 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
 
             socket.on("error", err => {
                 this.emitter.emit("error", err);
+            });
+
+            socket.on("end", () => {
+                this.emitter.emit("client-disconnected", dbSocket);
             });
         });
 
@@ -73,6 +78,11 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
 
     onClientConnected(callback: (client: IDatabridgeSocket) => void): this {
         this.emitter.on("client-connected", callback);
+        return this;
+    }
+
+    onClientDisconnected(callback: (client: IDatabridgeSocket) => void): this {
+        this.emitter.on("client-disconnected", callback);
         return this;
     }
 
