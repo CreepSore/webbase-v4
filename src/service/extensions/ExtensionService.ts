@@ -32,6 +32,7 @@ export default class ExtensionService {
                     if(extDir.startsWith("Custom.Template")) return null;
 
                     if(!fs.existsSync(path.join(this.extensionPath, extDir, "index.ts"))) return null;
+                    if(this.getDisabledExtensions().includes(extDir)) return null;
 
                     const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + extDir + "/index.ts")).default;
                     const extension: IExtension = new ImportedExtension();
