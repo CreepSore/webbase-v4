@@ -21,9 +21,9 @@
         "src/**/*.tsx",
         "src/**/*.js",
         "src/**/*.jsx",
-        "extensions/*.ts",
-        "extensions/*.tsx",
-        "extensions/*.js",
-        "extensions/*.jsx"
+        "extensions/**/*.ts",
+        "extensions/**/*.tsx",
+        "extensions/**/*.js",
+        "extensions/**/*.jsx"
     ]
 }

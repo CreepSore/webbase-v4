@@ -37,29 +37,26 @@ export default class CoreDb implements IExtension {
         if(!executionContext.extensionService.extensions.find(ext => ext.metadata.dependencies.includes(this.metadata.name))) return;
         this.checkConfig();
 
-        let mainApp = executionContext.application as MainApplication;
-        mainApp.onAfterStartup(() => {
-            let config = {...this.config};
-            // @ts-ignore
-            config.log = {
-                warn(message: string) {
-                    console.log("WARN", "Knex", message);
-                },
-                error(message: string) {
-                    console.log("ERROR", "Knex", message);
-                },
-                deprecate(message: string) {
-                    console.log("DEPRECATE", "Knex", message);
-                },
-                debug(message: string) {
-                    console.log("DEBUG", "Knex", message);
-                }
-            };
+        let config = {...this.config};
+        // @ts-ignore
+        config.log = {
+            warn(message: string) {
+                console.log("WARN", "Knex", message);
+            },
+            error(message: string) {
+                console.log("ERROR", "Knex", message);
+            },
+            deprecate(message: string) {
+                console.log("DEPRECATE", "Knex", message);
+            },
+            debug(message: string) {
+                console.log("DEBUG", "Knex", message);
+            }
+        };
 
-            this.db = knex.knex(config);
-            console.log("INFO", "Core.Db", `Initialized Connection to the Database @ [${JSON.stringify(this.db.client.connectionSettings)}]`);
-            this.events.emit("db-loaded", this.db);
-        });
+        this.db = knex.knex(config);
+        console.log("INFO", "Core.Db", `Initialized Connection to the Database @ [${JSON.stringify(this.db.client.connectionSettings)}]`);
+        this.events.emit("db-loaded", this.db);
     }
 
     async stop() {

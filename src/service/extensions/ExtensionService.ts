@@ -23,22 +23,21 @@ export default class ExtensionService {
         if(this.extensionsStarted) return false;
         if(!fs.existsSync(this.extensionPath)) return false;
         let disabled = this.getDisabledExtensions();
-        let extDir = fs.readdirSync(this.extensionPath);
+        let extBaseDir = fs.readdirSync(this.extensionPath);
 
         this.extensions = (await Promise.all(
-            extDir
-                .filter(name => /\.(js|ts)$/.test(name) && !disabled.includes(name))
-                .map(async filename => {
-                    if((!filename.endsWith(".js") && !filename.endsWith(".ts")) || filename.startsWith("Custom.Template")) return null;
-                    const finalPath = path.join(this.extensionPath, filename);
-                    let stat = fs.statSync(finalPath);
+            extBaseDir
+                .filter(name => !disabled.includes(name))
+                .map(async extDir => {
+                    if(extDir.startsWith("Custom.Template")) return null;
 
-                    if(!stat.isFile()) return null;
-
-                    const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + filename)).default;
-
-                    const extension: IExtension = new ImportedExtension();
-                    return extension;
+                    try {
+                        const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + extDir + "/index.ts")).default;
+                        const extension: IExtension = new ImportedExtension();
+                        return extension;
+                    }
+                    catch {}
+                    return null;
                 })
         )).filter(x => Boolean(x));
 

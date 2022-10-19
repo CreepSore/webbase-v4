@@ -9,7 +9,7 @@ import PagePermissions from "./pages/PagePermissions";
 import PageLogin from "./pages/PageLogin";
 
 function Main() {
-    let [currentPage, setCurrentPage] = React.useState("login");
+    let [currentPage, setCurrentPage] = React.useState("users");
 
     return <Router currentPage={currentPage}>
         <RouterPage key="home">

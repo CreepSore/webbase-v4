@@ -3,11 +3,11 @@ import {EventEmitter} from "events";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import CoreWeb from "./Core.Web";
-import User from "./Core.Usermgmt/Models/User";
-import PermissionGroup from "./Core.Usermgmt/Models/PermissionGroup";
-import Permission from "./Core.Usermgmt/Models/Permission";
-import CoreDb from "./Core.Db";
+import CoreWeb from "../Core.Web";
+import User from "../Core.Usermgmt/Models/User";
+import PermissionGroup from "../Core.Usermgmt/Models/PermissionGroup";
+import Permission from "../Core.Usermgmt/Models/Permission";
+import CoreDb from "../Core.Db";
 
 class TemplateConfig {
 
