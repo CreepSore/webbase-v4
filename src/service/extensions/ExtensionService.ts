@@ -31,13 +31,11 @@ export default class ExtensionService {
                 .map(async extDir => {
                     if(extDir.startsWith("Custom.Template")) return null;
 
-                    try {
-                        const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + extDir + "/index.ts")).default;
-                        const extension: IExtension = new ImportedExtension();
-                        return extension;
-                    }
-                    catch {}
-                    return null;
+                    if(!fs.existsSync(path.join(this.extensionPath, extDir, "index.ts"))) return null;
+
+                    const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + extDir + "/index.ts")).default;
+                    const extension: IExtension = new ImportedExtension();
+                    return extension;
                 })
         )).filter(x => Boolean(x));
 
