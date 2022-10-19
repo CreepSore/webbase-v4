@@ -15,7 +15,7 @@ export default class User {
     permissionGroupId?: number;
     created?: Date;
     modified?: Date;
-
+    
     static async resolve(user: Partial<User>) {
         return await this.use().where(user).select() as Partial<User>[];
     }
@@ -76,6 +76,7 @@ export default class User {
         user.id = user.id || uuid.v4();
         user.created = user.created || new Date();
         user.permissionGroupId = user.permissionGroupId || (await PermissionGroup.use().where({name: "Anonymous"}))[0].id;
+        user.email = user.email || null;
 
         return await this.knex.insert(user).into(this.tableName);
     }

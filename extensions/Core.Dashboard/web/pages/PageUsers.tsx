@@ -2,15 +2,16 @@ import React from "react";
 import NavigationBar from "../components/NavigationBar";
 import UserView from "../components/UserView";
 
-interface PageHomeProperties {
+interface PageUsersProperties {
     setCurrentPage(key: string);
 }
 
-export default function PageHome(props: PageHomeProperties) {
+export default function PageUsers(props: PageUsersProperties) {
     return <div className="flex flex-col">
         <NavigationBar
-            activePage="home"
+            activePage="users"
             onNavigation={newPage => props.setCurrentPage(newPage)}
         />
+        <UserView />
     </div>;
-};
+}

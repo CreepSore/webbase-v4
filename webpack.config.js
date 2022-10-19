@@ -75,6 +75,10 @@ module.exports = function(env, argv) {
                         test: /\.(json)$/i,
                         exclude: /(node_modules)/
                     },
+                    {
+                        test: /\.png$/i,
+                        type: "asset/inline"
+                    },
                     { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
                 ]
             },
@@ -123,6 +127,10 @@ module.exports = function(env, argv) {
                                 }
                             }
                         ]
+                    },
+                    {
+                        test: /\.png$/i,
+                        type: "asset/inline"
                     },
                     { test: /\.(css)$/i, exclude: /(node_modules)/, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
                 ]

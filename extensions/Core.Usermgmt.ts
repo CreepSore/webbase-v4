@@ -7,8 +7,16 @@ import CoreDb from "./Core.Db";
 import { Knex } from "knex";
 
 import User from "./Core.Usermgmt/Models/User";
+import ApiKey from "./Core.Usermgmt/Models/ApiKey";
 import PermissionGroup from "./Core.Usermgmt/Models/PermissionGroup";
 import Permission from "./Core.Usermgmt/Models/Permission";
+import CoreWeb from "./Core.Web";
+
+declare module 'express-session' {
+    export interface SessionData {
+      uid: string
+    }
+  }
 
 class TemplateConfig {
 
@@ -42,6 +50,21 @@ export default class CoreUsermgmt implements IExtension {
             this.setupSchema(knex);
             this.events.emit("initialized");
         });
+
+        let coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
+        coreWeb.app.get("/core.usermgmt/userdata", async(req, res) => {
+            if(!req.session.uid) {
+                return res.json({loggedIn: false, uid: null});
+            }
+            let user = await User.use().where({id: req.session.uid}).first();
+            delete user.password;
+            if(!user) {
+                req.session.uid = null;
+                return res.json({loggedIn: false, uid: null});
+            }
+
+            res.json({loggedIn: true, uid: req.session.uid, user});
+        });
     }
 
     async stop() {
@@ -50,6 +73,32 @@ export default class CoreUsermgmt implements IExtension {
 
     onInitialized(callback: () => void) {
         this.events.on("initialized", callback);
+    }
+
+    async loginByCredentials(credentials: {email?: string, username?: string, password: string}) {
+        if(credentials.email && credentials.username) return null;
+        let where: typeof credentials = {password: User.hashPassword(credentials.password)};
+        if(credentials.email) {
+            where.email = credentials.email;
+        }
+        else if(credentials.username) {
+            where.username = credentials.username;
+        }
+        else {
+            return null;
+        }
+
+        return Boolean(await User.use().where(where).first());
+    }
+
+    async loginByApiKey(apiKey: string) {
+        let foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
+        if(!foundApiKey) return null;
+
+        let user = await User.use().where({id: foundApiKey.id}).first() as Partial<User>;
+        if(!user) return null;
+
+        return user;
     }
 
     private async setupSchema(knex: Knex) {
@@ -66,10 +115,13 @@ export default class CoreUsermgmt implements IExtension {
                     .references("id")
                     .inTable("permissiongroups");
 
+                table.unique(["permission", "permissiongroup"]);
+
                 table.dateTime("created");
             }));
 
         await User.setup(knex);
+        await ApiKey.setup(knex);
 
         let permissionsToCreate: {check: Boolean, data: Permission}[] = [
             {check: await Permission.exists({name: "ALL"}), data: {
@@ -93,6 +145,13 @@ export default class CoreUsermgmt implements IExtension {
             await PermissionGroup.create({
                 name: "Administrator",
                 description: "Administrator Group"
+            });
+
+            let group = await PermissionGroup.use().where({name: "Administrator"}).first();
+            await knex("permissiongrouppermissions").insert({
+                permission: (await Permission.use().where({name: "ALL"}).first()).id,
+                permissiongroup: group.id,
+                created: Date.now()
             });
         }
     }
