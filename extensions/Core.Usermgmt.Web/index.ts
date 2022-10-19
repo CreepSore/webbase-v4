@@ -12,7 +12,8 @@ import Permission from "../Core.Usermgmt/Models/Permission";
 import CoreWeb from "../Core.Web";
 import CoreUsermgmt from "../Core.Usermgmt";
 
-import Permissions from "./Core.Usermgmt.Web.Permissions";
+import Permissions from "./permissions";
+import * as express from "express";
 
 declare module 'express-session' {
     export interface SessionData {
@@ -48,14 +49,16 @@ export default class CoreUsermgmtWeb implements IExtension {
         }
 
         let coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
-        coreUsermgmt.createPermissions(...Object.values(Permissions));
+        let perms = await coreUsermgmt.createPermissions(...Object.values(Permissions));
+        await Promise.all(perms.map(p => PermissionGroup.addPermission({name: "Administrator"}, p)));
 
         let coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
         let coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
+        let apiRouter = express.Router();
+
         coreWeb.app.use(async(req, res, next) => {
-            let useAnonGroup = false;
+            let useAnonGroup = true;
             if(req.session.uid) {
-                useAnonGroup = true;
                 let user = await User.use().where({id: req.session.uid}).first();
                 if(!user) {
                     delete req.session.uid;
@@ -90,7 +93,7 @@ export default class CoreUsermgmtWeb implements IExtension {
             next();
         });
 
-        coreWeb.app.get("/core.usermgmt/logon-info", async(req, res) => {
+        apiRouter.get("/logon-info", async(req, res) => {
             if(!res.locals.user) {
                 res.json({loggedIn: false});
                 return;
@@ -98,13 +101,122 @@ export default class CoreUsermgmtWeb implements IExtension {
 
             res.json({loggedIn: true, uid: res.locals.user.id, user: res.locals.user, additionalData: res.locals.additionalData});
         });
-        
-        coreWeb.app.post("/core.usermgmt/user/:id/impersonate", async(req, res) => {
+
+        apiRouter.post("/user/:id/impersonate", async(req, res) => {
             let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(permissions.some(p => p.name === Permissions.ImpersonateUser.name))
+            if(!permissions.some(p => p.name === Permissions.ImpersonateUser.name)) return res.json({success: false});
 
             req.session.uid = req.params.id;
+            res.json({success: true});
         });
+
+        apiRouter.get("/user", async(req, res) => {
+            let permissions: Permission[] = res.locals.additionalData.permissions;
+            if(!permissions.some(p => p.name === Permissions.ViewUser.name)) return res.json({success: false});
+
+            res.json(await User.use().select());
+        });
+
+        apiRouter.get("/user/:id", async(req, res) => {
+            let permissions: Permission[] = res.locals.additionalData.permissions;
+            if(!permissions.some(p => p.name === Permissions.ViewUser.name)) return res.json({success: false});
+
+            res.json(await User.use().where({id: req.params.id}).first());
+        });
+
+        apiRouter.put("/user", async(req, res) => {
+            let permissions: Permission[] = res.locals.additionalData.permissions;
+            if(!permissions.some(p => p.name === Permissions.CreateUser.name)) return res.json({success: false});
+
+            let data = req.body;
+            data.password = User.hashPassword(data.password);
+
+            try {
+                await User.use().insert(req.body);
+                res.json({success: true});
+            }
+            catch {
+                res.json({success: false});
+            }
+        });
+
+        apiRouter.patch("/user/:id", async(req, res) => {
+            let permissions: Permission[] = res.locals.additionalData.permissions;
+            if(!permissions.some(p => p.name === Permissions.EditUser.name)) return res.json({success: false});
+
+            let user = await User.use().where({id: req.params.id}).first();
+            if(!user) {
+                res.json({success: false});
+                return;
+            }
+
+            let data = req.body;
+            if(data.password !== user.password) {
+                data.password = User.hashPassword(data.password);
+            }
+
+            await User.use().where({id: req.params.id}).update(req.body);
+            res.json({success: true});
+        });
+
+        apiRouter.delete("/user/:id", async(req, res) => {
+            let permissions: Permission[] = res.locals.additionalData.permissions;
+            if(!permissions.some(p => p.name === Permissions.DeleteUser.name)) return;
+
+            await User.use().where({id: req.params.id}).delete();
+            res.json({success: true});
+        });
+
+        apiRouter.post("/login", async(req, res) => {
+            let user = await coreUsermgmt.loginByCredentials(req.body);
+            req.session.uid = user.id;
+
+            return user ? res.json({success: true}) : res.json({success: false});
+        });
+
+        apiRouter.get("/permission", async(req, res) => {
+            res.json(await Permission.use().select());
+        });
+
+        apiRouter.get("/permission-group", async(req, res) => {
+            const permissionGroups = await PermissionGroup.use().select();
+            await Promise.all(permissionGroups.map(async pg => {
+                let permissions = await Permission.use()
+                    .select("permissions.id", "permissions.name", "permissions.description")
+                        .join("permissiongrouppermissions as pgp", "permissions.id", "permission")
+                        .join(`${PermissionGroup.tableName} as pg`, "permissiongroup", "pg.id")
+                        .where("pg.id", pg.id);
+
+                pg.permissions = permissions;
+            }));
+
+            res.json(permissionGroups);
+        });
+
+        apiRouter.put("/permission-group/:pgid/permission/:pid", async(req, res) => {
+            const {pgid, pid} = req.params;
+            console.log("INFO", "Core.Dashboard", `Adding Permission [${pid}] to Group [${pgid}]`);
+
+            await coreDb.db("permissiongrouppermissions").insert({
+                permission: pid,
+                permissiongroup: pgid,
+                created: Date.now()
+            }).then(() => res.json({success: true}))
+            .catch(() => res.json({success: false}));
+        });
+
+        apiRouter.delete("/permission-group/:pgid/permission/:pid", async(req, res) => {
+            const {pgid, pid} = req.params;
+            console.log("INFO", "Core.Dashboard", `Deleting Permission [${pid}] from Group [${pgid}]`);
+
+            await coreDb.db("permissiongrouppermissions").where({
+                permissiongroup: pgid,
+                permission: pid
+            }).delete();
+            res.json({success: true});
+        });
+
+        coreWeb.app.use("/api/core.usermgmt", apiRouter);
     }
 
     async stop() {

@@ -2,7 +2,7 @@ import React from "react";
 import LoginView from "../components/LoginView";
 
 interface PageHomeProperties {
-    setCurrentPage(key: string);
+    setCurrentPage: (key: string) => void;
 }
 
 export default function PageHome(props: PageHomeProperties) {

@@ -23,7 +23,7 @@ export default function PermissionsView() {
     }, [selectedPermissionGroup, permissionGroups, permissions]);
 
     const updatePermissionGroups = () => {
-        fetch("/core.dashboard/permission-group")
+        fetch("/api/core.usermgmt/permission-group")
             .then(res => res.json())
             .then(data => {
                 setPermissionGroups(data);
@@ -33,15 +33,15 @@ export default function PermissionsView() {
     React.useEffect(() => {
         updatePermissionGroups();
 
-        fetch("/core.dashboard/permission")
+        fetch("/api/core.usermgmt/permission")
             .then(res => res.json())
             .then(data => {
                 setPermissions(data);
             });
     }, []);
 
-    const removePermission = (pgid, pid) => {
-        fetch(`/core.dashboard/permission-group/${pgid}/permission/${pid}`, {
+    const removePermission = (pgid: string, pid: string) => {
+        fetch(`/api/core.usermgmt/permission-group/${pgid}/permission/${pid}`, {
             method: "DELETE"
         }).then(res => res.json())
             .then(() => {
@@ -49,8 +49,8 @@ export default function PermissionsView() {
             });
     }
 
-    const addPermission = (pgid, pid) => {
-        fetch(`/core.dashboard/permission-group/${pgid}/permission/${pid}`, {
+    const addPermission = (pgid: string, pid: string) => {
+        fetch(`/api/core.usermgmt/permission-group/${pgid}/permission/${pid}`, {
             method: "PUT"
         }).then(res => res.json())
             .then(() => {
@@ -79,7 +79,7 @@ export default function PermissionsView() {
             key={p.name}
             className="grid grid-cols-2 border-b border-b-slate-200 hover:bg-slate-200 cursor-pointer"
             onClick={() => {
-                addPermission(selectedPermissionGroup?.id, p.id);
+                addPermission(String(selectedPermissionGroup?.id), String(p.id));
             }}
         >
                 <div>{p.name}</div>
@@ -92,7 +92,7 @@ export default function PermissionsView() {
                 key={p.name}
                 className="grid grid-cols-2 border-b border-b-slate-200 hover:bg-slate-200 cursor-pointer"
                 onClick={() => {
-                    removePermission(selectedPermissionGroup?.id, p.id);
+                    removePermission(String(selectedPermissionGroup?.id), p.id);
                 }}
             >
                 <div>{p.name}</div>

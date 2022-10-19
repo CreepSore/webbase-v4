@@ -47,7 +47,7 @@ export default class CoreUsermgmt implements IExtension {
 
     }
 
-    async loginByCredentials(credentials: {email?: string, username?: string, password: string}) {
+    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<Partial<User>> {
         if(credentials.email && credentials.username) return null;
         let where: Partial<User> = {password: User.hashPassword(credentials.password), isActive: true};
         if(credentials.email) {
@@ -60,10 +60,10 @@ export default class CoreUsermgmt implements IExtension {
             return null;
         }
 
-        return Boolean(await User.use().where(where).first());
+        return await User.use().where(where).first();
     }
 
-    async loginByApiKey(apiKey: string) {
+    async loginByApiKey(apiKey: string): Promise<Partial<User>> {
         let foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
         if(!foundApiKey) return null;
 

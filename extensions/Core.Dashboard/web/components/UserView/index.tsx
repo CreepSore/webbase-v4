@@ -7,7 +7,7 @@ import Permission from "../../../../Core.Usermgmt/Models/Permission";
 
 interface UserButtonProperties {
     user: Partial<User>;
-    onClick?: (user) => void;
+    onClick?: (user: Partial<User>) => void;
 }
 
 function UserButton(props: UserButtonProperties) {
@@ -36,7 +36,7 @@ function UserEditDialog(props: UserEditDialogProperties) {
     let [permissionGroup, setPermissionGroup] = React.useState(-1);
 
     React.useEffect(() => {
-        fetch("/core.dashboard/permission-group")
+        fetch("/api/core.usermgmt/permission-group")
             .then(res => res.json())
             .then(data => {
                 setPermissionGroups(data);
@@ -125,7 +125,11 @@ function UserEditDialog(props: UserEditDialogProperties) {
     </div>;
 }
 
-export default function UserView() {
+interface UserViewProps {
+    setCurrentPage: (key: string) => void;
+}
+
+export default function UserView(props: UserViewProps) {
     let [users, setUsers] = React.useState<Partial<User>[]>([]);
     let [userEditDialogVisible, setUserEditDialogVisible] = React.useState(false);
     let [userEditDialogUser, setUserEditDialogUser] = React.useState<Partial<User>>({});
@@ -139,9 +143,16 @@ export default function UserView() {
     }, [search, users]);
 
     let updateUsers = async() => {
-        return await fetch("/core.dashboard/user")
+        return await fetch("/api/core.usermgmt/user")
             .then(res => res.json())
-            .then(data => setUsers(data));
+            .then(data => {
+                if(data.success !== false) {
+                    setUsers(data);
+                }
+                else {
+                    props.setCurrentPage("login");
+                }
+            });
     };
 
     React.useEffect(() => {
@@ -158,10 +169,9 @@ export default function UserView() {
 
                 if(user.id) {
                     setIsLoading(true);
-                    fetch("/core.dashboard/user", {
+                    fetch(`/api/core.usermgmt/user/${user.id}`, {
                         method: "PATCH",
                         body: JSON.stringify({
-                            id: user.id,
                             username: user.username,
                             email: user.email || null,
                             password: user.password,
@@ -176,7 +186,7 @@ export default function UserView() {
                 }
                 else {
                     setIsLoading(true);
-                    fetch("/core.dashboard/user", {
+                    fetch("/api/core.usermgmt/user", {
                         method: "PUT",
                         body: JSON.stringify({
                             username: user.username,
@@ -205,7 +215,7 @@ export default function UserView() {
                 if(!user.id) return;
 
                 setIsLoading(true);
-                fetch(`/core.dashboard/user/${user.id}`, {
+                fetch(`/api/core.usermgmt/user/${user.id}`, {
                     method: "DELETE"
                 }).then(() => updateUsers())
                     .then(() => setIsLoading(false));

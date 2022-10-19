@@ -3,7 +3,7 @@ import NavigationBar from "../components/NavigationBar";
 import UserView from "../components/UserView";
 
 interface PageUsersProperties {
-    setCurrentPage(key: string);
+    setCurrentPage: (key: string) => void;
 }
 
 export default function PageUsers(props: PageUsersProperties) {
@@ -12,6 +12,8 @@ export default function PageUsers(props: PageUsersProperties) {
             activePage="users"
             onNavigation={newPage => props.setCurrentPage(newPage)}
         />
-        <UserView />
+        <UserView
+            setCurrentPage={props.setCurrentPage}
+        />
     </div>;
 }

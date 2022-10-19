@@ -39,11 +39,16 @@ export default class PermissionGroup {
         if(resolvedPermissionGroup.length !== 1) return null;
         if(resolvedPermission.length !== 1) return null;
 
-        return await this.knex("permissiongrouppermissions").insert({
-            permission: resolvedPermission[0].id,
-            permissiongroup: resolvedPermissionGroup[0].id,
-            created: new Date()
-        });
+        try {
+            return await this.knex("permissiongrouppermissions").insert({
+                permission: resolvedPermission[0].id,
+                permissiongroup: resolvedPermissionGroup[0].id,
+                created: new Date()
+            });
+        }
+        catch {
+            return 0;
+        }
     }
 
     static async hasPermission(group: Partial<PermissionGroup>, permission: Partial<Permission>) {
