@@ -27,7 +27,9 @@ class CoreMailTemplate {
             password: "password",
             secure: true,
             rejectUnauthorizedTls: true
-        }
+        },
+        // @ts-ignore
+        recipients: []
     }
 }
 
@@ -110,8 +112,11 @@ export default class CoreMail implements IExtension {
 
     async sendAlertMail(mail: Partial<Mail.Options>) {
         if(!this.config.alerts.enabled) return;
-
-        this.sendMail("ALERT", mail);
+        
+        for(let recipient of this.config.alerts.recipients) {
+            mail.to = recipient;
+            await this.sendMail("ALERT", mail);
+        };
     }
 
     private checkConfig() {
