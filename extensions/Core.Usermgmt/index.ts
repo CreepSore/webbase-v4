@@ -10,7 +10,6 @@ import User from "../Core.Usermgmt/Models/User";
 import ApiKey from "../Core.Usermgmt/Models/ApiKey";
 import PermissionGroup from "../Core.Usermgmt/Models/PermissionGroup";
 import Permission from "../Core.Usermgmt/Models/Permission";
-import CoreWeb from "../Core.Web";
 
 class TemplateConfig {
 

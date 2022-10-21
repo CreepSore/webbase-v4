@@ -91,6 +91,17 @@ export default function NavigationBar(props: NavigationBarProperties) {
         return () => window.removeEventListener("click", cb);
     }, []);
 
+    const openMenu = (menu: string, x: number, y: number) => {
+        if(visibleMenu) {
+            setVisibleMenu("");
+            return;
+        }
+
+        setMenuX(x);
+        setMenuY(y);
+        setVisibleMenu(menu);
+    };
+
     if(!logonInfo) return;
 
     return <div className="flex items-center bg-gray-600 h-full max-h-[2.5em]">
@@ -106,16 +117,10 @@ export default function NavigationBar(props: NavigationBarProperties) {
             pageKey="dataMenu"
             isActive={visibleMenu === "dataMenu" || ["users", "permissions"].includes(props.activePage)}
             onClick={(menu, x, y) => {
-                if(visibleMenu) {
-                    setVisibleMenu("");
-                    return;
-                }
-
-                setMenuX(x);
-                setMenuY(y);
-                setVisibleMenu(menu);
+                openMenu(menu, x, y);
             }}
             label="Views"
+            visible={viewUsers || viewPermissions}
         />
 
         <NavMenu visible={visibleMenu === "dataMenu"} x={menuX} y={menuY}>
