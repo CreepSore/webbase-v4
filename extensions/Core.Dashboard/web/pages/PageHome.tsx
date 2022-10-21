@@ -3,7 +3,7 @@ import NavigationBar from "../components/NavigationBar";
 import UserView from "../components/UserView";
 
 interface PageHomeProperties {
-    setCurrentPage(key: string);
+    setCurrentPage: (key: string) => void;
 }
 
 export default function PageHome(props: PageHomeProperties) {

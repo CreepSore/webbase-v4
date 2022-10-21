@@ -47,9 +47,9 @@ export default class CoreUsermgmt implements IExtension {
 
     }
 
-    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<Partial<User>> {
+    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<{user?: Partial<User>, error?: string}> {
         if(credentials.email && credentials.username) return null;
-        let where: Partial<User> = {password: User.hashPassword(credentials.password), isActive: true};
+        let where: Partial<User> = {password: User.hashPassword(credentials.password)};
         if(credentials.email) {
             where.email = credentials.email;
         }
@@ -57,20 +57,45 @@ export default class CoreUsermgmt implements IExtension {
             where.username = credentials.username;
         }
         else {
-            return null;
+            return {
+                error: "INVALID_CREDENTIALS"
+            };
         }
 
-        return await User.use().where(where).first();
+        let user = await User.use().where(where).first();
+        if(!user) {
+            return {
+                error: "INVALID_CREDENTIALS"
+            };
+        }
+        else if(!user.isActive) {
+            return {
+                error: "USER_INACTIVE"
+            };
+        }
+
+        return {
+            user
+        };
     }
 
-    async loginByApiKey(apiKey: string): Promise<Partial<User>> {
+    async loginByApiKey(apiKey: string): Promise<{user?: Partial<User>, error?: string}> {
         let foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
         if(!foundApiKey) return null;
 
-        let user = await User.use().where({id: foundApiKey.id, isActive: true}).first() as Partial<User>;
-        if(!user) return null;
+        let user = await User.use().where({id: foundApiKey.id}).first() as Partial<User>;
+        if(!user) return {
+            error: "INVALID_API_KEY"
+        };
 
-        return user;
+        if(!user.isActive) return {
+            error: "USER_INACTIVE"
+        };
+
+        return {
+            user,
+            error: null
+        };
     }
 
     async createPermissions(...permissions: Partial<Permission>[]): Promise<Partial<Permission>[]> {
@@ -108,11 +133,6 @@ export default class CoreUsermgmt implements IExtension {
         await User.setup(knex);
         await ApiKey.setup(knex);
 
-        const [allPerm] = await this.createPermissions({
-            name: "ALL",
-            description: "Pseudopermission for all permissions"
-        });
-
         if(!await PermissionGroup.exists({name: "Anonymous"})) {
             await PermissionGroup.create({
                 name: "Anonymous",
@@ -125,8 +145,6 @@ export default class CoreUsermgmt implements IExtension {
                 name: "Administrator",
                 description: "Administrator Group"
             });
-
-            PermissionGroup.addPermission({name: "Administrator"}, {name: "ALL"});
         }
     }
 

@@ -7,9 +7,10 @@ import PageHome from "./pages/PageHome";
 import PageUsers from "./pages/PageUsers";
 import PagePermissions from "./pages/PagePermissions";
 import PageLogin from "./pages/PageLogin";
+import PageLogs from "./pages/PageLogs";
 
 function Main() {
-    let [currentPage, setCurrentPage] = React.useState("users");
+    let [currentPage, setCurrentPage] = React.useState("home");
 
     return <Router currentPage={currentPage}>
         <RouterPage key="home">
@@ -26,6 +27,10 @@ function Main() {
 
         <RouterPage key="login">
             <PageLogin setCurrentPage={setCurrentPage} />
+        </RouterPage>
+
+        <RouterPage key="logs">
+            <PageLogs setCurrentPage={setCurrentPage} />
         </RouterPage>
     </Router>;
 }

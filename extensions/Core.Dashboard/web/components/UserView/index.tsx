@@ -4,16 +4,19 @@ import React from "react";
 import "./style.css";
 import PermissionGroup from "../../../../Core.Usermgmt/Models/PermissionGroup";
 import Permission from "../../../../Core.Usermgmt/Models/Permission";
+import { usePermissions } from "../../hooks";
+import UsermgmtPermissions from "../../../../Core.Usermgmt.Web/permissions";
 
 interface UserButtonProperties {
     user: Partial<User>;
     onClick?: (user: Partial<User>) => void;
+    clickable?: boolean;
 }
 
 function UserButton(props: UserButtonProperties) {
     return <button
-        className="w-[6em] h-[6em] bg-slate-100 rounded border border-slate-200 hover:brightness-95"
-        onClick={() => props.onClick?.(props.user)}
+        className={`w-[6em] h-[6em] rounded border border-slate-200 ${props.clickable === false ? "cursor-default" : "hover:brightness-95"} ${!props.user.isActive ? "bg-red-100" : "bg-slate-100"}`}
+        onClick={() => props.clickable && props.onClick?.(props.user)}
     >
         {props.user.username}
     </button>
@@ -130,6 +133,13 @@ interface UserViewProps {
 }
 
 export default function UserView(props: UserViewProps) {
+    let [permViewUsers, permEditUsers, permAddUser, permViewPermissions] = usePermissions(
+        UsermgmtPermissions.ViewPermissions.name,
+        UsermgmtPermissions.EditUser.name,
+        UsermgmtPermissions.CreateUser.name,
+        UsermgmtPermissions.ViewPermissions.name
+    );
+
     let [users, setUsers] = React.useState<Partial<User>[]>([]);
     let [userEditDialogVisible, setUserEditDialogVisible] = React.useState(false);
     let [userEditDialogUser, setUserEditDialogUser] = React.useState<Partial<User>>({});
@@ -234,7 +244,7 @@ export default function UserView(props: UserViewProps) {
                     />
                 </div>
                 <div className="flex gap-3 mt-2">
-                    {!search && <button
+                    {!search && permAddUser && <button
                         className="w-[6em] h-[6em] bg-green-100 rounded border border-green-200 hover:brightness-95"
                         onClick={() => {
                             setUserEditDialogUser({});
@@ -251,6 +261,7 @@ export default function UserView(props: UserViewProps) {
                             setUserEditDialogUser(user);
                             setUserEditDialogVisible(true);
                         }}
+                        clickable={permEditUsers && permViewPermissions}
                     />)}
                 </div>
             </div>

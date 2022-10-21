@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import MainApplication from "@app/MainApplication";
@@ -5,7 +6,7 @@ import ConfigModel from "@logic/config/ConfigModel";
 import LoggerService from "@service/logger/LoggerService";
 import ConsoleLogger from "@service/logger/ConsoleLogger";
 import FileLogger from "@service/logger/FileLogger";
-import * as fs from "fs";
+import CacheLogger from "@service/logger/CacheLogger";
 
 export default class Core implements IExtension {
     metadata: ExtensionMetadata = {
@@ -26,6 +27,7 @@ export default class Core implements IExtension {
         LoggerService
             .addLogger(new ConsoleLogger())
             .addLogger(new FileLogger(`logs/out_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`))
+            .addLogger(new CacheLogger(), "cache")
             .hookConsoleLog();
     }
 

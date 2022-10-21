@@ -5,7 +5,8 @@ export default class LoggerService {
     static loggers: ILogger[] = [];
     static oldLog: (...data: any[]) => void = null;
 
-    static addLogger(logger: ILogger) {
+    static addLogger(logger: ILogger, name?: string) {
+        logger.name = name;
         this.loggers.push(logger);
         return this;
     }
@@ -20,6 +21,10 @@ export default class LoggerService {
         console.log = (level: string, ...args: any[]) => {
             this.log(level, ...args);
         }
+    }
+
+    static getLogger(name: string) {
+        return this.loggers.find(log => log.name === name);
     }
 
     static unhookConsoleLog() {

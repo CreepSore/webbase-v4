@@ -2,7 +2,12 @@ import React from "react";
 import Permission from "../../../../Core.Usermgmt/Models/Permission";
 import PermissionGroup from "../../../../Core.Usermgmt/Models/PermissionGroup";
 
+import UsermgmtPermissions from "../../../../Core.Usermgmt.Web/permissions";
+import {usePermissions} from "../../hooks";
+
 export default function PermissionsView() {
+    let [permEditPermissions] = usePermissions(UsermgmtPermissions.EditPermissions.name);
+
     let [permissionGroups, setPermissionGroups] = React.useState<Partial<PermissionGroup & {permissions: Partial<Permission[]>}>[]>([]);
     let [permissions, setPermissions] = React.useState<Partial<Permission>[]>([]);
     let [selectedPermissionGroupId, setSelectedPermissionGroupId] = React.useState(-1);
@@ -77,8 +82,9 @@ export default function PermissionsView() {
         <div className="col-span-2 border-r border-slate-200 px-1">
             {nonselectedPermissions.map(p => <div
             key={p.name}
-            className="grid grid-cols-2 border-b border-b-slate-200 hover:bg-slate-200 cursor-pointer"
+            className={`grid grid-cols-2 border-b border-b-slate-200 ${permEditPermissions ? "hover:bg-slate-200 cursor-pointer" : ""}`}
             onClick={() => {
+                if(!permEditPermissions) return;
                 addPermission(String(selectedPermissionGroup?.id), String(p.id));
             }}
         >
@@ -90,8 +96,9 @@ export default function PermissionsView() {
         <div className="col-span-2 px-1">
             {selectedPermissions.map(p => <div
                 key={p.name}
-                className="grid grid-cols-2 border-b border-b-slate-200 hover:bg-slate-200 cursor-pointer"
+                className={`grid grid-cols-2 border-b border-b-slate-200 ${permEditPermissions ? "hover:bg-slate-200 cursor-pointer" : ""}`}
                 onClick={() => {
+                    if(!permEditPermissions) return;
                     removePermission(String(selectedPermissionGroup?.id), p.id);
                 }}
             >

@@ -3,7 +3,7 @@ import NavigationBar from "../components/NavigationBar";
 import PermissionsView from "../components/PermissionsView";
 
 interface PagePermissionsProperties {
-    setCurrentPage(key: string);
+    setCurrentPage: (key: string) => void;
 }
 
 export default function PagePermissions(props: PagePermissionsProperties) {

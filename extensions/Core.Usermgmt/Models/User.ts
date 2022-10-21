@@ -86,7 +86,8 @@ export default class User {
         await knex.schema.hasTable(this.tableName)
             .then(val => !val && knex.schema.createTable(this.tableName, table => {
                 table.string("id", 36)
-                    .primary();
+                    .primary()
+                    .notNullable();
 
                 table.string("username", 32)
                     .unique();
