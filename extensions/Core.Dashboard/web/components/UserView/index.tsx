@@ -4,7 +4,7 @@ import React from "react";
 import "./style.css";
 import PermissionGroup from "../../../../Core.Usermgmt/Models/PermissionGroup";
 import Permission from "../../../../Core.Usermgmt/Models/Permission";
-import { usePermissions } from "../../hooks";
+import { usePermissions, invalidateLogonInfo } from "../../hooks";
 import UsermgmtPermissions from "../../../../Core.Usermgmt.Web/permissions";
 
 interface UserButtonProperties {
@@ -17,6 +17,7 @@ function UserButton(props: UserButtonProperties) {
     return <button
         className={`w-[6em] h-[6em] rounded border border-slate-200 ${props.clickable === false ? "cursor-default" : "hover:brightness-95"} ${!props.user.isActive ? "bg-red-100" : "bg-slate-100"}`}
         onClick={() => props.clickable && props.onClick?.(props.user)}
+        disabled={props.clickable === false}
     >
         {props.user.username}
     </button>
@@ -25,8 +26,9 @@ function UserButton(props: UserButtonProperties) {
 interface UserEditDialogProperties {
     user: Partial<User>;
     onSave?: (user: Partial<User>) => void;
-    onCancel?: () => void;
+    onCancel: () => void;
     onDelete?: (user: Partial<User>) => void;
+    onImpersonate?: (user: Partial<User>) => void;
 }
 
 function UserEditDialog(props: UserEditDialogProperties) {
@@ -37,6 +39,13 @@ function UserEditDialog(props: UserEditDialogProperties) {
     let [password, setPassword] = React.useState(props.user.password || "");
     let [isActive, setIsActive] = React.useState(props.user.isActive || false);
     let [permissionGroup, setPermissionGroup] = React.useState(-1);
+
+    let [permEditUser, permDeleteUser, permImpersonateUser, permCreateUser] = usePermissions(
+        UsermgmtPermissions.EditUser.name,
+        UsermgmtPermissions.DeleteUser.name,
+        UsermgmtPermissions.ImpersonateUser.name,
+        UsermgmtPermissions.CreateUser.name
+    );
 
     React.useEffect(() => {
         fetch("/api/core.usermgmt/permission-group")
@@ -104,7 +113,7 @@ function UserEditDialog(props: UserEditDialogProperties) {
             </div>
 
             <div className="flex flex-col gap-1 mt-2">
-                {props.onSave && <button
+                {((permEditUser && props.user.id) || (permCreateUser && !props.user.id)) && props.onSave && <button
                     className="border bg-green-200 hover:brightness-105 py-2"
                     onClick={() => props.onSave?.({
                         id: props.user?.id,
@@ -118,11 +127,19 @@ function UserEditDialog(props: UserEditDialogProperties) {
                 {props.onCancel && <button
                     className="border bg-slate-200 hover:brightness-95 py-2"
                     onClick={() => props.onCancel?.()}
-                >Cancel</button>}
-                {props.onDelete && props.user.id && <button
+                >{((permEditUser && props.user.id) || (permCreateUser && !props.user.id)) ? "Cancel" : "Close"}</button>}
+                {permDeleteUser && props.onDelete && props.user.id && <button
                     className="border bg-red-200 hover:brightness-95 py-2"
                     onClick={() => props.onDelete?.(props.user)}
                 >Delete</button>}
+                {permImpersonateUser && <button
+                    className="border bg-blue-200 hover:brightness-95 py-2"
+                    onClick={async() => {
+                        invalidateLogonInfo();
+                        await fetch(`/api/core.usermgmt/user/${props.user.id}/impersonate`, {method: "POST"});
+                        props.onImpersonate?.(props.user);
+                    }}
+                >Impersonate</button>}
             </div>
         </div>
     </div>;
@@ -160,7 +177,7 @@ export default function UserView(props: UserViewProps) {
                     setUsers(data);
                 }
                 else {
-                    props.setCurrentPage("login");
+                    props.setCurrentPage("home");
                 }
             });
     };
@@ -230,6 +247,9 @@ export default function UserView(props: UserViewProps) {
                 }).then(() => updateUsers())
                     .then(() => setIsLoading(false));
             }}
+            onImpersonate={() => {
+                props.setCurrentPage("home");
+            }}
         />}
 
         <div className="flex justify-center items-center">
@@ -261,7 +281,7 @@ export default function UserView(props: UserViewProps) {
                             setUserEditDialogUser(user);
                             setUserEditDialogVisible(true);
                         }}
-                        clickable={permEditUsers && permViewPermissions}
+                        clickable={permViewUsers && permViewPermissions}
                     />)}
                 </div>
             </div>

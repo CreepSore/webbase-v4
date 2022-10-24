@@ -168,5 +168,7 @@ export default function NavigationBar(props: NavigationBarProperties) {
                 props.onNavigation("login");
             }}
         />}
+
+        {logonInfo.loggedIn && <p className="text-sm text-white/50 pl-3 select-none">Logged in as {logonInfo.user.username}</p>}
     </div>;
 }

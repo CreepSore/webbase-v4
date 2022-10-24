@@ -102,32 +102,24 @@ export default class CoreUsermgmtWeb implements IExtension {
             res.json({loggedIn: true, uid: res.locals.user.id, user: res.locals.user, additionalData: res.locals.additionalData});
         });
 
-        apiRouter.post("/user/:id/impersonate", async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.ImpersonateUser.name)) return res.json({success: false});
-
+        apiRouter.post("/user/:id/impersonate", this.checkPermissions(Permissions.ImpersonateUser.name), async(req, res) => {
+            console.log("WARN", "Core.Usermgmt", `IP [${req.headers['x-forwarded-for'] || req.socket.remoteAddress}] impersonated uid ${req.params.id}`)
             req.session.uid = req.params.id;
             res.json({success: true});
         });
 
-        apiRouter.get("/user", async(req, res) => {
+        apiRouter.get("/user", this.checkPermissions(Permissions.ViewUser.name), async(req, res) => {
             let permissions: Permission[] = res.locals.additionalData.permissions;
             if(!permissions.some(p => p.name === Permissions.ViewUser.name)) return res.json({success: false});
 
             res.json(await User.use().select());
         });
 
-        apiRouter.get("/user/:id", async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.ViewUser.name)) return res.json({success: false});
-
+        apiRouter.get("/user/:id", this.checkPermissions(Permissions.ViewUser.name), async(req, res) => {
             res.json(await User.use().where({id: req.params.id}).first());
         });
 
-        apiRouter.put("/user", async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.CreateUser.name)) return res.json({success: false});
-
+        apiRouter.put("/user", this.checkPermissions(Permissions.CreateUser.name), async(req, res) => {
             let data = req.body;
             data.password = User.hashPassword(data.password);
             data.isActive = Boolean(data.isActive);
@@ -141,7 +133,7 @@ export default class CoreUsermgmtWeb implements IExtension {
             }
         });
 
-        apiRouter.patch("/user/:id", async(req, res) => {
+        apiRouter.patch("/user/:id", this.checkPermissions(Permissions.EditUser.name), async(req, res) => {
             let permissions: Permission[] = res.locals.additionalData.permissions;
             if(!permissions.some(p => p.name === Permissions.EditUser.name)) return res.json({success: false});
 
@@ -161,18 +153,19 @@ export default class CoreUsermgmtWeb implements IExtension {
             res.json({success: true});
         });
 
-        apiRouter.delete("/user/:id", async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.DeleteUser.name)) return;
-
+        apiRouter.delete("/user/:id", this.checkPermissions(Permissions.DeleteUser.name), async(req, res) => {
             await User.use().where({id: req.params.id}).delete();
             res.json({success: true});
         });
 
         apiRouter.post("/login", async(req, res) => {
             let logon = await coreUsermgmt.loginByCredentials(req.body);
-            if(logon.error) return res.json({success: false, error: logon.error});
+            if(logon.error) {
+                console.log("WARN", "Core.Usermgmt.Web", `IP [${req.headers['x-forwarded-for'] || req.socket.remoteAddress}] failed to log-in with credentials ${JSON.stringify(req.body)}`);
+                return res.json({success: false, error: logon.error});
+            }
 
+            console.log("INFO", "Core.Usermgmt.Web", `IP [${req.headers['x-forwarded-for'] || req.socket.remoteAddress}] logged-in with credentials ${JSON.stringify(req.body)}`);
             req.session.uid = logon.user.id;
             return res.json({success: true});
         });
@@ -182,17 +175,14 @@ export default class CoreUsermgmtWeb implements IExtension {
             res.json({success: true});
         });
 
-        apiRouter.get("/permission", async(req, res) => {
+        apiRouter.get("/permission", this.checkPermissions(Permissions.ViewPermissions.name), async(req, res) => {
             let permissions: Permission[] = res.locals.additionalData.permissions;
             if(!permissions.some(p => p.name === Permissions.ViewPermissions.name)) return res.json({success: false});
 
             res.json(await Permission.use().select());
         });
 
-        apiRouter.get("/permission-group", async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.ViewPermissions.name)) return res.json({success: false});
-
+        apiRouter.get("/permission-group", this.checkPermissions(Permissions.ViewPermissions.name), async(req, res) => {
             const permissionGroups = await PermissionGroup.use().select();
             await Promise.all(permissionGroups.map(async pg => {
                 let permissions = await Permission.use()
@@ -207,10 +197,7 @@ export default class CoreUsermgmtWeb implements IExtension {
             res.json(permissionGroups);
         });
 
-        apiRouter.put("/permission-group/:pgid/permission/:pid", async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.EditPermissions.name)) return res.json({success: false});
-
+        apiRouter.put("/permission-group/:pgid/permission/:pid", this.checkPermissions(Permissions.EditPermissions.name), async(req, res) => {
             const {pgid, pid} = req.params;
             console.log("INFO", "Core.Dashboard", `Adding Permission [${pid}] to Group [${pgid}]`);
 
@@ -222,10 +209,7 @@ export default class CoreUsermgmtWeb implements IExtension {
             .catch(() => res.json({success: false}));
         });
 
-        apiRouter.delete("/permission-group/:pgid/permission/:pid", async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.EditPermissions.name)) return res.json({success: false});
-
+        apiRouter.delete("/permission-group/:pgid/permission/:pid", this.checkPermissions(Permissions.EditPermissions.name), async(req, res) => {
             const {pgid, pid} = req.params;
             console.log("INFO", "Core.Dashboard", `Deleting Permission [${pid}] from Group [${pgid}]`);
 
@@ -241,6 +225,14 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     async stop() {
 
+    }
+
+    private checkPermissions(...perms: string[]) {
+        return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+            let permissions: Permission[] = res.locals.additionalData.permissions;
+            if(!permissions.some(p => perms.includes(p.name))) return res.json({success: false});
+            next();
+        };
     }
 
     private checkConfig() {

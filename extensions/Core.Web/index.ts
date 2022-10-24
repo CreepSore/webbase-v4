@@ -2,8 +2,8 @@ import * as fs from "fs";
 import {EventEmitter} from "events";
 import {Server} from "net";
 
-import * as express from "express";
-import * as expressSession from "express-session";
+import express from "express";
+import expressSession from "express-session";
 import helmet from "helmet";
 import * as uuid from "uuid";
 
