@@ -8,9 +8,23 @@ import PageUsers from "./pages/PageUsers";
 import PagePermissions from "./pages/PagePermissions";
 import PageLogin from "./pages/PageLogin";
 import PageLogs from "./pages/PageLogs";
+import PageCustom from "./pages/PageCustom";
+
+import {useDashboardPages} from "./hooks";
 
 function Main() {
     let [currentPage, setCurrentPage] = React.useState("home");
+    let [loading, customDashboardPages] = useDashboardPages();
+    let customPages = React.useMemo(() => {
+        const result = customDashboardPages.map(cdp => <RouterPage key={cdp.key}>
+            <PageCustom
+                setCurrentPage={setCurrentPage}
+                dashboardPage={cdp}
+            />
+        </RouterPage>);
+
+        return result;
+    }, [customDashboardPages]);
 
     return <Router currentPage={currentPage}>
         <RouterPage key="home">
@@ -32,6 +46,8 @@ function Main() {
         <RouterPage key="logs">
             <PageLogs setCurrentPage={setCurrentPage} />
         </RouterPage>
+
+        {customPages}
     </Router>;
 }
 

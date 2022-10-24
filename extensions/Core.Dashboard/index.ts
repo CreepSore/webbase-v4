@@ -48,6 +48,7 @@ export default class CoreDashboard implements IExtension {
 
         let mainScriptUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
         coreWeb.addAppRoute("/core.dashboard/", mainScriptUrl);
+        console.log("INFO", coreWeb.addScriptFromFile("Core.Dashboard.Test", "Core.Dashboard.Test.js"));
 
         coreWeb.app.get("/api/core.dashboard/logs", async(req, res) => {
             if(!res.locals.additionalData.permissions.some((p: Permission) => p.name === Permissions.ViewLogs.name)) return res.json([]);

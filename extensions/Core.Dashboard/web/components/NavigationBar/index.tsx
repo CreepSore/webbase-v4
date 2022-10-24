@@ -3,7 +3,7 @@ import React from "react";
 import UsermgmtPermissions from "../../../../Core.Usermgmt.Web/permissions";
 import DashboardPermission from "../../../permissions";
 
-import {usePermissions, invalidateLogonInfo, useLogonInfo} from "../../hooks";
+import {usePermissions, invalidateLogonInfo, useLogonInfo, useDashboardPages} from "../../hooks";
 
 interface NavigationBarProperties {
     activePage: string;
@@ -81,6 +81,51 @@ export default function NavigationBar(props: NavigationBarProperties) {
     let [menuX, setMenuX] = React.useState(0);
     let [menuY, setMenuY] = React.useState(0);
 
+    let [loading, pages] = useDashboardPages();
+    let customDropdownMenu = React.useMemo(() => {
+        if(loading) return <></>;
+        return [...new Set(pages.filter(p => Boolean(p.parentMenuTitle) && p.showInNavigation).map(p => p.parentMenuTitle))]
+            .map(dropDownTitle => {
+                const menuKey = `custom-menu-${dropDownTitle}`;
+                const submenus = pages.filter(p => p.parentMenuTitle === dropDownTitle);
+
+                return <React.Fragment key={menuKey}>
+                    <NavMenu
+                        visible={visibleMenu === menuKey} x={menuX} y={menuY}
+                    >
+                        <div className="text-white flex flex-col">
+                            {submenus.map(submenu => <NavMenuButton
+                                key={submenu.key}
+                                label={submenu.label}
+                                onClick={() => props.onNavigation(submenu.key)}
+                                isActive={props.activePage === submenu.key}
+                            />)}
+                        </div>
+                    </NavMenu>
+
+                    <NavButton
+                        pageKey={menuKey}
+                        isActive={visibleMenu === menuKey || submenus.map(p => p.key).includes(props.activePage)}
+                        onClick={(menu, x, y) => {
+                            openMenu(menu, x, y);
+                        }}
+                        label={dropDownTitle}
+                    />
+                </React.Fragment>;
+            });
+    }, [pages, props.activePage, visibleMenu]);
+
+    let customMenuButtons = React.useMemo(() => {
+        return pages.filter(p => !p.parentMenuTitle && p.showInNavigation).map(p => <NavButton
+            key={p.key}
+            pageKey={p.key}
+            label={p.label}
+            onClick={props.onNavigation}
+            isActive={props.activePage === p.key}
+            visible={true}
+        />);
+    }, [pages]);
+
     React.useEffect(() => {
         let cb = () => {
             setVisibleMenu("");
@@ -146,6 +191,10 @@ export default function NavigationBar(props: NavigationBarProperties) {
             visible={viewLogs}
             onClick={() => props.onNavigation("logs")}
         />
+
+        {customDropdownMenu}
+
+        {customMenuButtons}
 
         {logonInfo.loggedIn && <NavButton
             pageKey="logout"

@@ -67,3 +67,17 @@ export function usePermissions(...permissions: string[]) {
 
     return permissions.map(p => logonInfo.additionalData.permissions.some(perm => perm.name === p));
 }
+
+export interface DashboardPage {
+    key: string;
+    label: string;
+    scriptUrl: string;
+    parentMenuTitle?: string; // null = normal menu entry
+    showInNavigation: boolean;
+}
+
+export function useDashboardPages(): [boolean, DashboardPage[], () => void] {
+    return [false, [
+        {key: "teamspeak-dashboard", label: "TS Dashboard", scriptUrl: "/js/Core.Dashboard.Test/7c7522d3-711d-431f-8c69-5122bd8b1f6e", showInNavigation: true}
+    ], () => {}];
+}
