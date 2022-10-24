@@ -1,5 +1,6 @@
-// @ts-ignore
-window.loaded = function Test() {
+// @ts-nocheck
+
+export default function Test() {
     let [val, setVal] = React.useState("");
 
     return <>
@@ -7,3 +8,5 @@ window.loaded = function Test() {
         <button onClick={() => alert(val)}>Oida</button>
     </>;
 }
+
+window.loaded = Test;
