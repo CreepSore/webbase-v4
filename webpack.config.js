@@ -33,53 +33,57 @@ module.exports = function(env, argv) {
                 },
                 modules: ['node_modules']
             },
-            externals: {knex: 'commonjs knex'},
+            externals: {knex: 'commonjs knex', "ts3-nodejs-library": "commonjs ts3-nodejs-library"},
             module: {
                 rules: [
                     {
-                        test: /\.(ts|js)$/i,
-                        exclude: /(node_modules)/,
-                        loader: "babel-loader",
-                        options: {
-                            plugins: [
-                                ["babel-plugin-tsconfig-paths", {
-                                    rootDir: ".",
-                                    tsconfig: "tsconfig.json",
-                                }]
-                            ],
-                            presets: ["@babel/typescript", ["@babel/preset-env", {
-                                targets: {
-                                    node: "17"
-                                }
-                            }]]
-                        },
-                    },
-                    {
-                        test: /\.(tsx|jsx)$/i,
-                        exclude: /(node_modules)/,
-                        use: [
+                        oneOf: [
                             {
+                                test: /\.(ts|js)$/i,
+                                exclude: /(node_modules)/,
                                 loader: "babel-loader",
                                 options: {
-                                    presets: ["@babel/typescript", "@babel/preset-react", ["@babel/preset-env", {
+                                    plugins: [
+                                        ["babel-plugin-tsconfig-paths", {
+                                            rootDir: ".",
+                                            tsconfig: "tsconfig.json",
+                                        }]
+                                    ],
+                                    presets: ["@babel/typescript", ["@babel/preset-env", {
                                         targets: {
                                             node: "17"
                                         }
                                     }]]
-                                }
-                            }
-                        ],
-                        type: "asset/resource"
-                    },
-                    {
-                        test: /\.(json)$/i,
-                        exclude: /(node_modules)/
-                    },
-                    {
-                        test: /\.png$/i,
-                        type: "asset/inline"
-                    },
-                    { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
+                                },
+                            },
+                            {
+                                test: /\.(tsx|jsx)$/i,
+                                exclude: /(node_modules)/,
+                                use: [
+                                    {
+                                        loader: "babel-loader",
+                                        options: {
+                                            presets: ["@babel/typescript", "@babel/preset-react", ["@babel/preset-env", {
+                                                targets: {
+                                                    node: "17"
+                                                }
+                                            }]]
+                                        }
+                                    }
+                                ],
+                                type: "asset/resource"
+                            },
+                            {
+                                test: /\.(json)$/i,
+                                exclude: /(node_modules)/
+                            },
+                            {
+                                test: /\.png$/i,
+                                type: "asset/inline"
+                            },
+                            { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
+                        ]
+                    }
                 ]
             },
             optimization: {
