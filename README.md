@@ -1,12 +1,12 @@
 # Webbase v4
 
 ## Index
-1. [[#Introduction]]
-2. [[#Design Choices]]
-3. [[#Core-Modules]]
-4. [[#Developing Extensions]]
-5. [[#Building and starting the application]]
-6. [[#Logs]]
+1. Introduction
+2. Design Choices
+3. Core-Modules
+4. Developing Extensions
+5. Building and starting the application
+6. Logs
 
 ## Introduction#
 The webbase-v4 is an application-framework targetted to building web-apps using express.js. Despite its name, it's also possible to build normal nodejs-applications with it.
@@ -32,17 +32,17 @@ The only few things that you are not able to disable are the absolute core thing
 ---
 
 ## Core-Modules
-- [[#Core-Modules Introduction]]
-- [[#Core]]
-- [[#Core.Web]]
-- [[#Core.Db]]
-- [[#Core.Usermgmt]]
-- [[#Core.Usermgmt.Web]]
-- [[#Core.Mail]]
-- [[#Core.Cache]]
-- [[#Core.Databridge]]
-- [[#Core.Dashboard]]
-- [[#Core.ReactComponents]]
+- Core-Modules Introduction
+- Core
+- Core.Web
+- Core.Db
+- Core.Usermgmt
+- Core.Usermgmt.Web
+- Core.Mail
+- Core.Cache
+- Core.Databridge
+- Core.Dashboard
+- Core.ReactComponents
 
 ### Core-Modules Introduction
 The core modules provide the most basic functionality for almost everything that you need to develop a web-application. Per default, all core modules are enabled; however they can be disabled (see [[#ExtensionService]])
