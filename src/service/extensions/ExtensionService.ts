@@ -74,7 +74,11 @@ export default class ExtensionService {
     }
 
     getExtension(name: string) {
-        return this.extensions.find(ext => ext.metadata.name === name);
+        const result = this.extensions.find(ext => ext.metadata.name === name);
+        if(!result) {
+            console.log("WARN", "ExtensionService.ts", `Failed to get extension [${name}]`);
+        }
+        return result;
     }
 
     getExtensions(names: string[]) {
@@ -95,7 +99,7 @@ export default class ExtensionService {
         if(runStart) {
             try {
                 await node.start({...this.executionContext});
-                console.log("INFO", "ExtensionService.ts", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`)
+                console.log("INFO", "ExtensionService.ts", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`);
             }
             catch(err) {
                 console.log("ERROR", "ExtensionService.ts", `Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed: [${err.message}]: ${err.stack}`);

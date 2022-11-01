@@ -71,13 +71,24 @@ export function usePermissions(...permissions: string[]) {
 export interface DashboardPage {
     key: string;
     label: string;
-    scriptUrl: string;
+    url: string;
     parentMenuTitle?: string; // null = normal menu entry
     showInNavigation: boolean;
 }
 
-export function useDashboardPages(): [boolean, DashboardPage[], () => void] {
-    return [false, [
-        {key: "teamspeak-dashboard", label: "TS Dashboard", scriptUrl: "/js/Core.Dashboard.Test/7c7522d3-711d-431f-8c69-5122bd8b1f6e", showInNavigation: true}
-    ], () => {}];
+export function invalidateDashboardPages() {
+    window.localStorage.removeItem("dashboard-pages");
+}
+
+export function useDashboardPages(): DashboardPage[] {
+    let [val, setVal] = useLocalStorage("dashboard-pages");
+
+    if(!val || Date.now() - val.lastUpdate > 60000 * 5) {
+        fetch("/api/core.dashboard/pages")
+            .then(res => res.json())
+            .then(res => setVal({lastUpdate: Date.now(), data: res}))
+            .catch(() => setVal({lastUpdate: Date.now(), data: []}));
+    }
+
+    return val?.data || [];
 }

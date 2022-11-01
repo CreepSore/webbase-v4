@@ -1,6 +1,5 @@
 {
     "entry": {
-        "Core.Dashboard.Main.js": "./extensions/Core.Dashboard/web/main.tsx",
-        "Core.Dashboard.Test.js": "./extensions/Core.Dashboard/web/test.tsx"
+        "Core.Dashboard.Main.js": "./extensions/Core.Dashboard/web/main.tsx"
     }
 }

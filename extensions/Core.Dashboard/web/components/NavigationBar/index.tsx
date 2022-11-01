@@ -3,7 +3,7 @@ import React from "react";
 import UsermgmtPermissions from "../../../../Core.Usermgmt.Web/permissions";
 import DashboardPermission from "../../../permissions";
 
-import {usePermissions, invalidateLogonInfo, useLogonInfo, useDashboardPages} from "../../hooks";
+import {usePermissions, invalidateLogonInfo, useLogonInfo, useDashboardPages, invalidateDashboardPages} from "../../hooks";
 
 interface NavigationBarProperties {
     activePage: string;
@@ -81,9 +81,8 @@ export default function NavigationBar(props: NavigationBarProperties) {
     let [menuX, setMenuX] = React.useState(0);
     let [menuY, setMenuY] = React.useState(0);
 
-    let [loading, pages] = useDashboardPages();
+    let pages = useDashboardPages();
     let customDropdownMenu = React.useMemo(() => {
-        if(loading) return <></>;
         return [...new Set(pages.filter(p => Boolean(p.parentMenuTitle) && p.showInNavigation).map(p => p.parentMenuTitle))]
             .map(dropDownTitle => {
                 const menuKey = `custom-menu-${dropDownTitle}`;
@@ -204,6 +203,7 @@ export default function NavigationBar(props: NavigationBarProperties) {
                 fetch("/api/core.usermgmt/logout", {method: "POST"})
                 .then(() => {
                     invalidateLogonInfo();
+                    invalidateDashboardPages();
                     location.reload()
                 });
             }}

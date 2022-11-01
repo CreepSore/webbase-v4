@@ -16,6 +16,15 @@ class TemplateConfig {
 
 }
 
+export interface DashboardPage {
+    key: string;
+    label: string;
+    url: string;
+    parentMenuTitle?: string; // null = normal menu entry
+    showInNavigation: boolean;
+    permissions?: string[];
+}
+
 export default class CoreDashboard implements IExtension {
     metadata: ExtensionMetadata = {
         name: "Core.Dashboard",
@@ -28,6 +37,7 @@ export default class CoreDashboard implements IExtension {
     config: TemplateConfig;
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
+    pages: DashboardPage[] = [];
 
     constructor() {
         this.config = this.loadConfig();
@@ -48,16 +58,24 @@ export default class CoreDashboard implements IExtension {
 
         let mainScriptUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
         coreWeb.addAppRoute("/core.dashboard/", mainScriptUrl);
-        console.log("INFO", coreWeb.addScriptFromFile("Core.Dashboard.Test", "Core.Dashboard.Test.js"));
 
         coreWeb.app.get("/api/core.dashboard/logs", async(req, res) => {
             if(!res.locals.additionalData.permissions.some((p: Permission) => p.name === Permissions.ViewLogs.name)) return res.json([]);
             res.json((LoggerService.getLogger("cache") as CacheLogger).logEntries);
         });
+
+        coreWeb.app.get("/api/core.dashboard/pages", async(req, res) => {
+            res.json(this.pages.filter(p => (p.permissions || []).every(perm => res.locals.additionalData.permissions.map((x: Permission) => x.name).includes(perm))))
+        });
     }
 
     async stop() {
         
+    }
+
+    registerDashboardPage(page: DashboardPage) {
+        console.log("INFO", "Core.Dashboard", `Registered new page [${page.key}]@[${page.url}]`);
+        this.pages.push(page);
     }
 
     private checkConfig() {

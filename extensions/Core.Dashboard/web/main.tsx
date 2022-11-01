@@ -14,7 +14,7 @@ import {useDashboardPages} from "./hooks";
 
 function Main() {
     let [currentPage, setCurrentPage] = React.useState("home");
-    let [loading, customDashboardPages] = useDashboardPages();
+    let customDashboardPages = useDashboardPages();
     let customPages = React.useMemo(() => {
         const result = customDashboardPages.map(cdp => <RouterPage key={cdp.key}>
             <PageCustom

@@ -227,12 +227,17 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     }
 
-    private checkPermissions(...perms: string[]) {
+    checkPermissions(...perms: string[]) {
         return (req: express.Request, res: express.Response, next: express.NextFunction) => {
             let permissions: Permission[] = res.locals.additionalData.permissions;
             if(!permissions.some(p => perms.includes(p.name))) return res.json({success: false});
             next();
         };
+    }
+
+    hasPermission(res: express.Response, ...perms: string[]) {
+        let permissions: Permission[] = res.locals.additionalData.permissions;
+        return permissions.some(p => perms.includes(p.name));
     }
 
     private checkConfig() {
