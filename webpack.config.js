@@ -33,7 +33,7 @@ module.exports = function(env, argv) {
                 },
                 modules: ['node_modules']
             },
-            externals: {knex: 'commonjs knex', "ts3-nodejs-library": "commonjs ts3-nodejs-library"},
+            externals: {knex: 'commonjs knex'},
             module: {
                 rules: [
                     {
