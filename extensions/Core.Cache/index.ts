@@ -36,6 +36,7 @@ class CacheEntry<T> {
 
     async getValue() {
         if(this.refreshNextUpdate || (this.updateEveryMs > 0 && (Date.now() - Number(this.lastUpdate) > this.updateEveryMs))) {
+            this.refreshNextUpdate = false;
             console.log("INFO", "Core.Cache", `Executing update-function for cache [${this.key}]`);
             this.currentValue = await this.updateCallback();
             console.log("INFO", "Core.Cache", `Updated value for cache [${this.key}] to [${util.inspect(this.currentValue, {breakLength: Infinity})}]`);
