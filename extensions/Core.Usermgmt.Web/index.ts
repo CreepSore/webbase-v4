@@ -109,9 +109,6 @@ export default class CoreUsermgmtWeb implements IExtension {
         });
 
         apiRouter.get("/user", this.checkPermissions(Permissions.ViewUser.name), async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.ViewUser.name)) return res.json({success: false});
-
             res.json(await User.use().select());
         });
 
@@ -134,9 +131,6 @@ export default class CoreUsermgmtWeb implements IExtension {
         });
 
         apiRouter.patch("/user/:id", this.checkPermissions(Permissions.EditUser.name), async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.EditUser.name)) return res.json({success: false});
-
             let user = await User.use().where({id: req.params.id}).first();
             if(!user) {
                 res.json({success: false});
@@ -176,9 +170,6 @@ export default class CoreUsermgmtWeb implements IExtension {
         });
 
         apiRouter.get("/permission", this.checkPermissions(Permissions.ViewPermissions.name), async(req, res) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => p.name === Permissions.ViewPermissions.name)) return res.json({success: false});
-
             res.json(await Permission.use().select());
         });
 
@@ -230,7 +221,7 @@ export default class CoreUsermgmtWeb implements IExtension {
     checkPermissions(...perms: string[]) {
         return (req: express.Request, res: express.Response, next: express.NextFunction) => {
             let permissions: Permission[] = res.locals.additionalData.permissions;
-            if(!permissions.some(p => perms.includes(p.name))) return res.json({success: false});
+            if(!permissions.some(p => perms.includes(p.name))) return res.status(403).end();
             next();
         };
     }

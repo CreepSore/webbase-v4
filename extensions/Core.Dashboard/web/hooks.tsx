@@ -2,7 +2,7 @@ import React from "react";
 import Permission from "../../Core.Usermgmt/Models/Permission";
 import User from "../../Core.Usermgmt/Models/User";
 
-export function useFetchJson<T>(url: string, options: RequestInit | undefined = undefined) : [boolean, T|null, () => void] {
+export function useFetchJson<T>(url: string, options: RequestInit | undefined = undefined, defaultValue: T = null) : [boolean, T|null, () => void] {
     let [data, setData] = React.useState<T|null>(null);
     let [loading, setLoading] = React.useState(true);
 
@@ -17,6 +17,9 @@ export function useFetchJson<T>(url: string, options: RequestInit | undefined = 
             .then(r => r.json())
             .then(data => {
                 setData(data);
+                setLoading(false);
+            }).catch(() => {
+                setData(defaultValue);
                 setLoading(false);
             })
     }, [loading]);

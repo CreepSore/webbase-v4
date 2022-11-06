@@ -11,6 +11,7 @@ import CoreUsermgmt from "../Core.Usermgmt";
 import Permissions from "./permissions";
 import PermissionGroup from "../Core.Usermgmt/Models/PermissionGroup";
 import Permission from "../Core.Usermgmt/Models/Permission";
+import CoreUsermgmtWeb from "../Core.Usermgmt.Web";
 
 class TemplateConfig {
 
@@ -51,16 +52,16 @@ export default class CoreDashboard implements IExtension {
 
         let coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
         let coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
+        let coreUsermgmtWeb = executionContext.extensionService.getExtension("Core.Usermgmt.Web") as CoreUsermgmtWeb;
 
-        const [permViewLogs] = await coreUsermgmt.createPermissions(...Object.values(Permissions));
+        await coreUsermgmt.createPermissions(...Object.values(Permissions));
         await Promise.all(Object.values(Permissions).map(
             perm => PermissionGroup.addPermission({name: "Administrator"}, {name: perm.name})));
 
         let mainScriptUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
         coreWeb.addAppRoute("/core.dashboard/", mainScriptUrl);
 
-        coreWeb.app.get("/api/core.dashboard/logs", async(req, res) => {
-            if(!res.locals.additionalData.permissions.some((p: Permission) => p.name === Permissions.ViewLogs.name)) return res.json([]);
+        coreWeb.app.get("/api/core.dashboard/logs", coreUsermgmtWeb.checkPermissions(Permissions.ViewLogs.name), async(req, res) => {
             res.json((LoggerService.getLogger("cache") as CacheLogger).logEntries);
         });
 

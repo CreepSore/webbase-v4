@@ -81,7 +81,7 @@ export default class ExtensionService {
         return result;
     }
 
-    getExtensions(names: string[]) {
+    getExtensions(...names: string[]) {
         return this.extensions.filter(ext => names.includes(ext.metadata.name));
     }
 
