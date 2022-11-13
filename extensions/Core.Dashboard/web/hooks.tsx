@@ -3,7 +3,7 @@ import Permission from "../../Core.Usermgmt/Models/Permission";
 import User from "../../Core.Usermgmt/Models/User";
 
 export function useFetchJson<T>(url: string, options: RequestInit | undefined = undefined, defaultValue: T = null) : [boolean, T|null, () => void] {
-    let [data, setData] = React.useState<T|null>(null);
+    let [data, setData] = React.useState<T|null>(defaultValue);
     let [loading, setLoading] = React.useState(true);
 
     let update = () => {

@@ -1,3 +1,4 @@
+import * as dns from "dns/promises";
 import {EventEmitter} from "events";
 
 import IExecutionContext from "@service/extensions/IExecutionContext";
@@ -21,8 +22,11 @@ declare module 'express-session' {
     }
   }
 
-class TemplateConfig {
-
+class CoreUsermgmtWebConfig {
+    autologin = [
+        {ip: "127.0.0.1", userid: "2"},
+        {dns: "localhost", userid: "2"}
+    ];
 }
 
 export default class CoreUsermgmtWeb implements IExtension {
@@ -34,7 +38,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         dependencies: ["Core.Usermgmt", "Core.Web"]
     };
 
-    config: TemplateConfig;
+    config: CoreUsermgmtWebConfig;
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
@@ -48,6 +52,21 @@ export default class CoreUsermgmtWeb implements IExtension {
             return;
         }
 
+        this.config.autologin = (await Promise.all(this.config.autologin.map(async al => {
+            if(al.dns) {
+                try {
+                    al.ip = (await dns.resolve4(al.dns))[0];
+                }
+                catch {return null;}
+            }
+            
+            if(!al.ip) return null;
+            return {
+                ip: al.ip,
+                userid: al.userid
+            }
+        }))).filter(Boolean);
+
         let coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
         let perms = await coreUsermgmt.createPermissions(...Object.values(Permissions));
         await Promise.all(perms.map(p => PermissionGroup.addPermission({name: "Administrator"}, p)));
@@ -57,6 +76,12 @@ export default class CoreUsermgmtWeb implements IExtension {
         let apiRouter = express.Router();
 
         coreWeb.app.use(async(req, res, next) => {
+            let autologin = this.config.autologin.find(login => login.ip === req.headers['x-forwarded-for'] || login.ip === req.socket.remoteAddress)?.userid;
+            if(autologin && !req.session.uid) {
+                console.log("WARN", "Core.Usermgmt.Web", `Automatically logged in ip [${req.headers['x-forwarded-for'] || req.socket.remoteAddress}] into user [${autologin}]`)
+                req.session.uid = autologin;
+            }
+
             let useAnonGroup = true;
             if(req.session.uid) {
                 let user = await User.use().where({id: req.session.uid}).first();
@@ -238,7 +263,7 @@ export default class CoreUsermgmtWeb implements IExtension {
     }
 
     private loadConfig() {
-        let model = new TemplateConfig();
+        let model = new CoreUsermgmtWebConfig();
         if(Object.keys(model).length === 0) return model;
 
         let [cfgname, templatename] = this.generateConfigNames();
