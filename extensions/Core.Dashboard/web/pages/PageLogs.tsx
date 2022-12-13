@@ -53,10 +53,13 @@ function LogViewer(props: LogViewerProperties) {
     const filterText = (text: string, searchText: string) => {
         if(!searchText) return true;
 
-        if(searchText.startsWith("!")) {
+        let searchMode = searchText[0]
+        if(["?", "!"].includes(searchText[0])) {
             try {
                 const match = new RegExp(searchText.substring(1), "gi");
-                return match.test(text);
+                if(searchMode === "?") return match.test(text);
+                if(searchMode === "!") return !match.test(text);
+                return false;
             }
             catch {
                 return false;
@@ -93,7 +96,7 @@ function LogViewer(props: LogViewerProperties) {
                         value={search1}
                         onChange={e => setSearch1(e.target.value)}
                         placeholder="Date"
-                        title="Prefix search with '!' to enable regex"
+                        title="Prefix search with '?' to enable regex or '?' to negate search"
                     /></th>
                     <th><input
                         className="w-full px-2 py-1"
@@ -101,7 +104,7 @@ function LogViewer(props: LogViewerProperties) {
                         value={search2}
                         onChange={e => setSearch2(e.target.value)}
                         placeholder="Level"
-                        title="Prefix search with '!' to enable regex"
+                        title="Prefix search with '?' to enable regex or '?' to negate search"
                     /></th>
                     <th><input
                         className="w-full px-2 py-1"
@@ -109,7 +112,7 @@ function LogViewer(props: LogViewerProperties) {
                         value={search3}
                         onChange={e => setSearch3(e.target.value)}
                         placeholder="Segments"
-                        title="Prefix search with '!' to enable regex"
+                        title="Prefix search with '?' to enable regex or '?' to negate search"
                     /></th>
                     <th><input
                         className="w-full px-2 py-1"
@@ -117,7 +120,7 @@ function LogViewer(props: LogViewerProperties) {
                         value={search4}
                         onChange={e => setSearch4(e.target.value)}
                         placeholder="Message"
-                        title="Prefix search with '!' to enable regex"
+                        title="Prefix search with '?' to enable regex or '?' to negate search"
                     /></th>
                     <th></th>
                 </tr>
