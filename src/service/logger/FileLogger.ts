@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as path from "path";
 import ILogger from "./ILogger";
 import LoggerService from "./LoggerService";
 
@@ -7,6 +8,11 @@ export default class FileLogger implements ILogger {
 
     constructor(logPath: string) {
         this.logfilePath = logPath;
+
+        let logDir = path.dirname(this.logfilePath);
+        if(!fs.existsSync(logDir)) {
+            fs.mkdirSync(logDir);
+        }
     }
 
     async log(level: string, ...args: any[]) {
