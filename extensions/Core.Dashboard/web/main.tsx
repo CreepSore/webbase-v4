@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import * as knex from "knex";
 
 import Router from "../../Core.ReactComponents/Router";
 import RouterPage from "../../Core.ReactComponents/Router/RouterPage";
@@ -11,6 +12,30 @@ import PageLogs from "./pages/PageLogs";
 import PageCustom from "./pages/PageCustom";
 
 import {useDashboardPages} from "./hooks";
+
+declare global {
+    interface Window {
+        runDbQuery<T>(query: string): Promise<T>;
+    }
+}
+
+window.runDbQuery = query => {
+    return new Promise((res, rej) => {
+        fetch("/api/core.dashboard/db/query", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({query}),
+        }).then(response => response.json())
+            .then(data => {
+                if(data.success === false) {
+                    return rej();
+                }
+
+                return res(data);
+            })
+            .catch(() => {rej()});
+    });
+};
 
 function Main() {
     let [currentPage, setCurrentPage] = React.useState("home");
