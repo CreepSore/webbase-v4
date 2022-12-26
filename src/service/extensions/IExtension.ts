@@ -8,6 +8,7 @@ export interface ExtensionMetadata {
     dependencies: Array<string>;
     resolvedDependencies?: Array<IExtension>;
     isLoaded?: boolean;
+    extensionPath?: string;
 }
 
 export interface IExtensionConstructor {

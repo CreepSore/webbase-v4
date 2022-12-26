@@ -1,4 +1,5 @@
 import {EventEmitter} from "events";
+import * as vm from "vm";
 
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
@@ -12,6 +13,7 @@ import Permissions from "./permissions";
 import PermissionGroup from "../Core.Usermgmt/Models/PermissionGroup";
 import Permission from "../Core.Usermgmt/Models/Permission";
 import CoreUsermgmtWeb from "../Core.Usermgmt.Web";
+import CoreDb from "../Core.Db";
 
 class TemplateConfig {
 
@@ -53,6 +55,7 @@ export default class CoreDashboard implements IExtension {
         let coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
         let coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
         let coreUsermgmtWeb = executionContext.extensionService.getExtension("Core.Usermgmt.Web") as CoreUsermgmtWeb;
+        let coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
 
         await coreUsermgmt.createPermissions(...Object.values(Permissions));
         await Promise.all(Object.values(Permissions).map(
@@ -67,6 +70,16 @@ export default class CoreDashboard implements IExtension {
 
         coreWeb.app.get("/api/core.dashboard/pages", async(req, res) => {
             res.json(this.pages.filter(p => (p.permissions || []).every(perm => res.locals.additionalData.permissions.map((x: Permission) => x.name).includes(perm))))
+        });
+
+        coreWeb.app.post("/api/core.dashboard/db/query", coreUsermgmtWeb.checkPermissions(Permissions.DbQuery.name), async(req, res) => {
+            try {
+                let result = await coreDb.db.raw(req.body.query);
+                res.json(result);
+            }
+            catch {
+                res.status(500).json({success: false, error: "Internal Server Error"});
+            }
         });
     }
 
