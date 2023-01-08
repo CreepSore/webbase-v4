@@ -23,7 +23,16 @@ declare module 'express-session' {
     export interface SessionData {
       uid: string
     }
-  }
+}
+
+declare global {
+    namespace Express {
+        interface Request {
+            user: User;
+            additionalData: {permissionGroup: string, permissions: string[]}
+        }
+    }
+}
 
 class CoreUsermgmtWebConfig {
     autologin = [
@@ -108,19 +117,19 @@ export default class CoreUsermgmtWeb implements IExtension {
                         useAnonGroup = false;
                     }
 
-                    res.locals.user = user;
+                    req.user = res.locals.user = user;
                 }
             }
 
             if(useAnonGroup) {
                 let anonGroup = await PermissionGroup.use().where({name: "Anonymous"}).first();
-                res.locals.additionalData = {
+                req.additionalData = res.locals.additionalData = {
                     permissionGroup: anonGroup.name,
                     permissions: await coreDb.db.columns("p.name", "p.description", "p.created", "p.modified")
                         .from(`${Permission.tableName} as p`)
                         .leftJoin("permissiongrouppermissions as pgp", "p.id", "pgp.permission")
                         .where({"pgp.permissiongroup": anonGroup.id})
-                }
+                };
             }
             next();
         });
