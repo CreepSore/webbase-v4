@@ -8,6 +8,16 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
 
     constructor(websocketUrl: string) {
         this.websocketUrl = websocketUrl;
+
+        if(this.websocketUrl.startsWith("/")) {
+            let url = new URL(this.websocketUrl, location.origin);
+            url.protocol = url.protocol.replace("http", "ws");
+            this.websocketUrl = url.href;
+        }
+        else if(this.websocketUrl.startsWith("http")) {
+            this.websocketUrl = this.websocketUrl.replace("http", "ws");
+        }
+
         this.callbacks = [];
     }
 
