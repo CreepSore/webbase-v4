@@ -14,6 +14,9 @@ import PermissionGroup from "../Core.Usermgmt/Models/PermissionGroup";
 import Permission from "../Core.Usermgmt/Models/Permission";
 import CoreUsermgmtWeb from "../Core.Usermgmt.Web";
 import CoreDb from "../Core.Db";
+import expressWs from "express-ws";
+import DatabridgeWebsocketServerProtocol from "../Core.Databridge/protocols/server/DatabridgeWebsocketServerProtocol";
+import DatabridgePacket from "../Core.Databridge/DatabridgePacket";
 
 class TemplateConfig {
 
@@ -53,6 +56,8 @@ export default class CoreDashboard implements IExtension {
         }
 
         let coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
+        let app = coreWeb.app as undefined as expressWs.Application;
+
         let coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
         let coreUsermgmtWeb = executionContext.extensionService.getExtension("Core.Usermgmt.Web") as CoreUsermgmtWeb;
         let coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
@@ -64,15 +69,31 @@ export default class CoreDashboard implements IExtension {
         let mainScriptUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
         coreWeb.addAppRoute("/core.dashboard/", mainScriptUrl);
 
-        coreWeb.app.get("/api/core.dashboard/logs", coreUsermgmtWeb.checkPermissions(Permissions.ViewLogs.name), async(req, res) => {
+        app.get("/api/core.dashboard/logs", coreUsermgmtWeb.checkPermissions(Permissions.ViewLogs.name), async(req, res) => {
             res.json((LoggerService.getLogger("cache") as CacheLogger).logEntries);
         });
 
-        coreWeb.app.get("/api/core.dashboard/pages", async(req, res) => {
+        let logDatabridge = new DatabridgeWebsocketServerProtocol();
+        let intervals = new Map();
+        logDatabridge.onClientConnected(c => {
+            c.sendPacket(new DatabridgePacket("LOG", (LoggerService.getLogger("cache") as CacheLogger).logEntries, {}));
+
+            intervals.set(c, setInterval(() => {
+                c.sendPacket(new DatabridgePacket("LOG", (LoggerService.getLogger("cache") as CacheLogger).logEntries, {}));
+            }, 2000));
+        });
+
+        logDatabridge.onClientDisconnected(c => {
+            intervals.delete(c);
+        });
+
+        app.ws("/ws/core.dashboard/logs", coreUsermgmtWeb.checkPermissionsWs(Permissions.ViewLogs.name), logDatabridge.middleware());
+
+        app.get("/api/core.dashboard/pages", async(req, res) => {
             res.json(this.pages.filter(p => (p.permissions || []).every(perm => res.locals.additionalData.permissions.map((x: Permission) => x.name).includes(perm))))
         });
 
-        coreWeb.app.post("/api/core.dashboard/db/query", coreUsermgmtWeb.checkPermissions(Permissions.DbQuery.name), async(req, res) => {
+        app.post("/api/core.dashboard/db/query", coreUsermgmtWeb.checkPermissions(Permissions.DbQuery.name), async(req, res) => {
             try {
                 let result = await coreDb.db.raw(req.body.query);
                 res.json(result);

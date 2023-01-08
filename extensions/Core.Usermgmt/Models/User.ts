@@ -42,6 +42,10 @@ export default class User {
         return await PermissionGroup.hasPermission({id: resolvedUser[0].permissionGroupId}, {id: resolvedPermission[0].id});
     }
 
+    static async hasPermissions(user: Partial<User>, ...permissions: Array<Partial<Permission>>) {
+        return (await Promise.all(permissions.map(p => this.hasPermission(user, p)))).every(b => Boolean(b));
+    }
+
     static use() {
         return this.knex(this.tableName);
     }

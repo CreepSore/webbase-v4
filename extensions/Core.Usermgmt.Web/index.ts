@@ -16,6 +16,8 @@ import CoreWeb from "../Core.Web";
 import CoreUsermgmt from "../Core.Usermgmt";
 
 import Permissions from "./permissions";
+import { Knex } from "knex";
+import expressWs from "express-ws";
 
 declare module 'express-session' {
     export interface SessionData {
@@ -42,6 +44,8 @@ export default class CoreUsermgmtWeb implements IExtension {
     config: CoreUsermgmtWebConfig;
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
+
+    knex: Knex;
 
     constructor() {
         this.config = this.loadConfig();
@@ -73,6 +77,8 @@ export default class CoreUsermgmtWeb implements IExtension {
         await Promise.all(perms.map(p => PermissionGroup.addPermission({name: "Administrator"}, p)));
 
         let coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
+        this.knex = coreDb.db;
+
         let coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
         let apiRouter = express.Router();
 
@@ -248,6 +254,19 @@ export default class CoreUsermgmtWeb implements IExtension {
         return (req: express.Request, res: express.Response, next: express.NextFunction) => {
             let permissions: Permission[] = res.locals.additionalData.permissions;
             if(!permissions.some(p => perms.includes(p.name))) return res.status(403).end();
+            next();
+        };
+    }
+
+    checkPermissionsWs(...perms: string[]): expressWs.WebsocketRequestHandler {
+        return async(ws, req, next) => {
+            let res = await User.hasPermissions({id: req.session.uid}, ...perms.map(p => {
+                return {
+                    name: p
+                };
+            }))
+
+            if(!res) return ws.close();
             next();
         };
     }

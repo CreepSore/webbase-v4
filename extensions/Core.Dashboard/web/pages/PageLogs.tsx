@@ -5,6 +5,8 @@ import UserView from "../components/UserView";
 import {useFetchJson, usePermissions} from "../hooks";
 
 import DashboardPermission from "../../permissions";
+import DatabridgeWebsocketClient from "../../../Core.Databridge/web/DatabridgeWebsocketClient";
+import DatabridgePacket from "../../../Core.Databridge/DatabridgePacket";
 
 interface LogEntry {
     id: string;
@@ -135,7 +137,7 @@ function LogViewer(props: LogViewerProperties) {
 
 export default function PageLogs(props: PageLogsProperties) {
     let [permViewLogs] = usePermissions(DashboardPermission.ViewLogs.name);
-    let [, logs, updateLogs] = useFetchJson<LogEntry[]>("/api/core.dashboard/logs");
+    let [logs, setLogs] = React.useState([]);
     let containerRef = React.useRef<HTMLDivElement>();
     let [scroll, setScroll] = React.useState(containerRef.current?.scrollTop || 0);
 
@@ -155,6 +157,22 @@ export default function PageLogs(props: PageLogsProperties) {
         return () => window.removeEventListener("scroll", cb);
     }, [containerRef.current]);
 
+    const logSocket = React.useRef<DatabridgeWebsocketClient>();
+    React.useEffect(() => {
+        logSocket.current = new DatabridgeWebsocketClient("/ws/core.dashboard/logs")
+            .onPacketReceived(p => {
+                if(p.type === "LOG") {
+                    let packet = p as DatabridgePacket<{id: string, date: number, level: string, infos: string[], message: string}[]>;
+                    setLogs(packet.data);
+                }
+            });
+        logSocket.current.connect();
+
+        return () => {
+            logSocket.current?.close();
+        };
+    }, []);
+
     return <div className="flex flex-col h-screen bg-slate-800 overflow-x-auto" ref={containerRef}>
         <NavigationBar
             activePage="logs"
@@ -168,11 +186,6 @@ export default function PageLogs(props: PageLogsProperties) {
                 className="bg-white/50 text-white rounded-full w-16 h-16 text-lg border border-transparent hover:border-white"
                 onClick={() => containerRef.current?.scrollTo?.({top: scroll === 0 ? 999999 : 0})}
             >{scroll === 0 ? "D" : "U"}</button>
-
-            <button
-                className="bg-white/50 text-white rounded-full w-16 h-16 text-lg border border-transparent hover:border-white"
-                onClick={() => updateLogs()}
-            >Reload</button>
         </div>
         
     </div>;

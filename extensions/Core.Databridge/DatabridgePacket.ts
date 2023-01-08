@@ -1,14 +1,14 @@
 import * as uuid from "uuid";
 import IDatabridgePacket from "./IDatabridgePacket";
 
-export default class DatabridgePacket<T, T2 = any> implements IDatabridgePacket<T, T2> {
+export default class DatabridgePacket<DataType, MetadataType = any> implements IDatabridgePacket<DataType, MetadataType> {
     id: string;
     time: number;
     type: string;
-    data: T;
-    metadata: T2;
+    data: DataType;
+    metadata: MetadataType;
 
-    constructor(type: string, data: T, metadata: T2, id: string | null = null, time: number | null = null) {
+    constructor(type: string, data: DataType, metadata: MetadataType, id: string | null = null, time: number | null = null) {
         this.id = id ?? uuid.v4();
         this.time = time ?? Date.now();
         this.type = type;
