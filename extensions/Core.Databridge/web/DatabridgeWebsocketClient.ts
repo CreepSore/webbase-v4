@@ -11,23 +11,26 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
         this.callbacks = [];
     }
 
-    async connect(): Promise<any> {
-        this.ws = new WebSocket(this.websocketUrl);
-        this.ws.addEventListener("open", () => {
-            this.callbacks.filter(c => c.type === "onConnected").forEach(cb => cb.callback());
-        });
-
-        this.ws.addEventListener("close", () => {
-            this.callbacks.filter(c => c.type === "onDisconnected").forEach(cb => cb.callback());
-        });
-
-        this.ws.addEventListener("error", () => {
-            this.callbacks.filter(c => c.type === "onError").forEach(cb => cb.callback());
-        });
-
-        this.ws.addEventListener("message", (ev) => {
-            let data = JSON.parse(ev.data) as IDatabridgePacket<any, any>;
-            this.callbacks.filter(c => c.type === "onData").forEach(cb => cb.callback(data));
+    connect(): Promise<void> {
+        return new Promise(res => {
+            this.ws = new WebSocket(this.websocketUrl);
+            this.ws.onopen = () => {
+                this.callbacks.filter(c => c.type === "onConnected").forEach(cb => cb.callback());
+                res();
+            };
+    
+            this.ws.onclose = () => {
+                this.callbacks.filter(c => c.type === "onDisconnected").forEach(cb => cb.callback());
+            };
+    
+            this.ws.onerror = () => {
+                this.callbacks.filter(c => c.type === "onError").forEach(cb => cb.callback());
+            };
+    
+            this.ws.onmessage = (ev) => {
+                let data = JSON.parse(ev.data) as IDatabridgePacket<any, any>;
+                this.callbacks.filter(c => c.type === "onData").forEach(cb => cb.callback(data));
+            };
         });
     }
 
@@ -46,7 +49,14 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
     }
 
     sendPacket(packet: IDatabridgePacket<any, any>): this {
+        if(!this.ws) throw new Error("Connection has not been established yet.");
+
         this.ws.send(JSON.stringify(packet));
+        return this;
+    }
+
+    close() {
+        this.disconnect();
         return this;
     }
 

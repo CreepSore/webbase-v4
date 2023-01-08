@@ -82,6 +82,11 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         });
     }
 
+    close() {
+        this.disconnect();
+        return this;
+    }
+
     static stringToPacket(str: string) {
         try {
             let {id, time, type, data} = JSON.parse(str);

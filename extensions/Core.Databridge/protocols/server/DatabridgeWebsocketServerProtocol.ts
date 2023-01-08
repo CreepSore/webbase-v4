@@ -1,79 +1,76 @@
 import {EventEmitter} from "events";
-import * as net from "net";
+import expressWs from "express-ws";
 import IDatabridgePacket from "../../IDatabridgePacket";
 import IDatabridgeServerProtocol from "../IDatabridgeServerProtocol";
 import IDatabridgeSocket from "../IDatabridgeSocket";
 
-export default class DatabridgeTcpServerProtocol implements IDatabridgeServerProtocol {
+export default class DatabridgeWebsocketServerProtocol implements IDatabridgeServerProtocol {
     port: number;
     hostname: string;
     emitter: EventEmitter;
-    server: net.Server;
 
-    constructor(port: number, hostname: string = "127.0.0.1") {
-        this.port = port;
-        this.hostname = hostname;
+    constructor() {
         this.emitter = new EventEmitter();
     }
 
     async start(): Promise<void> {
-        this.server = net.createServer((socket) => {
-            let dbSocketEmitter = new EventEmitter();
-            let dbSocket: IDatabridgeSocket = {
+        console.log("ERROR", "DatabridgeWebSocketServerProtocol.ts", "Use 'middleware' instead of start!");
+    }
+
+    async stop(): Promise<void> {
+        console.log("ERROR", "DatabridgeWebSocketServerProtocol.ts", "'stop' function is invalid.");
+    }
+
+    middleware(): expressWs.WebsocketRequestHandler {
+        return (ws, req, next) => {
+            let socketEmitter = new EventEmitter();
+            let socket: IDatabridgeSocket = {
                 sendPacket(packet) {
-                    socket.write(DatabridgeTcpServerProtocol.packetToString(packet));
+                    ws.send(DatabridgeWebsocketServerProtocol.packetToString(packet));
                     return this;
                 },
                 onPacketReceived(callback) {
-                    dbSocketEmitter.on("packet-received", callback);
+                    socketEmitter.on("packet-received", callback);
                     return this;
                 },
                 waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {
                     return new Promise(res => {
                         let cb = (packet: IDatabridgePacket<T, T2>) => {
                             if(packet.type !== type) {
-                                dbSocketEmitter.once("packet-received", cb);
+                                socketEmitter.once("packet-received", cb);
                                 return;
                             }
 
                             res(packet);
                         };
-                        dbSocketEmitter.once("packet-received", cb);
+                        socketEmitter.once("packet-received", cb);
                     });
                 },
                 close() {
-                    socket.end();
+                    console.log("Closed");
+                    ws.close();
                     return this;
                 }
             };
 
-            this.emitter.emit("client-connected", dbSocket);
-
-            socket.on("data", (buf) => {
-                let bufStr = buf.toString("utf8");
-                bufStr.split("\n").filter(str => Boolean(str)).forEach(packetstr => {
-                    let dbPacket = DatabridgeTcpServerProtocol.stringToPacket(packetstr);
-                    if(!dbPacket) return;
-                    dbSocketEmitter.emit("packet-received", dbPacket);
-                });
+            ws.on("message", data => {
+                let bufStr = data.toString("utf8");
+                let dbPacket = DatabridgeWebsocketServerProtocol.stringToPacket(bufStr);
+                if(!dbPacket) return;
+                socketEmitter.emit("packet-received", dbPacket);
             });
 
-            socket.on("error", err => {
+            ws.on("error", err => {
                 this.emitter.emit("error", err);
             });
 
-            socket.on("end", () => {
-                this.emitter.emit("client-disconnected", dbSocket);
-                dbSocketEmitter.removeAllListeners();
+            ws.on("close", () => {
+                this.emitter.emit("client-disconnected", socket);
+                socketEmitter.removeAllListeners();
             });
-        });
 
-        this.server.listen(this.port, this.hostname);
-    }
-
-    async stop(): Promise<void> {
-        this.server.close();
-        this.server.removeAllListeners();
+            this.emitter.emit("client-connected", socket);;
+        };
     }
 
     onError(callback: (err: Error) => void) {
