@@ -56,6 +56,12 @@ export default class CoreWeb implements IExtension {
                     maxAge: 1000 * 60 * 60 // 60 Minutes
                 }
             }));
+
+        this.app.use((req, res, next) => {
+            console.log("NOTE", "Core.Web", req.method, `${req.headers['x-forwarded-for'] || req.socket.remoteAddress} requested [${req.url}]`);
+            next();
+        });
+
         this.events.emit("express-loaded", this.app);
         this.server = this.app.listen(this.config.port, this.config.hostname);
     }
