@@ -3,6 +3,7 @@ import {EventEmitter} from "events";
 import {Server} from "net";
 
 import express from "express";
+import expressWs from "express-ws";
 import expressSession from "express-session";
 import helmet from "helmet";
 import * as uuid from "uuid";
@@ -43,6 +44,7 @@ export default class CoreWeb implements IExtension {
         }
 
         this.app = express();
+        expressWs(this.app);
         this.app.use(helmet({
             contentSecurityPolicy: false
         })).use(express.json({limit: "250mb"}))

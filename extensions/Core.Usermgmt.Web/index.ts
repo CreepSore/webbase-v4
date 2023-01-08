@@ -1,6 +1,8 @@
 import * as dns from "dns/promises";
 import {EventEmitter} from "events";
 
+import * as express from "express";
+
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
@@ -14,7 +16,6 @@ import CoreWeb from "../Core.Web";
 import CoreUsermgmt from "../Core.Usermgmt";
 
 import Permissions from "./permissions";
-import * as express from "express";
 
 declare module 'express-session' {
     export interface SessionData {
@@ -59,7 +60,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                 }
                 catch {return null;}
             }
-            
+
             if(!al.ip) return null;
             return {
                 ip: al.ip,
