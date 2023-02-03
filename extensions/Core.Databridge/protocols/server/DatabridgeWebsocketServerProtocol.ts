@@ -47,7 +47,7 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
                     });
                 },
                 close() {
-                    console.log("Closed");
+                    socketEmitter.removeAllListeners();
                     ws.close();
                     return this;
                 }

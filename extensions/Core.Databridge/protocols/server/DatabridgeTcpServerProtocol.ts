@@ -42,6 +42,7 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
                     });
                 },
                 close() {
+                    dbSocketEmitter.removeAllListeners();
                     socket.end();
                     return this;
                 }
