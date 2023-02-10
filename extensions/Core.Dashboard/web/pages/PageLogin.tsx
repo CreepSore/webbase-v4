@@ -8,7 +8,7 @@ interface PageHomeProperties {
 }
 
 export default function PageHome(props: PageHomeProperties) {
-    return <div className="flex flex-col">
+    return <div className="flex flex-col min-h-screen bg-slate-800 text-slate-400">
         <LoginView onLogin={() => {
             invalidateLogonInfo();
             invalidateDashboardPages();

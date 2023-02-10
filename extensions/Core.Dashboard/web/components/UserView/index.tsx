@@ -15,7 +15,7 @@ interface UserButtonProperties {
 
 function UserButton(props: UserButtonProperties) {
     return <button
-        className={`w-[6em] h-[6em] rounded border border-slate-200 ${props.clickable === false ? "cursor-default" : "hover:brightness-95"} ${!props.user.isActive ? "bg-red-100" : "bg-slate-100"}`}
+        className={`w-[6em] h-[6em] rounded border border-slate-600 text-slate-100 ${props.clickable === false ? "cursor-default" : "hover:brightness-95"} ${!props.user.isActive ? "bg-red-500" : "bg-blue-500"}`}
         onClick={() => props.clickable && props.onClick?.(props.user)}
         disabled={props.clickable === false}
     >
@@ -56,15 +56,15 @@ function UserEditDialog(props: UserEditDialogProperties) {
             });
     }, []);
 
-    return <div className="z-50 fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-white">
-        <div className="p-2 bg-white w-full max-w-[1000px]">
+    return <div className="z-50 fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center bg-slate-800 text-slate-400">
+        <div className="p-2 bg-slate-700 text-slate-300 w-full max-w-[1000px]">
             <p className="text-xl mb-3">User - {props.user.username}</p>
 
             <div className="grid grid-cols-4">
                 <label>Username</label>
                 <div className="w-full col-span-3">
                     <input
-                        className="border border-slate-300 focus:border-slate-400 px-1 py-2 w-full"
+                        className="border border-slate-700 bg-slate-600 text-slate-400 focus:border-slate-400 px-1 py-2 w-full"
                         type="text"
                         value={username}
                         onChange={e => setUsername(e.target.value)}
@@ -73,7 +73,7 @@ function UserEditDialog(props: UserEditDialogProperties) {
                 <label>E-Mail</label>
                 <div className="w-full col-span-3">
                     <input
-                        className="border border-slate-300 focus:border-slate-400 px-1 py-2 w-full"
+                        className="border border-slate-700 bg-slate-600 text-slate-400 focus:border-slate-400 px-1 py-2 w-full"
                         type="text"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
@@ -82,7 +82,7 @@ function UserEditDialog(props: UserEditDialogProperties) {
                 <label>Password</label>
                 <div className="w-full col-span-3">
                     <input
-                        className="border border-slate-300 focus:border-slate-400 px-1 py-2 w-full"
+                        className="border border-slate-700 bg-slate-600 text-slate-400 focus:border-slate-400 px-1 py-2 w-full"
                         type="text"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
@@ -91,7 +91,7 @@ function UserEditDialog(props: UserEditDialogProperties) {
                 <label>Permission Group</label>
                 <div className="w-full col-span-3">
                     <select
-                        className="border border-slate-300 focus:border-slate-400 px-1 py-2 w-full"
+                        className="border border-slate-700 bg-slate-600 text-slate-400 focus:border-slate-400 px-1 py-2 w-full"
                         value={permissionGroup}
                         onChange={e => setPermissionGroup(Number(e.target.value))}
                     >
@@ -114,7 +114,7 @@ function UserEditDialog(props: UserEditDialogProperties) {
 
             <div className="flex flex-col gap-1 mt-2">
                 {((permEditUser && props.user.id) || (permCreateUser && !props.user.id)) && props.onSave && <button
-                    className="border bg-green-200 hover:brightness-105 py-2"
+                    className="border border-green-600 bg-green-500 hover:brightness-105 text-slate-100 py-2"
                     onClick={() => props.onSave?.({
                         id: props.user?.id,
                         username,
@@ -125,15 +125,15 @@ function UserEditDialog(props: UserEditDialogProperties) {
                     })}
                 >Save</button>}
                 {props.onCancel && <button
-                    className="border bg-slate-200 hover:brightness-95 py-2"
+                    className="border border-slate-600 bg-slate-500 hover:brightness-95 text-slate-100 py-2"
                     onClick={() => props.onCancel?.()}
                 >{((permEditUser && props.user.id) || (permCreateUser && !props.user.id)) ? "Cancel" : "Close"}</button>}
                 {permDeleteUser && props.onDelete && props.user.id && <button
-                    className="border bg-red-200 hover:brightness-95 py-2"
+                    className="border border-red-600 bg-red-500 hover:brightness-95 text-slate-100 py-2"
                     onClick={() => props.onDelete?.(props.user)}
                 >Delete</button>}
                 {permImpersonateUser && <button
-                    className="border bg-blue-200 hover:brightness-95 py-2"
+                    className="border border-blue-600 bg-blue-500 hover:brightness-95 text-slate-100 py-2"
                     onClick={async() => {
                         invalidateLogonInfo();
                         await fetch(`/api/core.usermgmt/user/${props.user.id}/impersonate`, {method: "POST"});
@@ -258,14 +258,14 @@ export default function UserView(props: UserViewProps) {
                     <label className="mr-3">Search</label>
                     <input
                         type="text"
-                        className="border border-slate-300 py-2 px-1 w-full"
+                        className="border border-slate-600 bg-slate-700 text-slate-400 py-2 px-1 w-full"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                     />
                 </div>
                 <div className="flex gap-3 mt-2">
                     {!search && permAddUser && <button
-                        className="w-[6em] h-[6em] bg-green-100 rounded border border-green-200 hover:brightness-95"
+                        className="w-[6em] h-[6em] bg-green-500 rounded border border-green-600 hover:brightness-95 text-slate-100"
                         onClick={() => {
                             setUserEditDialogUser({});
                             setUserEditDialogVisible(true);

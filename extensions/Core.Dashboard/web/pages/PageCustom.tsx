@@ -10,7 +10,7 @@ interface PageHomeProperties {
 }
 
 export default function PageCustom(props: PageHomeProperties) {
-    return <div className="flex flex-col h-screen">
+    return <div className="flex flex-col min-h-screen bg-slate-800 text-slate-400">
         <NavigationBar
             activePage={props.dashboardPage.key}
             onNavigation={newPage => props.setCurrentPage(newPage)}
