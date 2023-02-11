@@ -7,7 +7,7 @@
     "build": "webpack build --env buildtype=app --mode=production && webpack build --env buildtype=web --mode=production",
     "dbuild": "webpack build --env buildtype=app --mode=development && webpack build --env buildtype=web --mode=development",
     "start": "npm run build && (clear || cls) && node ./out/app.js",
-    "dstart": "npm run dbuild && (clear || cls) && node ./out/app.js",
+    "dstart": "npm run dbuild && (clear || cls) && DEBUG=true node ./out/app.js",
     "watch": "webpack build --env buildtype=app --mode=development -w",
     "watchWeb": "webpack build --env buildtype=web --mode=development -w"
   },
