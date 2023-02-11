@@ -22,12 +22,12 @@ module.exports = function(env, argv) {
             },
             output: {
                 path: path.resolve(__dirname, "out"),
-                filename: "[name]",
+                filename: "[name].js",
                 clean: true
             },
-            devtool: argv.mode === "development"? "source-map" : false,
+            devtool: argv.mode === "development" ? "inline-source-map" : false,
             resolve: {
-                extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+                extensions: [".ts", ".js", ".json"],
                 alias: {
                     wpextensions: path.resolve(__dirname, "extensions")
                 },
@@ -102,7 +102,7 @@ module.exports = function(env, argv) {
                 path: path.resolve(__dirname, "out"),
                 filename: "[name]"
             },
-            devtool: argv.mode === "development" ? "source-map" : false,
+            devtool: argv.mode === "development" ? "inline-source-map" : false,
             resolve: {
                 extensions: [".ts", ".tsx", ".js", ".jsx"],
                 modules: ['node_modules']
