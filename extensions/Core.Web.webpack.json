@@ -1,0 +1,5 @@
+{
+    "entry": {
+        "Core.Web.LiveReload.js": "./extensions/Core.Web/Core.Web.LiveReload.ts"
+    }
+}
