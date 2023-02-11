@@ -1,13 +1,19 @@
+import DatabridgePacket from "../Core.Databridge/DatabridgePacket";
 import DatabridgeWebsocketClient from "../Core.Databridge/web/DatabridgeWebsocketClient";
 
 window.addEventListener("load", () => {
     let databridge = new DatabridgeWebsocketClient("/Core.Web/LiveReload");
+
+    const pingInterval = setInterval(() => {
+        databridge.sendPacket(new DatabridgePacket("PING", {}, {}));
+    }, 10000);
 
     databridge.onPacketReceived(() => {
         location.reload();
     });
 
     databridge.onDisconnected(() => {
+        clearInterval(pingInterval);
         console.log("Connection lost");
 
         const banner = document.createElement("div");
