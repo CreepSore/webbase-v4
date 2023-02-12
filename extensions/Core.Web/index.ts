@@ -179,10 +179,10 @@ export default class CoreWeb implements IExtension {
         return src;
     }
 
-    enableLiveReload(waitMs: number = 0) {
+    enableLiveReload(waitMs: number = 0, productive: boolean = false) {
         let env = process.env;
 
-        if(env.DEBUG !== "true") return this;
+        if(!productive && env.DEBUG !== "true") return this;
         if(this.liveReload.enabled) return this;
         let oldHashes: {[key: string]: string} = {};
 
