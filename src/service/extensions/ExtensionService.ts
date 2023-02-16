@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
+import {EventEmitter} from "events";
 
 import IExecutionContext, {IAppExecutionContext, ICliExecutionContext} from "./IExecutionContext";
 import IExtension, {IExtensionConstructor} from "./IExtension";
@@ -7,13 +8,13 @@ import IExtension, {IExtensionConstructor} from "./IExtension";
 export default class ExtensionService {
     extensions: Array<IExtension> = [];
     extensionsStarted: boolean = false;
-    extensionPath: string;
+    extensionPath: string = "./extensions/";
     executionContext: IExecutionContext;
+    emitter: EventEmitter = new EventEmitter();
 
-    constructor() {
-        this.extensionPath = "./extensions/";
-    }
+    constructor() {}
 
+    //#region Public Methods
     setContextInfo(info: IAppExecutionContext|ICliExecutionContext) {
         this.executionContext = info;
         this.executionContext.extensionService = this;
@@ -62,6 +63,7 @@ export default class ExtensionService {
         }
 
         this.extensionsStarted = true;
+        this.fireAllExtensionsStarted({...this.executionContext});
     }
 
     async stopExtensions() {
@@ -85,7 +87,27 @@ export default class ExtensionService {
     getExtensions(...names: string[]) {
         return this.extensions.filter(ext => names.includes(ext.metadata.name));
     }
+    //#endregion
 
+    //#region Events
+    onAllExtensionsStarted(cb: (context: IExecutionContext) => void) {
+        this.emitter.on("all-extensions-started", cb);
+    }
+
+    private fireAllExtensionsStarted(context: IExecutionContext) {
+        this.emitter.emit("all-extensions-started", context);
+    }
+
+    onExtensionStarted(extensionName: string, cb: (context: IExecutionContext) => void) {
+        this.emitter.on(`extension-started-${extensionName}`, cb);
+    }
+
+    private fireOnExtensionStarted(extensionName: string, context: IExecutionContext) {
+        this.emitter.emit(`extension-started-${extensionName}`, context);
+    }
+    //#endregion
+
+    //#region Private Methods
     private async startExtensionRecursive(node: IExtension) {
         let runStart = false;
         if(!node.metadata.isLoaded) {
@@ -100,6 +122,7 @@ export default class ExtensionService {
         if(runStart) {
             try {
                 await node.start({...this.executionContext});
+                this.fireOnExtensionStarted(node.metadata.name, {...this.executionContext});
                 console.log("INFO", "ExtensionService.ts", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`);
             }
             catch(err) {
@@ -124,4 +147,5 @@ export default class ExtensionService {
 
         return disabledResult;
     }
+    //#endregion
 }
