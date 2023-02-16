@@ -93,6 +93,7 @@ export default class CoreGraphQL implements IExtension {
                 schema: this.rootSchema,
                 context: async(req): Promise<any> => {
                     const ctx: {[key: string]: any} = {};
+                    ctx.req = req.raw;
                     for(const extension of this.graphQlExtensions) {
                         // @ts-ignore
                         const extCtx = await extension.buildGraphQLContext(req);
@@ -101,7 +102,7 @@ export default class CoreGraphQL implements IExtension {
                         });
                     }
                     return ctx;
-                },
+                }
             };
             const handler = GraphQLExpress.createHandler(opt);
             coreWeb.app.use("/api/core.graphql", handler);

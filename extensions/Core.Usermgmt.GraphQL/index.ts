@@ -19,6 +19,7 @@ import { Knex } from "knex";
 import CoreDb from "../Core.Db";
 
 import UsermgmtPermissions from "../Core.Usermgmt.Web/permissions";
+import CoreUsermgmt from "../Core.Usermgmt";
 
 class CoreUsermgmtGraphQLConfig {}
 
@@ -36,6 +37,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
 
     db: Knex;
     coreGraphQL: CoreGraphQL;
+    coreUsermgmt: CoreUsermgmt;
 
     constructor() {
         this.config = this.loadConfig();
@@ -91,9 +93,9 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                     permissionById: (parent, args, context, info) => this.handlePermissionByIdQuery(parent, args, context, info),
                     permissionByName: (parent, args, context, info) => this.handlePermissionByNameQuery(parent, args, context, info)
                 },
-                Mutator: {
+                Mutation: {
                     loginByCredentials: (parent, args, context, info) => this.handleLoginByCredentialsMutation(parent, args, context, info),
-                    loginByApiKeyasync: (parent, args, context, info) => this.handleLoginByApiKeyMutation(parent, args, context, info),
+                    loginByApiKey: (parent, args, context, info) => this.handleLoginByApiKeyMutation(parent, args, context, info),
                     logout: (parent, args, context, info) => this.handleLogoutMutation(parent, args, context, info)
                 }
             },
@@ -227,16 +229,31 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     //#endregion
 
     //#region Session
-    async handleLoginByCredentialsMutation(parent, args, context, info) {
+    async handleLoginByCredentialsMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        const {username, password} = args;
+        const result = await this.coreUsermgmt.loginByCredentials({username, password});
+        if(result.error) {
+            throw new Error(result.error);
+        }
 
+        context.req.session.uid = result.user.id;
+        return result.user.id;
     }
 
-    async handleLoginByApiKeyMutation(parent, args, context, info) {
-        
+    async handleLoginByApiKeyMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        const {apiKey} = args;
+        const result = await this.coreUsermgmt.loginByApiKey(apiKey);
+        if(result.error) {
+            throw new Error(result.error);
+        }
+
+        context.req.session.uid = result.user.id;
+        return result.user.id;
     }
 
-    async handleLogoutMutation(parent, args, context, info) {
-        
+    async handleLogoutMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        context.req.session.uid = null;
+        return true;
     }
     //#endregion
 
@@ -255,6 +272,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
 
         const coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
         this.coreGraphQL = executionContext.extensionService.getExtension("Core.GraphQL") as CoreGraphQL;
+        this.coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
         this.db = coreDb.db;
 
         const coreGraphQL = executionContext.extensionService.getExtension("Core.GraphQL") as CoreGraphQL;
