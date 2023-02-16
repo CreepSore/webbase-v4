@@ -35,6 +35,6 @@ type Query {
 
 type Mutation {
     loginByCredentials(username: String!, password: String!): String
-    loginByApiKey(username: String!, password: String!): String
+    loginByApiKey(apiKey: String!): String
     logout: Boolean
 }

@@ -96,7 +96,8 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                     loginByApiKeyasync: (parent, args, context, info) => this.handleLoginByApiKeyMutation(parent, args, context, info),
                     logout: (parent, args, context, info) => this.handleLogoutMutation(parent, args, context, info)
                 }
-            }
+            },
+            
         });
     }
 
