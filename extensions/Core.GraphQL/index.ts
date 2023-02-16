@@ -90,16 +90,53 @@ export default class CoreGraphQL implements IExtension {
         if(this.schemes.length !== 0) {
             this.rootSchema = GraphQLToolsSchema.mergeSchemas({schemas: this.schemes});
             const opt: GraphQLExpress.HandlerOptions<undefined> = {
-                schema: this.rootSchema
+                schema: this.rootSchema,
+                context: async(req): Promise<any> => {
+                    const ctx: {[key: string]: any} = {};
+                    for(const extension of this.graphQlExtensions) {
+                        // @ts-ignore
+                        const extCtx = await extension.buildGraphQLContext(req);
+                        Object.entries(extCtx).forEach(([key, value]) => {
+                            ctx[key] = value;
+                        });
+                    }
+                    return ctx;
+                },
             };
             const handler = GraphQLExpress.createHandler(opt);
-            coreWeb.app.all("/api/core.graphql", handler);
+            coreWeb.app.use("/api/core.graphql", handler);
         }
         else {
-            coreWeb.app.all("/api/core.graphql", (req, res) => {
-                res.write("GraphQL is disabled in this configuration.");
+            coreWeb.app.use("/api/core.graphql", (req, res) => {
+                res.json({data: null, errors: [{message: "No GraphQL Schemes Found"}]});
             });
         }
+    }
+
+    fieldsFromResolveInfo(info: GraphQL.GraphQLResolveInfo) {
+        return this.nodeToObject(info.fieldNodes[0]);
+    }
+
+    private nodeToObject(node: GraphQL.SelectionNode) {
+        if(node.kind !== GraphQL.Kind.FIELD) return {};
+        if(!node.selectionSet) return {}
+        const result: any = {};
+
+        node.selectionSet.selections.forEach(selection => {
+            if(selection.kind !== GraphQL.Kind.FIELD) {
+                return {};
+            }
+
+            let nodeRes = {};
+            if(selection.kind === GraphQL.Kind.FIELD
+                && selection.selectionSet) {
+                    nodeRes = this.nodeToObject(selection);
+                }
+
+            result[selection.name.value] = nodeRes;
+        });
+
+        return result;
     }
 
     private checkConfig() {

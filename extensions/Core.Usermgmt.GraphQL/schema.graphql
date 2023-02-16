@@ -1,0 +1,40 @@
+type Permission {
+    id: ID!
+    name: String!
+    description: String
+}
+
+type PermissionGroup {
+    id: ID!
+    name: String!
+    description: String
+    permissions: [Permission]
+}
+
+type User {
+    id: ID!
+    username: String!
+    email: String
+    password: String
+    isActive: Boolean!
+    permissionGroup: PermissionGroup
+    pseudo: Boolean!
+}
+
+type Query {
+    me: User
+    users: [User]
+    userById(id: ID!): User
+    permissionGroups: [PermissionGroup]
+    permissionGroupById(id: ID!): PermissionGroup
+    permissionGroupByName(name: String!): PermissionGroup
+    permissions: [Permission]
+    permissionById(id: ID!): Permission
+    permissionByName(name: String!): Permission
+}
+
+type Mutation {
+    loginByCredentials(username: String!, password: String!): String
+    loginByApiKey(username: String!, password: String!): String
+    logout: Boolean
+}
