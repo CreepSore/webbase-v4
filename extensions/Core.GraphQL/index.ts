@@ -64,6 +64,7 @@ export default class CoreGraphQL implements IExtension {
     private onAllExtensionsStarted(context: IExecutionContext) {
         const coreWeb = context.extensionService.getExtension("Core.Web") as CoreWeb;
         this.schemes = [];
+        let hasError = false;
 
         this.graphQlExtensions.forEach(extension => {
             try {
@@ -72,10 +73,19 @@ export default class CoreGraphQL implements IExtension {
                 this.schemes.push(schema);
             }
             catch(err) {
+                hasError = true;
+
                 // @ts-ignore
                 if(extension.metadata?.name) console.log("ERROR", "Core.GraphQL", `Failed to build schema for extension ${extension.metadata.name}: ${err}`);
             }
         });
+
+        if(!hasError) {
+            console.log("INFO", "Core.GraphQL", "Successfully loaded all GraphQL Schemes");
+        }
+        else {
+            console.log("WARN", "Core.GraphQL", "Failed to load some GraphQL Schemes");
+        }
 
         if(this.schemes.length !== 0) {
             this.rootSchema = GraphQLToolsSchema.mergeSchemas({schemas: this.schemes});
