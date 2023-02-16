@@ -33,7 +33,12 @@ module.exports = function(env, argv) {
                 },
                 modules: ['node_modules']
             },
-            externals: {knex: 'commonjs knex'},
+            externals: {
+                knex: "commonjs knex",
+                "ts3-nodejs-library": "commonjs ts3-nodejs-library",
+                "utf-8-validate": "commonjs utf-8-validate",
+                bufferutil: "commonjs bufferutil",
+            },
             module: {
                 rules: [
                     {
@@ -87,7 +92,8 @@ module.exports = function(env, argv) {
                 ]
             },
             optimization: {
-                minimize: argv.mode === "productive"
+                minimize: argv.mode === "productive",
+                mangleExports: false
             },
             plugins: [ ],
             target: "node"
@@ -140,7 +146,9 @@ module.exports = function(env, argv) {
                 ]
             },
             optimization: {
-                minimize: argv.mode === "productive"
+                minimize: argv.mode === "productive",
+                mangleExports: false,
+                chunkIds: "named"
             },
             plugins: [ ],
         }, ...fs.readdirSync(extPath)
