@@ -66,9 +66,15 @@ export default class CoreGraphQL implements IExtension {
         this.schemes = [];
 
         this.graphQlExtensions.forEach(extension => {
-            const schema = extension.buildGraphQLSchema();
-            if(schema === null) return;
-            this.schemes.push(schema);
+            try {
+                const schema = extension.buildGraphQLSchema();
+                if(schema === null) return;
+                this.schemes.push(schema);
+            }
+            catch(err) {
+                // @ts-ignore
+                if(extension.metadata?.name) console.log("ERROR", "Core.GraphQL", `Failed to build schema for extension ${extension.metadata.name}: ${err}`);
+            }
         });
 
         if(this.schemes.length !== 0) {
