@@ -1,7 +1,11 @@
-import React from "react";
+import * as React from "react";
 
-export default function RouterPage({children}) {
+interface RouterPageProps {
+    children: any
+}
+
+export default function RouterPage(props: RouterPageProps) {
     return (
-        <>{children}</>
+        <>{props.children}</>
     );
 };

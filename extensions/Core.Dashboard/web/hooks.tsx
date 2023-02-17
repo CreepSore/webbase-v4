@@ -27,8 +27,9 @@ export function useFetchJson<T>(url: string, options: RequestInit | undefined = 
     return [loading, data, update];
 }
 
-export function useLocalStorage<T>(key: string) {
-    let [value, setValue] = React.useState(JSON.parse(window.localStorage.getItem(key)));
+export function useLocalStorage<T>(key: string, defaultValue: T = null): [T, (newValue: T) => void] {
+    let stored = window.localStorage.getItem(key);
+    let [value, setValue] = React.useState<T>(stored ? JSON.parse(stored) : defaultValue);
 
     let osv = setValue;
     setValue = (data) => {
@@ -36,12 +37,22 @@ export function useLocalStorage<T>(key: string) {
         osv(data);
     };
 
-    let castedVal = value as T;
-    return [castedVal, setValue];
+    return [value as T, setValue];
 }
 
 export function useLogonInfo() {
-    let [val, setVal] = useLocalStorage("logon-info");
+    let [val, setVal] = useLocalStorage<{
+        data: {
+            loggedIn: boolean,
+            uid?: string,
+            user?: Partial<User>,
+            additionalData: {
+                permissionGroup: string,
+                permissions: Partial<Permission>[]
+            }
+        },
+        lastUpdate: number
+    }>("logon-info");
 
     if(!val || Date.now() - val.lastUpdate > 60000 * 5) {
         fetch("/api/core.usermgmt/logon-info")
@@ -49,15 +60,7 @@ export function useLogonInfo() {
             .then(res => setVal({lastUpdate: Date.now(), data: res}));
     }
 
-    return val?.data as {
-        loggedIn: boolean,
-        uid?: string,
-        user?: Partial<User>,
-        additionalData: {
-            permissionGroup: string,
-            permissions: Partial<Permission>[]
-        }
-    };
+    return val?.data;
 }
 
 export function invalidateLogonInfo() {
@@ -84,7 +87,7 @@ export function invalidateDashboardPages() {
 }
 
 export function useDashboardPages(): DashboardPage[] {
-    let [val, setVal] = useLocalStorage("dashboard-pages");
+    let [val, setVal] = useLocalStorage<{data: DashboardPage[], lastUpdate: number}>("dashboard-pages");
 
     if(!val || Date.now() - val.lastUpdate > 60000 * 5) {
         fetch("/api/core.dashboard/pages")
