@@ -15,6 +15,10 @@ export default class ExtensionService {
     constructor() {}
 
     //#region Public Methods
+    /**
+     * Sets the current {@link IAppExecutionContext}
+     * @param info 
+     */
     setContextInfo(info: IAppExecutionContext|ICliExecutionContext) {
         this.executionContext = info;
         this.executionContext.extensionService = this;
@@ -76,6 +80,10 @@ export default class ExtensionService {
         this.extensionsStarted = false;
     }
 
+    /**
+     * Gets an extension by its name
+     * @param name the name of the extension
+     */
     getExtension(name: string) {
         const result = this.extensions.find(ext => ext.metadata.name === name);
         if(!result) {
@@ -84,12 +92,18 @@ export default class ExtensionService {
         return result;
     }
 
+    /**
+     * Gets multiple extensions by their names
+     */
     getExtensions(...names: string[]) {
         return this.extensions.filter(ext => names.includes(ext.metadata.name));
     }
     //#endregion
 
     //#region Events
+    /**
+     * Gets called after all extensions have been started
+     */
     onAllExtensionsStarted(cb: (context: IExecutionContext) => void) {
         this.emitter.on("all-extensions-started", cb);
     }
@@ -98,6 +112,9 @@ export default class ExtensionService {
         this.emitter.emit("all-extensions-started", context);
     }
 
+    /**
+     * Gets called after the specified extension has been started
+     */
     onExtensionStarted(extensionName: string, cb: (context: IExecutionContext) => void) {
         this.emitter.on(`extension-started-${extensionName}`, cb);
     }

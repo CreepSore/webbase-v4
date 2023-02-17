@@ -1,6 +1,7 @@
 ## Webbase ##
 
 extensions/*
+docs/
 !extensions/Core*
 !extensions/Custom.Template/
 !extensions/Custom.Template.webpack.json

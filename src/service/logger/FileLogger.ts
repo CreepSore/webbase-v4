@@ -1,8 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 import ILogger from "./ILogger";
-import LoggerService from "./LoggerService";
 
+/**
+ * Logs all console.log calls into a file as a formatted string.
+ */
 export default class FileLogger implements ILogger {
     logfilePath: string;
 

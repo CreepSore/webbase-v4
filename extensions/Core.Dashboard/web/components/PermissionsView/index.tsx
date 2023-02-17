@@ -45,8 +45,8 @@ export default function PermissionsView() {
             });
     }, []);
 
-    const removePermission = (pgid: string, pid: string) => {
-        fetch(`/api/core.usermgmt/permission-group/${pgid}/permission/${pid}`, {
+    const removePermission = (pgid: string | number, pid: string | number) => {
+        fetch(`/api/core.usermgmt/permission-group/${String(pgid)}/permission/${String(pid)}`, {
             method: "DELETE"
         }).then(res => res.json())
             .then(() => {
@@ -54,8 +54,8 @@ export default function PermissionsView() {
             });
     }
 
-    const addPermission = (pgid: string, pid: string) => {
-        fetch(`/api/core.usermgmt/permission-group/${pgid}/permission/${pid}`, {
+    const addPermission = (pgid: string | number, pid: string | number) => {
+        fetch(`/api/core.usermgmt/permission-group/${String(pgid)}/permission/${String(pid)}`, {
             method: "PUT"
         }).then(res => res.json())
             .then(() => {

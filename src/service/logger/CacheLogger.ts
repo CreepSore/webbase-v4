@@ -2,6 +2,9 @@ import * as uuid from "uuid";
 import ILogger from "./ILogger";
 import LoggerService from "./LoggerService";
 
+/**
+ * Logs all console.log calls into an array.
+ */
 export default class CacheLogger implements ILogger {
     maxEntries: number = -1;
     logEntries: {id: string, date: number, level: string, infos: string[], message: string}[] = [];
