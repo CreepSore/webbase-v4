@@ -43,7 +43,7 @@ export default function LoginPage(props: LoginPageProps) {
                 className={`login-input ${password ? "valid" : "invalid"}`}
                 value={password}
                 onChange={e => setPassword(e.target.value)} />
-            {loginError && <p>{loginError}</p>}
+            {loginError && <p className="error-alert">{loginError}</p>}
             <button
                 className={`login-input ${username && password ? "valid" : "invalid"}`}
                 onClick={() => doLoginMutation.execute({username, password})}
