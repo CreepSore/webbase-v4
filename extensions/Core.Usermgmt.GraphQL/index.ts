@@ -96,7 +96,8 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                 Mutation: {
                     loginByCredentials: (parent, args, context, info) => this.handleLoginByCredentialsMutation(parent, args, context, info),
                     loginByApiKey: (parent, args, context, info) => this.handleLoginByApiKeyMutation(parent, args, context, info),
-                    logout: (parent, args, context, info) => this.handleLogoutMutation(parent, args, context, info)
+                    logout: (parent, args, context, info) => this.handleLogoutMutation(parent, args, context, info),
+                    updateUser: (parent, args, context, info) => this.handleUpdateUserMutation(parent, args, context, info)
                 }
             },
             
@@ -104,6 +105,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     }
 
     //#region Usermgmt
+    //#region Usermgmt :: Queries
     async handleMeQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         return context.user;
     }
@@ -226,6 +228,28 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
             };
         });
     }
+    //#endregion
+    
+    //#region Usermgmt :: Mutations
+    async handleUpdateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.EditUser.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const {id, username, email, password, isActive, permissionGroupId} = args;
+        const updateValues: {[key: string]: any} = {};
+
+        if(username) updateValues.username = username;
+        if(email !== null) updateValues.email = email;
+        if(password) updateValues.password = User.hashPassword(password);
+        if(isActive === true || isActive === false) updateValues.isActive = isActive ? 1 : 0;
+        if(permissionGroupId) updateValues.permissionGroupId = permissionGroupId;
+
+
+        await User.use().update(updateValues).where({id});
+        return true;
+    }
+    //#endregion
     //#endregion
 
     //#region Session

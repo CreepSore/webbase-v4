@@ -1,11 +1,11 @@
 export interface IPermission {
-    id: string;
+    id: number;
     name: string;
     description?: string;
 }
 
 export interface IPermissionGroup {
-    id: string;
+    id: number;
     name: string;
     description?: string;
     permissions?: IPermission[];

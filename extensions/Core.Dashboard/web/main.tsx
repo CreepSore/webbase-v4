@@ -13,6 +13,7 @@ import "./style.css";
 import Sidebar from "./components/Sidebar";
 import IUser from "../../Core.Usermgmt/Interfaces/ModelTypes";
 import LoginPage from "./pages/LoginPage";
+import UsersPage from "./pages/UsersPage";
 
 function Main() {
     let startPage = location.hash.substring(1);
@@ -77,7 +78,9 @@ function Main() {
                 </RouterPage>
 
                 <RouterPage key="users">
-
+                    <UsersPage
+                        myUser={myUser}
+                    />
                 </RouterPage>
 
                 <RouterPage key="permissions">

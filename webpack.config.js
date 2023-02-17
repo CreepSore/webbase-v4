@@ -111,7 +111,10 @@ module.exports = function(env, argv) {
             devtool: argv.mode === "development" ? "inline-source-map" : false,
             resolve: {
                 extensions: [".ts", ".tsx", ".js", ".jsx"],
-                modules: ['node_modules']
+                modules: ['node_modules'],
+                alias: {
+                    "@extensions": extPath
+                }
             },
             module: {
                 rules: [

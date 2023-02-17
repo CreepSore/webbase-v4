@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+@layer base {
+
+}
+
+@layer components {
+    .users-page {
+        @apply w-full;
+
+        .users-table-container {
+            @apply w-full;
+
+            table.users-table {
+                @apply w-full;
+
+                button.edit-button {
+                    @apply bg-violet-400 hover:brightness-90;
+                    @apply text-white;
+                    @apply cursor-pointer px-4 py-1;
+                }
+
+                button.add-button {
+                    @apply bg-green-400 hover:brightness-90;
+                    @apply text-white;
+                    @apply cursor-pointer px-4 py-1;
+                }
+
+                thead {
+                    tr > th {
+                        @apply text-left;
+                        @apply bg-violet-600;
+                        @apply text-white font-bold;
+                    }
+                }
+
+                tbody {
+                    tr {
+                        &:nth-child(even) > td {
+                            @apply bg-violet-500;
+                        }
+
+                        &:nth-child(odd) > td {
+                            @apply bg-violet-600;
+                        }
+                    }
+
+                    tr > td {
+                        @apply py-1;
+
+                        &:first {
+                            @apply pl-2;
+                        }
+
+                        &:last-child {
+                            @apply pr-2;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@layer utilities {
+
+}
