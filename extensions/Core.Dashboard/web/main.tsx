@@ -1,81 +1,94 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import * as knex from "knex";
 
 import Router from "../../Core.ReactComponents/Router";
 import RouterPage from "../../Core.ReactComponents/Router/RouterPage";
-import PageHome from "./pages/PageHome";
-import PageUsers from "./pages/PageUsers";
-import PagePermissions from "./pages/PagePermissions";
-import PageLogin from "./pages/PageLogin";
-import PageLogs from "./pages/PageLogs";
-import PageCustom from "./pages/PageCustom";
 
-import {useDashboardPages} from "./hooks";
+import {useQuery} from "../../Core.GraphQL/web/GraphQLHooks";
 
-declare global {
-    interface Window {
-        runDbQuery<T>(query: string): Promise<T>;
-    }
-}
+// @ts-ignore
+import backgroundImageSrc from "./bg.png";
 
-window.runDbQuery = query => {
-    return new Promise((res, rej) => {
-        fetch("/api/core.dashboard/db/query", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({query}),
-        }).then(response => response.json())
-            .then(data => {
-                if(data.success === false) {
-                    return rej();
-                }
-
-                return res(data);
-            })
-            .catch(() => {rej()});
-    });
-};
+import "./style.css";
+import Sidebar from "./components/Sidebar";
+import IUser from "../../Core.Usermgmt/Interfaces/ModelTypes";
+import LoginPage from "./pages/LoginPage";
 
 function Main() {
-    let [currentPage, setCurrentPage] = React.useState("home");
-    let customDashboardPages = useDashboardPages();
-    let customPages = React.useMemo(() => {
-        const result = customDashboardPages.map(cdp => <RouterPage key={cdp.key}>
-            <PageCustom
-                setCurrentPage={setCurrentPage}
-                dashboardPage={cdp}
-            />
-        </RouterPage>);
+    let startPage = location.hash.substring(1);
+    let [currentDashboardPage, setCurrentDashboardPage] = React.useState(startPage || "home");
+    let myUserQuery = useQuery<{me: IUser}>(
+        `{ me { pseudo, id, username, email, permissionGroup { name, permissions { name } } } }`,
+        {onSuccess: (data) => setMyUser(data.me)}
+    );
+    let [myUser, setMyUser] = React.useState<IUser>();
 
-        return result;
-    }, [customDashboardPages]);
+    let onNavigationRequest = (target: string) => {
+        if(target === currentDashboardPage) return;
+        window.history.pushState(null, "", target !== "home" ? `#${target}` : "/");
 
-    return <Router currentPage={currentPage}>
-        <RouterPage key="home">
-            <PageHome setCurrentPage={setCurrentPage} />
-        </RouterPage>
+        setCurrentDashboardPage(target);
+    }
 
-        <RouterPage key="users">
-            <PageUsers setCurrentPage={setCurrentPage} />
-        </RouterPage>
+    React.useEffect(() => {
+        if(myUser?.pseudo) {
+            if(currentDashboardPage !== "login") {
+                setCurrentDashboardPage("login");
+            }
+        }
+        else {
+            setCurrentDashboardPage("home");
+        }
+    }, [myUser]);
 
-        <RouterPage key="permissions">
-            <PagePermissions setCurrentPage={setCurrentPage} />
-        </RouterPage>
+    if(myUserQuery.loading) {
+        return <></>;
+    }
 
-        <RouterPage key="login">
-            <PageLogin setCurrentPage={setCurrentPage} />
-        </RouterPage>
+    return <div id="dashboard">
+        <div className="background">
+            <div className="background-container">
+                <div className="image" style={{backgroundImage: `url(${backgroundImageSrc})`}}/>
+                <div className="blur"></div>
+            </div>
+        </div>
+        <div id="dashboard-content">
+            <Sidebar
+                activePage={currentDashboardPage}
+                onNavigationRequest={onNavigationRequest}
+                isLoggedIn={!myUser?.pseudo}
+                onLogout={() => myUserQuery.forceUpdate()}/>
 
-        <RouterPage key="logs">
-            <PageLogs setCurrentPage={setCurrentPage} />
-        </RouterPage>
+            <Router currentPage={currentDashboardPage}>
+                <RouterPage key="login">
+                    <LoginPage
+                        onLoginSuccess={() => {
+                            myUserQuery.forceUpdate();
+                            setCurrentDashboardPage("home");
+                        }}
+                        onLoginFailure={() => {
+                            console.log("FAILURE");
+                        }}
+                    />
+                </RouterPage>
 
-        {customPages}
-    </Router>;
+                <RouterPage key="home">
+
+                </RouterPage>
+
+                <RouterPage key="users">
+
+                </RouterPage>
+
+                <RouterPage key="permissions">
+
+                </RouterPage>
+            </Router>
+        </div>
+    </div>;
 }
 
 window.addEventListener("load", () => {
     ReactDOM.createRoot(document.querySelector("#react-container") as Element).render(<Main />);
 });
+

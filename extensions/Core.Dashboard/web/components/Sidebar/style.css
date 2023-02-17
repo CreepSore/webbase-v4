@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .dashboard-sidebar {
+        @apply flex flex-col gap-2 border-r-4 border-violet-600;
+        @apply max-w-sm w-full;
+        @apply bg-black/40;
+        @apply backdrop-blur-lg;
+        @apply px-4 py-8;
+
+        & button {
+            @apply w-full px-4 py-2 rounded-lg;
+            @apply bg-black/40 hover:bg-black/60;
+            @apply flex justify-between;
+        }
+    }
+}
