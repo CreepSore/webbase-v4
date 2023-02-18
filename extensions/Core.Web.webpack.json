@@ -1,5 +1,13 @@
 {
-    "entry": {
-        "Core.Web.LiveReload.js": "./extensions/Core.Web/Core.Web.LiveReload.ts"
+    "appBuildConfig": {
+        "externals": {
+            "express": "commonjs express",
+            "express-ws": "commonjs express-ws"
+        }
+    },
+    "webBuildConfig": {
+        "entry": {
+            "Core.Web.LiveReload.js": "./extensions/Core.Web/Core.Web.LiveReload.ts"
+        }
     }
 }

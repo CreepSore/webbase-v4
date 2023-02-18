@@ -1,5 +1,7 @@
 {
-    "entry": {
-        "Core.Dashboard.Main.js": "./extensions/Core.Dashboard/web/main.tsx"
+    "webBuildConfig": {
+        "entry": {
+            "Core.Dashboard.Main.js": "./extensions/Core.Dashboard/web/main.tsx"
+        }
     }
 }

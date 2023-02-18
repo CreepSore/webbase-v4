@@ -1,5 +1,10 @@
 {
-    "entry": {
-        "Custom.Template.Main.js": "./extensions/Custom.Template/Custom.Template.Main.tsx"
+    "appBuildConfig": {
+
+    },
+    "webBuildConfig": {
+        "entry": {
+            "Custom.Template.Main.js": "./extensions/Custom.Template/Custom.Template.Main.tsx"
+        }
     }
 }

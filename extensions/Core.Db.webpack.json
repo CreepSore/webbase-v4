@@ -1,0 +1,7 @@
+{
+    "appBuildConfig": {
+        "externals": {
+            "knex": "commonjs knex"
+        }
+    }
+}
