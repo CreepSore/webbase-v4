@@ -59,7 +59,8 @@ function Main() {
                 activePage={currentDashboardPage}
                 onNavigationRequest={onNavigationRequest}
                 isLoggedIn={!myUser?.pseudo}
-                onLogout={() => myUserQuery.forceUpdate()}/>
+                onLogout={() => myUserQuery.forceUpdate()}
+                myPermissions={(myUser?.permissionGroup?.permissions || []).map(p => p.name)}/>
 
             <Router currentPage={currentDashboardPage}>
                 <RouterPage key="login">
@@ -81,6 +82,10 @@ function Main() {
                 <RouterPage key="users">
                     <UsersPage
                         myUser={myUser}
+                        afterImpersonate={() => {
+                            myUserQuery.forceUpdate();
+                            setCurrentDashboardPage("home");
+                        }}
                     />
                 </RouterPage>
 

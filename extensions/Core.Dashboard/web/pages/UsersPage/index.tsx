@@ -7,6 +7,7 @@ import { useQuery } from "../../../../Core.GraphQL/web/GraphQLHooks";
 import UsermgmtPermissions from "../../../../Core.Usermgmt.Web/permissions";
 import UserEditorDialog from "./components/UserEditorDialog";
 import UserAddDialog from "./components/UserAddDialog";
+import INavigator from "../../interfaces/INavigator";
 
 interface UsersTableRowProps {
     user: IUser;
@@ -56,6 +57,7 @@ function UsersTable(props: UsersTableProps) {
 
 interface UsersPageProps {
     myUser: IUser;
+    afterImpersonate: () => void;
 }
 
 export default function UsersPage(props: UsersPageProps) {
@@ -65,7 +67,9 @@ export default function UsersPage(props: UsersPageProps) {
     const [addUserDialogVisible, setAddUserDialogVisible] = React.useState(false);
     const usersQuery = useQuery<{users: IUser[]}>(`{ users { id, username, email, isActive, permissionGroup { id, name } } }`, {
         onSuccess: (data, errors) => {
-            setUsers(data.users);
+            if(!errors?.length) {
+                setUsers(data.users);
+            }
         }
     });
 
@@ -90,6 +94,9 @@ export default function UsersPage(props: UsersPageProps) {
             afterDelete={() => {
                 setEditingUser(null);
                 usersQuery.forceUpdate();
+            }}
+            afterImpersonate={() => {
+                props.afterImpersonate();
             }}
         />}
 

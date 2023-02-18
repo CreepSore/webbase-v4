@@ -9,6 +9,7 @@ interface UserEditorDialogProps {
     onClose: () => void;
     afterSave: () => void;
     afterDelete: () => void;
+    afterImpersonate: () => void;
 }
 
 export default function UserEditorDialog(props: UserEditorDialogProps) {
@@ -41,7 +42,14 @@ export default function UserEditorDialog(props: UserEditorDialogProps) {
         deleteUser(id: $id)
     }`, {
         onSuccess: () => props.afterDelete(),
-        onError: () => props.afterSave()
+        onError: () => props.afterDelete()
+    });
+
+    const impersonateUserMutation = useMutation(`mutation ImpersonateUser($id: ID!){
+        impersonateUser(id: $id)
+    }`, {
+        onSuccess: () => props.afterImpersonate(),
+        onError: () => props.afterImpersonate()
     });
 
     const saveUser = () => {
@@ -58,6 +66,10 @@ export default function UserEditorDialog(props: UserEditorDialogProps) {
     const deleteUser = () => {
         deleteUserMutation.execute({id: props.user.id});
     };
+
+    const impersonateUser = () => {
+        impersonateUserMutation.execute({id: props.user.id});
+    }
 
     return <div className="dialog-container">
         <div className="dialog user-edit-dialog">
@@ -106,10 +118,12 @@ export default function UserEditorDialog(props: UserEditorDialogProps) {
                 <div className="flex flex-col gap-1 col-span-1 md:col-span-2 mt-2">
                     <button
                         className="save-button"
-                        onClick={() => {
-                            saveUser();
-                        }}
+                        onClick={() => saveUser()}
                     >Save</button>
+                    <button
+                        className="impersonate-button"
+                        onClick={() => impersonateUser()}
+                    >Impersonate</button>
                     <button
                         className="delete-button"
                         onClick={() => {

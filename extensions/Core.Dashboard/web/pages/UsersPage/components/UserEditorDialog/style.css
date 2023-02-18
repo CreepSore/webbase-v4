@@ -53,6 +53,10 @@
                 @apply px-2;
             }
 
+            button.impersonate-button {
+                @apply bg-violet-600 py-2 px-4 text-white font-bold hover:brightness-110;
+            }
+
             button.delete-button {
                 @apply bg-red-600 py-2 px-4 text-white font-bold hover:brightness-110;
             }

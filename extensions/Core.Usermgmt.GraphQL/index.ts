@@ -102,6 +102,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                     updateUser: (parent, args, context, info) => this.handleUpdateUserMutation(parent, args, context, info),
                     createUser: (parent, args, context, info) => this.handleCreateUserMutation(parent, args, context, info),
                     deleteUser: (parent, args, context, info) => this.handleDeleteUserMutation(parent, args, context, info),
+                    impersonateUser: (parent, args, context, info) => this.handleImpersonateUserMutation(parent, args, context, info),
                     addPermissionToGroup: (parent, args, context, info) => this.handleAddPermissionToGroupMutation(parent, args, context, info),
                     removePermissionFromGroup: (parent, args, context, info) =>this.handleRemovePermissionFromGroupMutation(parent, args, context, info),
                     createPermissionGroup: (parent, args, context, info) => this.handleCreatePermissionGroupMutation(parent, args, context, info)
@@ -294,6 +295,16 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         const {id} = args;
 
         await User.use().delete().where({id});
+        return true;
+    }
+
+    async handleImpersonateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.ImpersonateUser.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const {id} = args;
+        context.req.session.uid = id;
         return true;
     }
 
