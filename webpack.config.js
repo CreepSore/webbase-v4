@@ -36,8 +36,11 @@ module.exports = function(env, argv) {
             },
             externals: {
                 knex: "commonjs knex",
+                express: "commonjs express",
+                "express-ws": "commonjs express-ws",
                 "utf-8-validate": "commonjs utf-8-validate",
-                bufferutil: "commonjs bufferutil"
+                bufferutil: "commonjs bufferutil",
+                "ts3-nodejs-library": "commonjs ts3-nodejs-library"
             },
             module: {
                 rules: [
