@@ -42,18 +42,23 @@ interface SidebarProps extends INavigator, ILogonStateManager {
 }
 
 export default function Sidebar(props: SidebarProps) {
+    const menuRef = React.useRef<HTMLDivElement>(null);
+
     const doLogoutMutation = useMutation(`mutation {
         logout
     }`, {onSuccess: (data: string, errors) => {
         props.onLogout?.();
     }});
 
-    return props.isLoggedIn ? <div className="dashboard-sidebar">
-        <SidebarNavigationButton pageKey={"home"} label={"Home"} activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />
-        {props.myPermissions.includes(UsermgmtPermissions.ViewUser.name) && <SidebarNavigationButton pageKey="users" label="Users" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
-        {props.myPermissions.includes(UsermgmtPermissions.ViewPermissions.name) && <SidebarNavigationButton pageKey="permissions" label="Permissions" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
-        {props.myPermissions.includes(DashboardPermissions.ViewLogs.name) && <SidebarNavigationButton pageKey="logs" label="Logs" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
-        <SidebarButton label="Logout" onClick={() => doLogoutMutation.execute()} />
-    </div> : <></>;
+    return props.isLoggedIn ? <>
+        <button className="fixed top-0 left-0 z-50 xl:hidden text-white p-2 bg-black/10" onClick={() => menuRef.current?.classList?.toggle?.("flex")}>M</button>
+        <div className="dashboard-sidebar" ref={menuRef}>
+            <SidebarNavigationButton pageKey={"home"} label={"Home"} activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />
+            {props.myPermissions.includes(UsermgmtPermissions.ViewUser.name) && <SidebarNavigationButton pageKey="users" label="Users" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+            {props.myPermissions.includes(UsermgmtPermissions.ViewPermissions.name) && <SidebarNavigationButton pageKey="permissions" label="Permissions" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+            {props.myPermissions.includes(DashboardPermissions.ViewLogs.name) && <SidebarNavigationButton pageKey="logs" label="Logs" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+            <SidebarButton label="Logout" onClick={() => doLogoutMutation.execute()} />
+        </div>
+    </> : <></>;
 }
 

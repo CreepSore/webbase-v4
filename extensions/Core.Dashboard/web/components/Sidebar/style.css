@@ -4,7 +4,7 @@
 
 @layer components {
     .dashboard-sidebar {
-        @apply flex flex-col gap-2 border-r-4 border-violet-600;
+        @apply hidden xl:flex flex-col gap-2 border-r-4 border-violet-600;
         @apply max-w-sm w-full;
         @apply bg-black/40;
         @apply backdrop-blur-lg;

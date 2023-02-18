@@ -55,7 +55,11 @@ function Main() {
                 activePage={currentDashboardPage}
                 onNavigationRequest={onNavigationRequest}
                 isLoggedIn={!myUser?.pseudo}
-                onLogout={() => myUserQuery.forceUpdate()}
+                onLogout={() => {
+                    myUserQuery.forceUpdate();
+                    setCurrentDashboardPage("home");
+                }}
+
                 myPermissions={(myUser?.permissionGroup?.permissions || []).map(p => p.name)}/>
 
             <Router currentPage={currentDashboardPage}>
