@@ -35,7 +35,6 @@ module.exports = function(env, argv) {
             },
             externals: {
                 knex: "commonjs knex",
-                "ts3-nodejs-library": "commonjs ts3-nodejs-library",
                 "utf-8-validate": "commonjs utf-8-validate",
                 bufferutil: "commonjs bufferutil",
             },

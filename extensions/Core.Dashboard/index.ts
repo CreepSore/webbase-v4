@@ -86,6 +86,10 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         
     }
 
+    registerDashboardPage() {
+        
+    }
+
     private checkConfig() {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
