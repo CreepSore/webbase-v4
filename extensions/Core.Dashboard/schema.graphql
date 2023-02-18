@@ -1,0 +1,11 @@
+type Log {
+    id: ID!
+    date: String!
+    level: String
+    infos: [String]
+    message: String
+}
+
+type Query {
+    logs: [Log]
+}

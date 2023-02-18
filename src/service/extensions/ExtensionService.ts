@@ -96,7 +96,7 @@ export default class ExtensionService {
      * Gets multiple extensions by their names
      */
     getExtensions(...names: string[]) {
-        return this.extensions.filter(ext => names.includes(ext.metadata.name));
+        return names.map(name => this.getExtension(name));
     }
     //#endregion
 

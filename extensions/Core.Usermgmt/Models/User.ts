@@ -97,8 +97,7 @@ export default class User {
                     .unique();
 
                 table.string("email", 255)
-                    .nullable()
-                    .unique();
+                    .nullable();
 
                 table.string("password", 44); // SHA256
 

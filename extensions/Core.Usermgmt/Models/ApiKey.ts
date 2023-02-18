@@ -1,8 +1,5 @@
 import * as crypto from "crypto";
 import { Knex } from "knex";
-import * as uuid from "uuid";
-import Permission from "./Permission";
-import PermissionGroup from "./PermissionGroup";
 
 export default class ApiKey {
     static tableName: string = "apikeys";
@@ -24,10 +21,10 @@ export default class ApiKey {
     static async setup(knex: Knex) {
         this.knex = knex;
         await knex.schema.hasTable(this.tableName)
-            .then(val => {
+            .then(async val => {
                 if(val) return;
 
-                knex.schema.createTable(this.tableName, table => {
+                await knex.schema.createTable(this.tableName, table => {
                     table.string("id", 36)
                         .primary();
 
@@ -36,13 +33,13 @@ export default class ApiKey {
                     table.dateTime("validUntil")
                         .nullable();
 
-                    table.integer("userId")
+                    table.string("userId")
                         .references("id")
                         .inTable("users");
 
                     table.dateTime("created");
                     table.dateTime("modified").nullable();
-                })
+                });
             });
     }
 

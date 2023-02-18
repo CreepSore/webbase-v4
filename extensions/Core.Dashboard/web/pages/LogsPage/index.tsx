@@ -1,12 +1,9 @@
+import e from "express";
 import React from "react";
-import NavigationBar from "../components/NavigationBar";
-import UserView from "../components/UserView";
 
-import {useFetchJson, usePermissions} from "../hooks";
+import {useMutation, useQuery} from "../../../../Core.GraphQL/web/GraphQLHooks";
 
-import DashboardPermission from "../../permissions";
-import DatabridgeWebsocketClient from "../../../Core.Databridge/web/DatabridgeWebsocketClient";
-import DatabridgePacket from "../../../Core.Databridge/DatabridgePacket";
+import "./style.css";
 
 interface LogEntry {
     id: string;
@@ -93,7 +90,7 @@ function LogViewer(props: LogViewerProperties) {
             <thead>
                 <tr>
                     <th><input
-                        className="w-full px-2 py-1"
+                        className="w-full px-2 py-1 bg-violet-600"
                         type="text"
                         value={search1}
                         onChange={e => setSearch1(e.target.value)}
@@ -101,7 +98,7 @@ function LogViewer(props: LogViewerProperties) {
                         title="Prefix search with '?' to enable regex or '!' to negate search"
                     /></th>
                     <th><input
-                        className="w-full px-2 py-1"
+                        className="w-full px-2 py-1 bg-violet-600"
                         type="text"
                         value={search2}
                         onChange={e => setSearch2(e.target.value)}
@@ -109,7 +106,7 @@ function LogViewer(props: LogViewerProperties) {
                         title="Prefix search with '?' to enable regex or '!' to negate search"
                     /></th>
                     <th><input
-                        className="w-full px-2 py-1"
+                        className="w-full px-2 py-1 bg-violet-600"
                         type="text"
                         value={search3}
                         onChange={e => setSearch3(e.target.value)}
@@ -117,7 +114,7 @@ function LogViewer(props: LogViewerProperties) {
                         title="Prefix search with '?' to enable regex or '!' to negate search"
                     /></th>
                     <th><input
-                        className="w-full px-2 py-1"
+                        className="w-full px-2 py-1 bg-violet-600"
                         type="text"
                         value={search4}
                         onChange={e => setSearch4(e.target.value)}
@@ -134,17 +131,28 @@ function LogViewer(props: LogViewerProperties) {
     </div>
 }
 
+interface LogsPageProps {
+    onLoginSuccess?: (userId: string) => void;
+    onLoginFailure?: () => void;
+}
 
-export default function PageLogs(props: PageLogsProperties) {
-    let [permViewLogs] = usePermissions(DashboardPermission.ViewLogs.name);
-    let [logs, setLogs] = React.useState([]);
+export default function LogsPage(props: LogsPageProps) {
     let containerRef = React.useRef<HTMLDivElement>();
     let [scroll, setScroll] = React.useState(containerRef.current?.scrollTop || 0);
-
-    if(!permViewLogs) {
-        props.setCurrentPage("home");
-        return;
-    }
+    const [logs, setLogs] = React.useState<{
+        id: string,
+        date: number,
+        level: string,
+        infos: string[],
+        message: string
+    }[]>([]);
+    useQuery(`{ logs { id, date, level, infos, message } }`, {
+        onSuccess: (data: any, errors) => {
+            if(!errors?.length) {
+                setLogs(data.logs);
+            }
+        }
+    });
 
     React.useEffect(() => {
         if(!containerRef.current) return;
@@ -157,28 +165,7 @@ export default function PageLogs(props: PageLogsProperties) {
         return () => window.removeEventListener("scroll", cb);
     }, [containerRef.current]);
 
-    const logSocket = React.useRef<DatabridgeWebsocketClient>();
-    React.useEffect(() => {
-        logSocket.current = new DatabridgeWebsocketClient("/ws/core.dashboard/logs")
-            .onPacketReceived(p => {
-                if(p.type === "LOG") {
-                    let packet = p as DatabridgePacket<{id: string, date: number, level: string, infos: string[], message: string}[]>;
-                    setLogs(packet.data);
-                }
-            });
-        logSocket.current.connect();
-
-        return () => {
-            logSocket.current?.close();
-        };
-    }, []);
-
-    return <div className="flex flex-col h-screen bg-slate-800 overflow-x-auto" ref={containerRef}>
-        <NavigationBar
-            activePage="logs"
-            onNavigation={newPage => props.setCurrentPage(newPage)}
-        />
-
+    return <div className="flex flex-col w-full h-screen bg-white/10 overflow-x-auto" ref={containerRef}>
         <LogViewer lines={logs}/>
 
         <div className="z-50 fixed right-4 bottom-4 flex flex-row items-end gap-2">
@@ -188,5 +175,5 @@ export default function PageLogs(props: PageLogsProperties) {
             >{scroll === 0 ? "D" : "U"}</button>
         </div>
         
-    </div>;
+    </div>;;
 }

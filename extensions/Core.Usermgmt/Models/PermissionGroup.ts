@@ -27,8 +27,7 @@ export default class PermissionGroup {
         if(resolvedPermissions.length === 0) return null;
 
         return await this.knex("permissiongrouppermissions").delete().where({
-            permissiongroup: resolvedPermissionGroup[0].id,
-            created: new Date()
+            permissiongroup: resolvedPermissionGroup[0].id
         }).whereIn("permission", resolvedPermissions.map(p => p.id));
     }
 

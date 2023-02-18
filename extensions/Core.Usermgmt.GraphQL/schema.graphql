@@ -1,11 +1,11 @@
 type Permission {
-    id: ID!
+    id: Int!
     name: String!
     description: String
 }
 
 type PermissionGroup {
-    id: ID!
+    id: Int!
     name: String!
     description: String
     permissions: [Permission]
@@ -36,5 +36,12 @@ type Query {
 type Mutation {
     loginByCredentials(username: String!, password: String!): String
     loginByApiKey(apiKey: String!): String
-    logout: Boolean
+    logout: Boolean!
+    deleteUser(id: ID!): Boolean!
+    updateUser(id: ID!, username: String, email: String, password: String, isActive: Boolean, permissionGroupId: Int): Boolean!
+    createUser(username: String!, email: String, password: String!, isActive: Boolean, permissionGroupId: Int): String!
+    impersonateUser(id: ID!): Boolean!
+    addPermissionToGroup(permissionGroupId: Int!, permissionId: Int!): Boolean!
+    removePermissionFromGroup(permissionGroupId: Int!, permissionId: Int!): Boolean!
+    createPermissionGroup(name: String!, description: String): Boolean!
 }

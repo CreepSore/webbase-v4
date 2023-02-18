@@ -35,7 +35,6 @@ module.exports = function(env, argv) {
             },
             externals: {
                 knex: "commonjs knex",
-                "ts3-nodejs-library": "commonjs ts3-nodejs-library",
                 "utf-8-validate": "commonjs utf-8-validate",
                 bufferutil: "commonjs bufferutil",
             },
@@ -111,7 +110,10 @@ module.exports = function(env, argv) {
             devtool: argv.mode === "development" ? "inline-source-map" : false,
             resolve: {
                 extensions: [".ts", ".tsx", ".js", ".jsx"],
-                modules: ['node_modules']
+                modules: ['node_modules'],
+                alias: {
+                    "@extensions": extPath
+                }
             },
             module: {
                 rules: [

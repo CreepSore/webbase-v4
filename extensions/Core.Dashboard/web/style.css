@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    #dashboard {
+        @apply w-full h-screen min-h-screen flex border-t-4 border-violet-600;
+
+        & > .background {
+            unset: all;
+            @apply -z-50 fixed w-full h-full;
+
+            & > .background-container {
+                @apply relative h-screen;
+
+                & > img {
+                    @apply absolute h-full place-self-center;
+                }
+
+                .image {
+                    @apply absolute top-0 right-0 bottom-0 left-0 bg-center bg-cover;
+                }
+
+                & > .blur {
+                    @apply absolute top-0 right-0 bottom-0 left-0 backdrop-blur-sm;
+                }
+            }
+        }
+
+        & > #dashboard-content {
+            @apply w-full h-full;
+            @apply flex;
+            @apply text-white;
+        }
+    }
+}

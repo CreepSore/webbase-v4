@@ -12,7 +12,8 @@
         "paths": {
             "@app/*": ["application/*"],
             "@logic/*": ["logic/*"],
-            "@service/*": ["service/*"]
+            "@service/*": ["service/*"],
+            "@extensions/*": ["../extensions/*"]
         },
         "esModuleInterop": true,
         "jsx": "react"
