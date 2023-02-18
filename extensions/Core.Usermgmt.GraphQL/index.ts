@@ -1,6 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import * as uuid from "uuid";
+
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
@@ -97,7 +99,9 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                     loginByCredentials: (parent, args, context, info) => this.handleLoginByCredentialsMutation(parent, args, context, info),
                     loginByApiKey: (parent, args, context, info) => this.handleLoginByApiKeyMutation(parent, args, context, info),
                     logout: (parent, args, context, info) => this.handleLogoutMutation(parent, args, context, info),
-                    updateUser: (parent, args, context, info) => this.handleUpdateUserMutation(parent, args, context, info)
+                    updateUser: (parent, args, context, info) => this.handleUpdateUserMutation(parent, args, context, info),
+                    createUser: (parent, args, context, info) => this.handleCreateUserMutation(parent, args, context, info),
+                    deleteUser: (parent, args, context, info) => this.handleDeleteUserMutation(parent, args, context, info)
                 }
             },
             
@@ -245,8 +249,48 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         if(isActive === true || isActive === false) updateValues.isActive = isActive ? 1 : 0;
         if(permissionGroupId) updateValues.permissionGroupId = permissionGroupId;
 
-
+        updateValues.modified = new Date();
         await User.use().update(updateValues).where({id});
+        return true;
+    }
+
+    async handleCreateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.CreateUser.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const id = uuid.v4();
+        let {username, email, password, isActive, permissionGroupId} = args;
+
+        if(!username || !password) {
+            throw new Error("Some mandatory fields are missing");
+        }
+
+        if(!permissionGroupId) permissionGroupId = 1;
+        if(!email) email = "";
+        if(isActive !== false && isActive !== true) isActive = false;
+        password = User.hashPassword(password);
+        
+        await User.use().insert({
+            id,
+            username,
+            email,
+            password,
+            isActive: isActive === true ? 1 : 0,
+            permissionGroupId,
+            created: new Date()
+        })
+        return true;
+    }
+
+    async handleDeleteUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.DeleteUser.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const {id} = args;
+
+        await User.use().delete().where({id});
         return true;
     }
     //#endregion

@@ -39,5 +39,5 @@ type Mutation {
     logout: Boolean!
     deleteUser(id: ID!): Boolean!
     updateUser(id: ID!, username: String, email: String, password: String, isActive: Boolean, permissionGroupId: Int): Boolean!
-    createUser(username: String!, email: String, password: String!, isActive: Boolean!, permissionGroupId: Int): String!
+    createUser(username: String!, email: String, password: String!, isActive: Boolean, permissionGroupId: Int): String!
 }

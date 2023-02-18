@@ -6,6 +6,7 @@ import { useQuery } from "../../../../Core.GraphQL/web/GraphQLHooks";
 
 import UsermgmtPermissions from "../../../../Core.Usermgmt.Web/permissions";
 import UserEditorDialog from "./components/UserEditorDialog";
+import UserAddDialog from "./components/UserAddDialog";
 
 interface UsersTableRowProps {
     user: IUser;
@@ -69,6 +70,14 @@ export default function UsersPage(props: UsersPageProps) {
     });
 
     return <div className="users-page">
+        {addUserDialogVisible && <UserAddDialog
+            onClose={() => setAddUserDialogVisible(false)}
+            afterSave={() => {
+                setAddUserDialogVisible(false);
+                usersQuery.forceUpdate();
+            }}
+        />}
+
         {editingUser && <UserEditorDialog
             user={editingUser}
             onClose={() => {
