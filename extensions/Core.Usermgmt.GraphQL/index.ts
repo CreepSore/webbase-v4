@@ -270,7 +270,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         if(!email) email = "";
         if(isActive !== false && isActive !== true) isActive = false;
         password = User.hashPassword(password);
-        
+
         await User.use().insert({
             id,
             username,
