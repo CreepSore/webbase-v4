@@ -4,6 +4,7 @@ import ILogonStateManager from "../../interfaces/ILogonStateManager";
 import INavigator from "../../interfaces/INavigator";
 
 import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
+import DashboardPermissions from "@extensions/Core.Dashboard/permissions";
 import "./style.css";
 
 interface SidebarButtonProps {
@@ -49,8 +50,9 @@ export default function Sidebar(props: SidebarProps) {
 
     return props.isLoggedIn ? <div className="dashboard-sidebar">
         <SidebarNavigationButton pageKey={"home"} label={"Home"} activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />
-        {props.myPermissions.includes(UsermgmtPermissions.ViewUser.name) && <SidebarNavigationButton pageKey={"users"} label={"Users"} activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
-        {props.myPermissions.includes(UsermgmtPermissions.ViewPermissions.name) && <SidebarNavigationButton pageKey={"permissions"} label={"Permissions"} activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+        {props.myPermissions.includes(UsermgmtPermissions.ViewUser.name) && <SidebarNavigationButton pageKey="users" label="Users" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+        {props.myPermissions.includes(UsermgmtPermissions.ViewPermissions.name) && <SidebarNavigationButton pageKey="permissions" label="Permissions" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+        {props.myPermissions.includes(DashboardPermissions.ViewLogs.name) && <SidebarNavigationButton pageKey="logs" label="Logs" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
         <SidebarButton label="Logout" onClick={() => doLogoutMutation.execute()} />
     </div> : <></>;
 }

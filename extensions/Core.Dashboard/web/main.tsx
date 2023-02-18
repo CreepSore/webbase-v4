@@ -15,33 +15,29 @@ import IUser from "../../Core.Usermgmt/Interfaces/ModelTypes";
 import LoginPage from "./pages/LoginPage";
 import UsersPage from "./pages/UsersPage";
 import PermissionsPage from "./pages/PermissionsPage";
+import LogsPage from "./pages/LogsPage";
 
 function Main() {
     let startPage = location.hash.substring(1);
     let [currentDashboardPage, setCurrentDashboardPage] = React.useState(startPage || "home");
+    let [myUser, setMyUser] = React.useState<IUser>();    
+
     let myUserQuery = useQuery<{me: IUser}>(
         `{ me { pseudo, id, username, email, permissionGroup { name, permissions { name } } } }`,
-        {onSuccess: (data) => setMyUser(data.me)}
+        {onSuccess: (data) => {
+            if(data.me.pseudo) {
+                setCurrentDashboardPage("login");
+            }
+            setMyUser(data.me);
+        }}
     );
-    let [myUser, setMyUser] = React.useState<IUser>();
 
     let onNavigationRequest = (target: string) => {
         if(target === currentDashboardPage) return;
-        window.history.pushState(null, "", target !== "home" ? `#${target}` : "/");
+        window.history.pushState(null, "", target !== "home" ? `#${target}` : "#");
 
         setCurrentDashboardPage(target);
     }
-
-    React.useEffect(() => {
-        if(myUser?.pseudo) {
-            if(currentDashboardPage !== "login") {
-                setCurrentDashboardPage("login");
-            }
-        }
-        else {
-            setCurrentDashboardPage("home");
-        }
-    }, [myUser]);
 
     if(myUserQuery.loading) {
         return <></>;
@@ -91,6 +87,10 @@ function Main() {
 
                 <RouterPage key="permissions">
                     <PermissionsPage />
+                </RouterPage>
+
+                <RouterPage key="logs">
+                    <LogsPage />
                 </RouterPage>
             </Router>
         </div>
