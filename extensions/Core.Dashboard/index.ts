@@ -76,7 +76,9 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         const [coreWeb, umgmtGraphQl, coreGraphQl]
             = executionContext.extensionService.getExtensions("Core.Web", "Core.Usermgmt.GraphQL", "Core.GraphQL") as [CoreWeb, CoreUsermgmtGraphQL, CoreGraphQL];
         this.umgmtGql = umgmtGraphQl;
-        const mainUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
+        const mainUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js", {
+            readFileEveryRequest: false
+        });
         coreWeb.addAppRoute("/core.dashboard", mainUrl);
 
         coreGraphQl.registerExtension(this);

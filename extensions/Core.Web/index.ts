@@ -51,6 +51,7 @@ export default class CoreWeb implements IExtension {
         hash: string,
         content: Buffer
     } } = {};
+    logSkipping: RegExp[] = [];
 
     constructor() {
         this.config = this.loadConfig();
@@ -79,6 +80,10 @@ export default class CoreWeb implements IExtension {
             }));
 
         this.app.use((req, res, next) => {
+            if(this.logSkipping.some(regex => regex.test(req.url))) {
+                return next();
+            }
+
             console.log("NOTE", "Core.Web", req.method, `${req.headers['x-forwarded-for'] || req.socket.remoteAddress} requested [${req.url}]`);
             next();
         });
@@ -111,6 +116,8 @@ export default class CoreWeb implements IExtension {
 
     addScript(name: string, source: string | any, url: string = `/${name}/${uuid.v4()}`) {
         this.app.get(url, (req, res) => {
+            res.setHeader("Cache-Control", "public, max-age=86400, must-revalidate")
+
             res.setHeader("Content-Type", "application/javascript")
                 .status(200)
                 .write(source);
@@ -121,22 +128,25 @@ export default class CoreWeb implements IExtension {
         return url;
     }
 
-    addScriptFromFile(name: string, path: string | any, options = {
-        url: `/js/${name}/${uuid.v4()}`,
-        readFileEveryRequest: true
-    }) {
+    addScriptFromFile(name: string, path: string | any, options: {
+        url?: string,
+        readFileEveryRequest?: boolean
+    } = {}) {
+        let url = `/js/${name}/${uuid.v4()}`;
+        let readFileEveryRequest = options.readFileEveryRequest || process.env.DEBUG === "true";
+
         const content = fs.readFileSync(__dirname + "/" + path);
         const scriptRegistryObject = this.scripts[path] = {
-            url: options.url,
+            url,
             content,
             hash: crypto.createHash("sha256").update(content).digest("hex")
         };
 
-        if(!options.readFileEveryRequest) {
-            return this.addScript(name, scriptRegistryObject.content, options.url);
+        if(!readFileEveryRequest) {
+            return this.addScript(name, scriptRegistryObject.content, url);
         }
         else {
-            this.app.get(options.url, (req, res) => {
+            this.app.get(url, (req, res) => {
                 res.setHeader("Content-Type", "application/javascript")
                     .status(200)
                     .write(fs.readFileSync(__dirname + "/" + path));
@@ -224,6 +234,11 @@ export default class CoreWeb implements IExtension {
             });
         });
 
+        return this;
+    }
+
+    skipLogForUrl(url: RegExp | string) {
+        this.logSkipping.push(typeof url === "string" ? new RegExp(url) : url);
         return this;
     }
 }

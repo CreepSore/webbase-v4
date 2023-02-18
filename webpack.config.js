@@ -29,14 +29,15 @@ module.exports = function(env, argv) {
             resolve: {
                 extensions: [".ts", ".js", ".json"],
                 alias: {
-                    wpextensions: path.resolve(__dirname, "extensions")
+                    wpextensions: path.resolve(__dirname, "extensions"),
+                    "@extensions": path.resolve(__dirname, "extensions")
                 },
                 modules: ['node_modules']
             },
             externals: {
                 knex: "commonjs knex",
                 "utf-8-validate": "commonjs utf-8-validate",
-                bufferutil: "commonjs bufferutil",
+                bufferutil: "commonjs bufferutil"
             },
             module: {
                 rules: [

@@ -105,7 +105,11 @@ export default class CoreGraphQL implements IExtension {
                 }
             };
             const handler = GraphQLExpress.createHandler(opt);
-            coreWeb.app.use("/api/core.graphql", handler);
+            coreWeb.skipLogForUrl("/api/core.graphql");
+            coreWeb.app.use("/api/core.graphql", (req, res, next) => {
+                console.log("NOTE", "Core.GraphQL", `${req.headers['x-forwarded-for'] || req.socket.remoteAddress} queried [${JSON.stringify(req.body)}]`);
+                next();
+            }, handler);
         }
         else {
             coreWeb.app.use("/api/core.graphql", (req, res) => {
