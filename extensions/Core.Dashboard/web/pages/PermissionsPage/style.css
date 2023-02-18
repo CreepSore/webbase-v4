@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+@layer base {
+
+}
+
+@layer components {
+    .permissions-page {
+        @apply w-full;
+
+        .permissions-editor {
+            @apply bg-white/10 backdrop-blur-md;
+            @apply w-full h-full;
+
+            .group-selector {
+                @apply w-full bg-violet-600;
+                @apply flex;
+            }
+
+            .editor {
+                @apply grid grid-cols-2;
+                @apply px-2;
+            }
+        }
+    }
+}
+
+@layer utilities {
+
+}

@@ -4,7 +4,7 @@
 
 @layer components {
     #dashboard {
-        @apply w-full h-screen max-h-screen flex border-t-4 border-violet-600;
+        @apply w-full h-screen min-h-screen flex border-t-4 border-violet-600;
 
         & > .background {
             unset: all;

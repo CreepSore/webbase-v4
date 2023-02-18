@@ -101,7 +101,10 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                     logout: (parent, args, context, info) => this.handleLogoutMutation(parent, args, context, info),
                     updateUser: (parent, args, context, info) => this.handleUpdateUserMutation(parent, args, context, info),
                     createUser: (parent, args, context, info) => this.handleCreateUserMutation(parent, args, context, info),
-                    deleteUser: (parent, args, context, info) => this.handleDeleteUserMutation(parent, args, context, info)
+                    deleteUser: (parent, args, context, info) => this.handleDeleteUserMutation(parent, args, context, info),
+                    addPermissionToGroup: (parent, args, context, info) => this.handleAddPermissionToGroupMutation(parent, args, context, info),
+                    removePermissionFromGroup: (parent, args, context, info) =>this.handleRemovePermissionFromGroupMutation(parent, args, context, info),
+                    createPermissionGroup: (parent, args, context, info) => this.handleCreatePermissionGroupMutation(parent, args, context, info)
                 }
             },
             
@@ -293,6 +296,37 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         await User.use().delete().where({id});
         return true;
     }
+
+    async handleAddPermissionToGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.EditPermissions.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const {permissionGroupId, permissionId} = args;
+
+        await PermissionGroup.addPermission({id: permissionGroupId}, {id: permissionId});
+        return true;
+    }
+
+    async handleRemovePermissionFromGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.EditPermissions.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const {permissionGroupId, permissionId} = args;
+        await PermissionGroup.removePermission({id: permissionGroupId}, {id: permissionId});
+        return true;
+    }
+
+    async handleCreatePermissionGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.EditPermissions.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const {name, description} = args;
+        await PermissionGroup.create({name, description});
+        return true;
+    }
     //#endregion
     //#endregion
 
@@ -352,7 +386,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     }
 
     private async permissionsByPermissionGroup(permissionGroupId: number) {
-        return await this.db.columns("p.name", "p.description", "p.created", "p.modified")
+        return await this.db.columns("p.id", "p.name", "p.description", "p.created", "p.modified")
             .from(`${Permission.tableName} as p`)
             .leftJoin("permissiongrouppermissions as pgp", "p.id", "pgp.permission")
             .where({"pgp.permissiongroup": permissionGroupId});
