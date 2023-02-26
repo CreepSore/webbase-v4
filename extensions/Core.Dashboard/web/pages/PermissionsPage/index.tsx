@@ -2,7 +2,7 @@ import { IPermission, IPermissionGroup } from "@extensions/Core.Usermgmt/Interfa
 import e from "express";
 import React from "react";
 
-import {useMutation, useQuery} from "../../../../Core.GraphQL/web/GraphQLHooks";
+import {useMutation, useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
 import PermGroupCreateDialog from "./PermGroupCreateDialog";
 import PermissionsEditor from "./PermissionsEditor";
 
@@ -84,6 +84,7 @@ export default function PermissionsPage(props: PermissionsPageProps) {
             onCreateButtonClicked={() => {
                 setCreateGroupDialogOpen(true);
             }}
+            disabled={permQuery.loading || mutationAddPerm.loading || mutationRemovePerm.loading}
         />
     </div>;
 }

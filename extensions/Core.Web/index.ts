@@ -132,7 +132,7 @@ export default class CoreWeb implements IExtension {
         url?: string,
         readFileEveryRequest?: boolean
     } = {}) {
-        let url = `/js/${name}/${uuid.v4()}`;
+        let url = options.url || `/js/${name}/${uuid.v4()}`;
         let readFileEveryRequest = options.readFileEveryRequest || process.env.DEBUG === "true";
 
         const content = fs.readFileSync(__dirname + "/" + path);
@@ -154,11 +154,11 @@ export default class CoreWeb implements IExtension {
                 res.end();
             });
 
-            return options.url;
+            return url;
         }
     }
 
-    generateReactPage(scripts: string | string[]) {
+    generateReactPage(scripts: string | string[] = []) {
         // ! Ignore: lol
         // eslint-disable-next-line no-param-reassign
         if(!Array.isArray(scripts)) scripts = [scripts];

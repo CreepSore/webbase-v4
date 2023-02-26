@@ -1,10 +1,10 @@
 import React from "react";
 
 import "./style.css";
-import IUser from "../../../../Core.Usermgmt/Interfaces/ModelTypes";
-import { useQuery } from "../../../../Core.GraphQL/web/GraphQLHooks";
+import IUser from "@extensions/Core.Usermgmt/Interfaces/ModelTypes";
+import { useQuery } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
-import UsermgmtPermissions from "../../../../Core.Usermgmt.Web/permissions";
+import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
 import UserEditorDialog from "./components/UserEditorDialog";
 import UserAddDialog from "./components/UserAddDialog";
 import INavigator from "../../interfaces/INavigator";

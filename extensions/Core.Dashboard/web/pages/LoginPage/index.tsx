@@ -1,7 +1,7 @@
 import e from "express";
 import React from "react";
 
-import {useMutation, useQuery} from "../../../../Core.GraphQL/web/GraphQLHooks";
+import {useMutation, useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 import "./style.css";
 
@@ -37,12 +37,14 @@ export default function LoginPage(props: LoginPageProps) {
                 type="text"
                 className={`login-input ${username ? "valid" : "invalid"}`}
                 value={username}
-                onChange={e => setUsername(e.target.value)}/>
+                onChange={e => setUsername(e.target.value)}
+                autoComplete="username" />
             <input
                 type="password"
                 className={`login-input ${password ? "valid" : "invalid"}`}
                 value={password}
-                onChange={e => setPassword(e.target.value)} />
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="current-password" />
             {loginError && <p className="error-alert">{loginError}</p>}
             <button
                 className={`login-input ${username && password ? "valid" : "invalid"}`}

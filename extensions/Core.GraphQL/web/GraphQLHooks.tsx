@@ -15,6 +15,7 @@ export function useQuery<T>(query: string, options: UseQueryOptions<T> = {}) {
     const [forceUpdateValue, forceUpdate] = React.useReducer(x => x + 1, 0);
 
     React.useEffect(() => {
+        setLoading(true);
         fetch("/api/core.graphql", {
             method: "POST",
             headers: {
@@ -56,8 +57,8 @@ export function useMutation<T>(mutation: string, options: UseMutationOptions<T> 
     const [data, setData] = React.useState<T>(options.defaultValue || null);
     const [variables, setVariables] = React.useState(options.variables || {});
     const [errors, setErrors] = React.useState<GraphQLFormattedError[]>([]);
-    const [loading, setLoading] = React.useState(false);
-    
+    const [loading, setLoading] = React.useState<boolean>(false);
+
     React.useEffect(() => {
         if(!loading) {
             return;

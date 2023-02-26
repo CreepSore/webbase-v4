@@ -5,8 +5,8 @@ import * as path from "path";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import CoreWeb from "../Core.Web";
-import CoreUsermgmtGraphQL from "../Core.Usermgmt.GraphQL";
+import CoreWeb from "@extensions/Core.Web";
+import CoreUsermgmtGraphQL from "@extensions/Core.Usermgmt.GraphQL";
 import IGraphQLExtension from "@extensions/Core.GraphQL/IGraphQLExtension";
 
 import { GraphQLSchema } from "graphql";
@@ -76,9 +76,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         const [coreWeb, umgmtGraphQl, coreGraphQl]
             = executionContext.extensionService.getExtensions("Core.Web", "Core.Usermgmt.GraphQL", "Core.GraphQL") as [CoreWeb, CoreUsermgmtGraphQL, CoreGraphQL];
         this.umgmtGql = umgmtGraphQl;
-        const mainUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js", {
-            readFileEveryRequest: false
-        });
+        const mainUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
         coreWeb.addAppRoute("/core.dashboard", mainUrl);
 
         coreGraphQl.registerExtension(this);

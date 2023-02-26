@@ -1,4 +1,4 @@
-import IUser from "../../../Core.Usermgmt/Interfaces/ModelTypes";
+import IUser from "@extensions/Core.Usermgmt/Interfaces/ModelTypes";
 
 export default interface ILogonStateManager {
     onLoginSuccess?(): void;

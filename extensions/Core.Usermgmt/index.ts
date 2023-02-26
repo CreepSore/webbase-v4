@@ -3,13 +3,13 @@ import {EventEmitter} from "events";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import CoreDb from "../Core.Db";
+import CoreDb from "@extensions/Core.Db";
 import { Knex } from "knex";
 
-import User from "../Core.Usermgmt/Models/User";
-import ApiKey from "../Core.Usermgmt/Models/ApiKey";
-import PermissionGroup from "../Core.Usermgmt/Models/PermissionGroup";
-import Permission from "../Core.Usermgmt/Models/Permission";
+import User from "@extensions/Core.Usermgmt/Models/User";
+import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
+import PermissionGroup from "@extensions/Core.Usermgmt/Models/PermissionGroup";
+import Permission from "@extensions/Core.Usermgmt/Models/Permission";
 
 class TemplateConfig {
 

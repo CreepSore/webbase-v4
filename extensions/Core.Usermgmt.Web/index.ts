@@ -6,14 +6,14 @@ import * as express from "express";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import CoreDb from "../Core.Db";
+import CoreDb from "@extensions/Core.Db";
 
-import User from "../Core.Usermgmt/Models/User";
-import ApiKey from "../Core.Usermgmt/Models/ApiKey";
-import PermissionGroup from "../Core.Usermgmt/Models/PermissionGroup";
-import Permission from "../Core.Usermgmt/Models/Permission";
-import CoreWeb from "../Core.Web";
-import CoreUsermgmt from "../Core.Usermgmt";
+import User from "@extensions/Core.Usermgmt/Models/User";
+import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
+import PermissionGroup from "@extensions/Core.Usermgmt/Models/PermissionGroup";
+import Permission from "@extensions/Core.Usermgmt/Models/Permission";
+import CoreWeb from "@extensions/Core.Web";
+import CoreUsermgmt from "@extensions/Core.Usermgmt";
 
 import Permissions from "./permissions";
 import { Knex } from "knex";

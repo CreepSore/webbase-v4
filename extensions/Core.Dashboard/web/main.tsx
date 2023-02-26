@@ -1,21 +1,25 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import Router from "../../Core.ReactComponents/Router";
-import RouterPage from "../../Core.ReactComponents/Router/RouterPage";
+import Router from "@extensions/Core.ReactComponents/Router";
+import RouterPage from "@extensions/Core.ReactComponents/Router/RouterPage";
 
-import {useQuery} from "../../Core.GraphQL/web/GraphQLHooks";
+import {useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 // @ts-ignore
 import backgroundImageSrc from "./bg.png";
 
 import "./style.css";
 import Sidebar from "./components/Sidebar";
-import IUser from "../../Core.Usermgmt/Interfaces/ModelTypes";
+import IUser from "@extensions/Core.Usermgmt/Interfaces/ModelTypes";
+
 import LoginPage from "./pages/LoginPage";
 import UsersPage from "./pages/UsersPage";
 import PermissionsPage from "./pages/PermissionsPage";
 import LogsPage from "./pages/LogsPage";
+
+import Notifications from "@extensions/Core.ReactComponents/Notifications";
+import NotificationManager from "@extensions/Core.ReactComponents/Notifications/NotificationManager";
 
 function Main() {
     let startPage = location.hash.substring(1);
@@ -31,6 +35,14 @@ function Main() {
             setMyUser(data.me);
         }}
     );
+
+    React.useEffect(() => {
+        NotificationManager.addNotification({
+            type: "info",
+            message: "text",
+            title: "test"
+        }); 
+    }, []);
 
     let onNavigationRequest = (target: string) => {
         if(target === currentDashboardPage) return;
@@ -76,7 +88,7 @@ function Main() {
                 </RouterPage>
 
                 <RouterPage key="home">
-
+                    <Notifications />
                 </RouterPage>
 
                 <RouterPage key="users">

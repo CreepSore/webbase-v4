@@ -1,7 +1,7 @@
 import e from "express";
 import React from "react";
 
-import {useMutation, useQuery} from "../../../../Core.GraphQL/web/GraphQLHooks";
+import {useMutation, useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 import "./style.css";
 

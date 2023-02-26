@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+@layer base {
+
+}
+
+@layer components {
+    .notifications {
+        @apply fixed;
+        @apply bottom-0 left-0 right-0;
+        @apply lg:bottom-auto lg:left-auto lg:top-0 lg:max-w-[500px] lg:w-[500px];
+        @apply m-1;
+
+        .notification {
+            @apply w-full;
+            @apply p-2;
+
+            &.info {
+                @apply bg-blue-600;
+            }
+
+            &.success {
+                @apply bg-green-600;
+            }
+
+            &.warn {
+                @apply bg-orange-600;
+            }
+
+            &.error {
+                @apply bg-red-600;
+            }
+        }
+    }
+}
+
+@layer utilities {
+
+}
+

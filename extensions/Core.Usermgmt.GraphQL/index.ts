@@ -7,21 +7,21 @@ import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 
-import IGraphQLExtension from "../Core.GraphQL/IGraphQLExtension";
+import IGraphQLExtension from "@extensions/Core.GraphQL/IGraphQLExtension";
 import { GraphQLResolveInfo, GraphQLSchema } from "graphql";
 import * as GraphQLTools from "@graphql-tools/schema";
 
-import CoreGraphQL from "../Core.GraphQL";
+import CoreGraphQL from "@extensions/Core.GraphQL";
 import { Request } from "express";
 import { ParsedQs } from "qs";
-import User from "../Core.Usermgmt/Models/User";
-import PermissionGroup from "../Core.Usermgmt/Models/PermissionGroup";
-import Permission from "../Core.Usermgmt/Models/Permission";
+import User from "@extensions/Core.Usermgmt/Models/User";
+import PermissionGroup from "@extensions/Core.Usermgmt/Models/PermissionGroup";
+import Permission from "@extensions/Core.Usermgmt/Models/Permission";
 import { Knex } from "knex";
-import CoreDb from "../Core.Db";
+import CoreDb from "@extensions/Core.Db";
 
-import UsermgmtPermissions from "../Core.Usermgmt.Web/permissions";
-import CoreUsermgmt from "../Core.Usermgmt";
+import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
+import CoreUsermgmt from "@extensions/Core.Usermgmt";
 
 class CoreUsermgmtGraphQLConfig {}
 

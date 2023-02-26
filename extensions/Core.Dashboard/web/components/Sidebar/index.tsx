@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useMutation } from "../../../../Core.GraphQL/web/GraphQLHooks";
+import { useMutation } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 import ILogonStateManager from "../../interfaces/ILogonStateManager";
 import INavigator from "../../interfaces/INavigator";
 

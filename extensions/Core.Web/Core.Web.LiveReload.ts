@@ -1,5 +1,5 @@
-import DatabridgePacket from "../Core.Databridge/DatabridgePacket";
-import DatabridgeWebsocketClient from "../Core.Databridge/web/DatabridgeWebsocketClient";
+import DatabridgePacket from "@extensions/Core.Databridge/DatabridgePacket";
+import DatabridgeWebsocketClient from "@extensions/Core.Databridge/web/DatabridgeWebsocketClient";
 
 window.addEventListener("load", async() => {
     let databridge = new DatabridgeWebsocketClient("/Core.Web/LiveReload");

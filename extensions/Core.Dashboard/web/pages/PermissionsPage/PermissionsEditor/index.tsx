@@ -5,14 +5,15 @@ interface PermissionsListProps {
     permissions: IPermission[];
     onPermissionClicked: (permission: IPermission) => void;
     className?: string;
+    disabled?: boolean;
 }
 
 function PermissionsList(props: PermissionsListProps) {
     return <div className={`flex flex-col w-full select-none ${props.className ? props.className : ""}`}>
         {props.permissions.map(p => <div
             key={p.id}
-            className="w-full grid grid-cols-2 text-lg py-0.5 hover:brightness-75 cursor-pointer"
-            onClick={() => props.onPermissionClicked(p)}
+            className={["w-full grid grid-cols-2 text-lg py-0.5", props.disabled ? "cursor-wait" : "cursor-pointer hover:brightness-75"].join(" ")}
+            onClick={() => !props.disabled && props.onPermissionClicked(p)}
         >
             <div>{p.name}</div>
             <div>{p.description}</div>
@@ -26,6 +27,7 @@ interface PermissionsEditorProps {
     onPermissionRemoved: (permission: IPermission, group: IPermissionGroup) => void;
     onPermissionAdded: (permission: IPermission, group: IPermissionGroup) => void;
     onCreateButtonClicked: () => void;
+    disabled?: boolean;
 }
 
 
@@ -56,17 +58,19 @@ export default function PermissionsEditor(props: PermissionsEditorProps) {
 
             <PermissionsList
                 permissions={unassignedPermissions}
-                className="text-red-600 font-mono"
+                className={["font-mono", props.disabled ? "text-slate-600" : "text-red-600"].join(" ")}
                 onPermissionClicked={perm => {
                     props.onPermissionAdded(perm, resolvedGroup);
                 }}
+                disabled={props.disabled}
             />
             <PermissionsList
                 permissions={assignedPermissions}
-                className="text-green-600 font-mono"
+                className={["font-mono", props.disabled ? "text-slate-600" : "text-green-600"].join(" ")}
                 onPermissionClicked={perm => {
                     props.onPermissionRemoved(perm, resolvedGroup);
                 }}
+                disabled={props.disabled}
             />
         </div>
     </div>;

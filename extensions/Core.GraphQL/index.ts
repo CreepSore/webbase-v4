@@ -9,7 +9,7 @@ import * as GraphQLExpress from 'graphql-http/lib/use/express';
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import CoreWeb from "../Core.Web";
+import CoreWeb from "@extensions/Core.Web";
 import IGraphQLExtension from "./IGraphQLExtension";
 
 class CoreGraphQLConfig {
