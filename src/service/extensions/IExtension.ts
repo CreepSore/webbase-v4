@@ -25,6 +25,14 @@ export interface ExtensionMetadata {
      */
     dependencies: Array<string>;
     /**
+     * The dependencies of the extension that have to be installed by npm.
+     */
+    npmDependencies?: Array<string>;
+    /**
+     * The dependencies of the extension that have to be installed by npm.
+     */
+    npmDevDependencies?: Array<string>;
+    /**
      * For internal use only.
      */
     resolvedDependencies?: Array<IExtension>;

@@ -62,6 +62,10 @@ export default class CoreGraphQL implements IExtension {
     }
 
     private onAllExtensionsStarted(context: IExecutionContext) {
+        if(context.contextType === "cli") {
+            return;
+        }
+
         const coreWeb = context.extensionService.getExtension("Core.Web") as CoreWeb;
         this.schemes = [];
         let hasError = false;

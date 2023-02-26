@@ -1,8 +1,25 @@
+import CliApplication from "@app/CliApplication";
 import IApplication from "@app/IApplication";
 import MainApplication from "@app/MainApplication";
 
+import minimist from "minimist";
+
 (async() => {
-    let app: IApplication = new MainApplication();
+    const args = minimist(process.argv.slice(2), {
+        alias: {
+            command: "c"
+        },
+        string: ["command"]
+    });
+
+    let app: IApplication;
+    if(args.command === null) {
+        app = new MainApplication();
+    }
+    else {
+        app = new CliApplication(args);
+    }
+
     try {
         await app.start();
     }

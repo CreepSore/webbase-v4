@@ -1,26 +1,26 @@
 import IApplication from "@app/IApplication";
 import MainApplication from "@app/MainApplication";
 import ExtensionService from "./ExtensionService";
-import {Configuration} from "webpack";
+import CliApplication from "@app/CliApplication";
 
 /**
  * Base ExecutionContext
  */
-export default interface IExecutionContext {
-    extensionService: ExtensionService;
-    contextType: "app"|"cli";
-    application: IApplication;
-}
+type IExecutionContext = (IAppExecutionContext|ICliExecutionContext);
+
+export default IExecutionContext;
 
 /**
  * Execution Context of the MainApplication Entrypoint
  */
-export interface IAppExecutionContext extends IExecutionContext {
-    contextType: "app",
+export interface IAppExecutionContext {
+    contextType: "app";
     application: MainApplication;
+    extensionService: ExtensionService;
 }
 
-// TODO: Implement after implementing CliApplication
-export interface ICliExecutionContext extends IExecutionContext {
-    contextType: "cli"
+export interface ICliExecutionContext {
+    contextType: "cli";
+    application: CliApplication
+    extensionService: ExtensionService;
 }

@@ -23,6 +23,7 @@
     "@types/express-session": "^1.17.5",
     "@types/express-ws": "^3.0.1",
     "@types/jest": "^29.2.4",
+    "@types/minimist": "^1.2.2",
     "@types/nodemailer": "^6.4.6",
     "@types/react": "^18.0.18",
     "@types/react-dom": "^18.0.6",
@@ -60,6 +61,7 @@
     "helmet": "^6.0.0",
     "knex": "^2.3.0",
     "mime": "^3.0.0",
+    "minimist": "^1.2.8",
     "nodemailer": "^6.8.0",
     "sqlite3": "^5.0.11",
     "uuid": "^9.0.0"

@@ -11,6 +11,7 @@ export default class ExtensionService {
     extensionPath: string = "./extensions/";
     executionContext: IExecutionContext;
     emitter: EventEmitter = new EventEmitter();
+    doSkipLogs: boolean = false;
 
     constructor() {}
 
@@ -98,6 +99,10 @@ export default class ExtensionService {
     getExtensions(...names: string[]) {
         return names.map(name => this.getExtension(name));
     }
+
+    skipLogs() {
+        this.doSkipLogs = true;
+    }
     //#endregion
 
     //#region Events
@@ -140,7 +145,7 @@ export default class ExtensionService {
             try {
                 await node.start({...this.executionContext});
                 this.fireOnExtensionStarted(node.metadata.name, {...this.executionContext});
-                console.log("INFO", "ExtensionService.ts", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`);
+                if(!this.doSkipLogs) console.log("INFO", "ExtensionService.ts", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`);
             }
             catch(err) {
                 console.log("ERROR", "ExtensionService.ts", `Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed: [${err.message}]: ${err.stack}`);
