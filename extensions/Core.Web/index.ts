@@ -12,6 +12,7 @@ import * as uuid from "uuid";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
+import LogBuilder from "@service/logger/LogBuilder";
 
 class CoreWebConfig {
     hostname: string = "127.0.0.1";
@@ -84,7 +85,14 @@ export default class CoreWeb implements IExtension {
                 return next();
             }
 
-            console.log("NOTE", "Core.Web", req.method, `${req.headers['x-forwarded-for'] || req.socket.remoteAddress} requested [${req.url}]`);
+            LogBuilder
+                .start()
+                .level("NOTE")
+                .info("Core.Web")
+                .info(req.method)
+                .line(`${req.headers['x-forwarded-for'] || req.socket.remoteAddress} requested [${req.url}]`)
+                .debugObject("body", Object.values(req.body).length > 0 ? req.body : null)
+                .done();
             next();
         });
 

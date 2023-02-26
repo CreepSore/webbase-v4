@@ -1,25 +1,24 @@
 import * as uuid from "uuid";
+import ILogEntry from "./ILogEntry";
 import ILogger from "./ILogger";
-import LoggerService from "./LoggerService";
 
 /**
  * Logs all console.log calls into an array.
  */
 export default class CacheLogger implements ILogger {
-    maxEntries: number = -1;
-    logEntries: {id: string, date: number, level: string, infos: string[], message: string}[] = [];
+    maxEntries: number = 500;
+    logEntries: {id: string, date: number, level: string, infos: string[], message: string, objects: any}[] = [];
 
-    async log(level: string, ...args: any[]) {
-        let infos = [...args].slice(0, args.length - 1);
+    async log(log: ILogEntry) {
+        if(!log.level) return;
 
-        let message: string = args[args.length - 1];
-        let formatted = `[${new Date().toISOString()}][${level.toUpperCase().padStart(8, " ")}]${infos.map(i => `[${i}]`)} ${message}`;
         this.logEntries.push({
-            id: uuid.v4(),
-            date: Date.now(),
-            level: level.toUpperCase(),
-            infos,
-            message
+            id: log.id,
+            date: log.date.getTime(),
+            level: log.level,
+            infos: log.infos,
+            message: log.lines.join("\n"),
+            objects: log.objects
         });
 
         if(this.maxEntries > 0) {

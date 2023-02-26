@@ -1,5 +1,7 @@
+import util from "util";
 import * as fs from "fs";
 import * as path from "path";
+import ILogEntry from "./ILogEntry";
 import ILogger from "./ILogger";
 
 /**
@@ -17,11 +19,19 @@ export default class FileLogger implements ILogger {
         }
     }
 
-    async log(level: string, ...args: any[]) {
-        let infos = [...args].slice(0, args.length - 1);
+    async log(log: ILogEntry) {
+        let date = `[${log.date.toISOString()}]`;
+        let level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
+        let infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
+        let message = log.lines.join("\n");
+        let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]`).join("");
 
-        let message: string = args[args.length - 1];
-        let formatted = `[${new Date().toISOString()}][${level.toUpperCase().padStart(8, " ")}]${infos.map(i => `[${i}]`)} ${message}\n`;
+        let formatted = `${date}${level}${infos} ${message}${objects ? ` @ ${objects}` : ""}`;
+
+        if(infos.length === 0 && !message) {
+            formatted = level;
+        }
+
         fs.appendFileSync(this.logfilePath, formatted);
     }
 }

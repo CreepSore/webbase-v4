@@ -13,7 +13,7 @@ import minimist from "minimist";
     });
 
     let app: IApplication;
-    if(args.command === null) {
+    if(args.command === undefined) {
         app = new MainApplication();
     }
     else {
