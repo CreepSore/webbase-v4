@@ -11,6 +11,7 @@ import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreWeb from "@extensions/Core.Web";
 import IGraphQLExtension from "./IGraphQLExtension";
+import LogBuilder from "@service/logger/LogBuilder";
 
 class CoreGraphQLConfig {
 
@@ -111,7 +112,15 @@ export default class CoreGraphQL implements IExtension {
             const handler = GraphQLExpress.createHandler(opt);
             coreWeb.skipLogForUrl("/api/core.graphql");
             coreWeb.app.use("/api/core.graphql", (req, res, next) => {
-                console.log("NOTE", "Core.GraphQL", `${req.headers['x-forwarded-for'] || req.socket.remoteAddress} queried [${JSON.stringify(req.body)}]`);
+                LogBuilder
+                    .start()
+                    .level("NOTE")
+                    .info("Core.GraphQL")
+                    .line(`${req.headers['x-forwarded-for'] || req.socket.remoteAddress} ran Query`)
+                    .object("query", req.body.query)
+                    .debugObject("variables", req.body.variables)
+                    .done();
+
                 next();
             }, handler);
         }

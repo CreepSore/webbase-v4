@@ -5,6 +5,7 @@ import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import * as knex from "knex";
 import MainApplication from "@app/MainApplication";
+import LogBuilder from "@service/logger/LogBuilder";
 
 class CoreDbConfig {
     client: string = "sqlite3";
@@ -55,7 +56,14 @@ export default class CoreDb implements IExtension {
         };
 
         this.db = knex.knex(config);
-        console.log("INFO", "Core.Db", `Initialized Connection to the Database @ [${JSON.stringify(this.db.client.connectionSettings)}]`);
+        LogBuilder
+            .start()
+            .level("INFO")
+            .info("Core.Db")
+            .line("Initialized Connection to the Database")
+            .debugObject("config", this.db.client.connectionSettings)
+            .done();
+
         this.events.emit("db-loaded", this.db);
     }
 

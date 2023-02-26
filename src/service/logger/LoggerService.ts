@@ -1,4 +1,6 @@
+import ILogEntry from "./ILogEntry";
 import ILogger from "./ILogger";
+import LogBuilder from "./LogBuilder";
 
 
 export default class LoggerService {
@@ -21,8 +23,8 @@ export default class LoggerService {
      * @param {string} level
      * @param {...any[]} args
      */
-    static async log(level: string, ...args: any[]) {
-        await Promise.all(this.loggers.map(logger => logger.log(level, ...args)));
+    static async log(log: ILogEntry) {
+        await Promise.all(this.loggers.map(logger => logger.log(log)));
     }
 
     /**
@@ -31,9 +33,23 @@ export default class LoggerService {
      */
     static hookConsoleLog() {
         this.oldLog = console.log;
+        LogBuilder.onDone = (entry => {
+            this.log(entry);
+        });
 
         console.log = (level: string, ...args: any[]) => {
-            this.log(level, ...args);
+            const builder = LogBuilder.start();
+
+            if(args.length > 0) {
+                builder.level(level);
+                args.slice(0, -1).forEach(info => builder.info(info));
+                builder.line(args[args.length - 1]);
+            }
+            else {
+                builder.line(level);
+            }
+
+            builder.done();
         }
     }
 

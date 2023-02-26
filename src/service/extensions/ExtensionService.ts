@@ -4,6 +4,7 @@ import {EventEmitter} from "events";
 
 import IExecutionContext, {IAppExecutionContext, ICliExecutionContext} from "./IExecutionContext";
 import IExtension, {IExtensionConstructor} from "./IExtension";
+import LogBuilder from "@service/logger/LogBuilder";
 
 export default class ExtensionService {
     extensions: Array<IExtension> = [];
@@ -88,7 +89,12 @@ export default class ExtensionService {
     getExtension(name: string) {
         const result = this.extensions.find(ext => ext.metadata.name === name);
         if(!result) {
-            console.log("WARN", "ExtensionService.ts", `Failed to get extension [${name}]`);
+            LogBuilder
+                .start()
+                .level("WARN")
+                .info("ExtensionService.ts")
+                .line(`Failed to get extension [${name}]`)
+                .done();
         }
         return result;
     }
@@ -148,7 +154,13 @@ export default class ExtensionService {
                 if(!this.doSkipLogs) console.log("INFO", "ExtensionService.ts", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`);
             }
             catch(err) {
-                console.log("ERROR", "ExtensionService.ts", `Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed: [${err.message}]: ${err.stack}`);
+                LogBuilder
+                    .start()
+                    .level("ERROR")
+                    .info("ExtensionService.ts")
+                    .line(`Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed`)
+                    .object("error", err)
+                    .done();
             }
 
             for(let child of this.extensions.filter(ext => ext.metadata.resolvedDependencies.includes(node))) {

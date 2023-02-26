@@ -4,6 +4,7 @@ import {EventEmitter} from "events";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
+import LogBuilder from "@service/logger/LogBuilder";
 
 class CacheConfig {
 
@@ -37,9 +38,20 @@ class CacheEntry<T> {
     async getValue() {
         if(this.refreshNextUpdate || (this.updateEveryMs > 0 && (Date.now() - Number(this.lastUpdate) > this.updateEveryMs))) {
             this.refreshNextUpdate = false;
-            console.log("INFO", "Core.Cache", `Executing update-function for cache [${this.key}]`);
+            LogBuilder
+                .start()
+                .level("INFO")
+                .info("Core.Cache")
+                .line(`Executing update-function for cache [${this.key}]`)
+                .done();
             this.currentValue = await this.updateCallback();
-            console.log("INFO", "Core.Cache", `Updated value for cache [${this.key}] to [${util.inspect(this.currentValue, {breakLength: Infinity})}]`);
+            LogBuilder
+                .start()
+                .level("INFO")
+                .info("Core.Cache")
+                .line(`Updated value for cache [${this.key}]`)
+                .debugObject("newValue", this.currentValue)
+                .done();
         }
 
         return this.currentValue;

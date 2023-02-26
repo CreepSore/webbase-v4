@@ -18,6 +18,7 @@ import CoreUsermgmt from "@extensions/Core.Usermgmt";
 import Permissions from "./permissions";
 import { Knex } from "knex";
 import expressWs from "express-ws";
+import LogBuilder from "@service/logger/LogBuilder";
 
 declare module 'express-session' {
     export interface SessionData {
@@ -94,7 +95,15 @@ export default class CoreUsermgmtWeb implements IExtension {
         coreWeb.app.use(async(req, res, next) => {
             let autologin = this.config.autologin.find(login => login.ip === req.headers['x-forwarded-for'] || login.ip === req.socket.remoteAddress)?.userid;
             if(autologin && !req.session.uid) {
-                console.log("WARN", "Core.Usermgmt.Web", `Automatically logged in ip [${req.headers['x-forwarded-for'] || req.socket.remoteAddress}] into user [${autologin}]`)
+                LogBuilder
+                    .start()
+                    .level("WARN")
+                    .info("Core.Usermgmt.Web")
+                    .line("Automatic logon occured")
+                    .object("info", {
+                        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+                        uid: autologin
+                    }).done();
                 req.session.uid = autologin;
             }
 
@@ -144,7 +153,15 @@ export default class CoreUsermgmtWeb implements IExtension {
         });
 
         apiRouter.post("/user/:id/impersonate", this.checkPermissions(Permissions.ImpersonateUser.name), async(req, res) => {
-            console.log("WARN", "Core.Usermgmt", `IP [${req.headers['x-forwarded-for'] || req.socket.remoteAddress}] impersonated uid ${req.params.id}`)
+            LogBuilder
+                .start()
+                .level("WARN")
+                .info("Core.Usermgmt.Web")
+                .line("Impersonation occured")
+                .object("info", {
+                    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+                    uid: req.params.id
+                }).done();
             req.session.uid = req.params.id;
             res.json({success: true});
         });
@@ -196,11 +213,26 @@ export default class CoreUsermgmtWeb implements IExtension {
         apiRouter.post("/login", async(req, res) => {
             let logon = await coreUsermgmt.loginByCredentials(req.body);
             if(logon.error) {
-                console.log("WARN", "Core.Usermgmt.Web", `IP [${req.headers['x-forwarded-for'] || req.socket.remoteAddress}] failed to log-in with credentials ${JSON.stringify(req.body)}`);
+                LogBuilder
+                    .start()
+                    .level("WARN")
+                    .info("Core.Usermgmt.Web")
+                    .line("Impersonation occured")
+                    .object("info", {
+                        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+                    }).debugObject("credentials", req.body).done();
                 return res.json({success: false, error: logon.error});
             }
 
-            console.log("INFO", "Core.Usermgmt.Web", `IP [${req.headers['x-forwarded-for'] || req.socket.remoteAddress}] logged-in with credentials ${JSON.stringify(req.body)}`);
+            LogBuilder
+                .start()
+                .level("INFO")
+                .info("Core.Usermgmt.Web")
+                .line("Impersonation occured")
+                .object("info", {
+                    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+                }).debugObject("credentials", req.body).done();
+
             req.session.uid = logon.user.id;
             return res.json({success: true});
         });
