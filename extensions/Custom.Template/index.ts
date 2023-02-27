@@ -28,11 +28,11 @@ export default class CustomTemplate implements IExtension {
     async start(executionContext: IExecutionContext) {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
-            this.startCli();
+            this.startCli(executionContext);
             return;
         }
         else if(executionContext.contextType === "app") {
-            this.startMain();
+            this.startMain(executionContext);
             return;
         }
     }
@@ -41,11 +41,11 @@ export default class CustomTemplate implements IExtension {
 
     }
 
-    private startCli() {
+    private startCli(executionContext: IExecutionContext) {
 
     }
 
-    private startMain() {
+    private startMain(executionContext: IExecutionContext) {
 
     }
 
