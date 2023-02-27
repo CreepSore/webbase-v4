@@ -66,7 +66,7 @@ describe("Logger Tests", () => {
             date: new Date(),
             level: "INFO",
             infos: ["TestInfo", "TestInfo2"],
-            lines: ["Test1"]
+            lines: ["Test1"],
             objects: {}
         }
         
