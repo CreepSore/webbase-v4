@@ -1,3 +1,5 @@
+import ILogEntry from "../src/service/logger/ILogEntry";
+import LogBuilder from "../src/service/logger/LogBuilder";
 import LoggerService from "../src/service/logger/LoggerService";
 
 describe("Logger Tests", () => {
@@ -18,28 +20,42 @@ describe("Logger Tests", () => {
     });
 
     it("should correctly add a logger and log data", () => {
-        const testData = {
+        const testData: ILogEntry = {
+            id: "",
+            date: new Date(),
             level: "INFO",
-            args: [
-                "Test",
-                {a: 1, b: "test"}
-            ]
-        }
+            infos: ["TestInfo"],
+            lines: ["Test1", "Test2"],
+            objects: {testObj: {a: 1, b: "2"}}
+        };
 
-        const log: {level: string, data: any[]}[] = [];
+        const log: ILogEntry[] = [];
         LoggerService.addLogger({
             name: "TestLogger",
-            async log(level, ...args) {
-                log.push({level, data: args});
+            async log(logEntry: ILogEntry) {
+                log.push(logEntry);
             }
         });
 
-        LoggerService.log(testData.level, ...testData.args);
-        
+        LoggerService.hookConsoleLog();
+
+        const builder = LogBuilder
+            .start()
+            .level(testData.level as string)
+            .object("testObj", testData.objects.testObj);
+
+        testData.lines.forEach(line => builder.line(line));
+        testData.infos.forEach(info => builder.info(info));
+
+        builder.done();
+
         expect(log.length).toBe(1);
         let logEntry = log[0];
 
         expect(logEntry.level).toBe(testData.level);
-        expect(logEntry.data).toStrictEqual(testData.args);
+        expect(Object.entries(logEntry.objects).length).toBe(Object.entries(testData.objects).length);
+        Object.entries(testData.objects).forEach(([key, value]) => expect(logEntry.objects[key]).toEqual(value));
+        testData.lines.forEach(line => expect(logEntry.lines).toContain(line));
+        testData.infos.forEach(info => expect(logEntry.infos).toContain(info));
     });
 });
