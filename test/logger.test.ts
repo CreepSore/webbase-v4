@@ -59,4 +59,34 @@ describe("Logger Tests", () => {
         testData.lines.forEach(line => expect(logEntry.lines).toContain(line));
         testData.infos.forEach(info => expect(logEntry.infos).toContain(info));
     });
+
+    it("should log correctly using hooked console.log", () => {
+        const testData: ILogEntry = {
+            id: "",
+            date: new Date(),
+            level: "INFO",
+            infos: ["TestInfo", "TestInfo2"],
+            lines: ["Test1"]
+            objects: {}
+        }
+        
+        LoggerService.hookConsoleLog();
+
+        const log: ILogEntry[] = [];
+        LoggerService.addLogger({
+            name: "TestLogger",
+            async log(logEntry: ILogEntry) {
+                log.push(logEntry);
+            }
+        });
+
+        console.log(testData.level, ...testData.infos, ...testData.lines);
+
+        expect(log.length).toBe(1);
+        let logEntry = log[0];
+
+        expect(logEntry.level).toBe(testData.level);
+        testData.lines.forEach(line => expect(logEntry.lines).toContain(line));
+        testData.infos.forEach(info => expect(logEntry.infos).toContain(info));
+    });
 });
