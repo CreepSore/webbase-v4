@@ -28,13 +28,13 @@ export default class LogBuilder {
         return this;
     }
 
-    info(info: string) {
-        this.logEntry.infos.push(info);
+    info(...infos: string[]) {
+        this.logEntry.infos.push(...infos);
         return this;
     }
 
-    line(line: string) {
-        this.logEntry.lines.push(line);
+    line(...lines: string[]) {
+        this.logEntry.lines.push(...lines);
         return this;
     }
 

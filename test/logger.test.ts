@@ -42,7 +42,8 @@ describe("Logger Tests", () => {
         const builder = LogBuilder
             .start()
             .level(testData.level as string)
-            .object("testObj", testData.objects.testObj);
+            .object("testObj", testData.objects.testObj)
+            .object("nullObj", null);
 
         testData.lines.forEach(line => builder.line(line));
         testData.infos.forEach(info => builder.info(info));
