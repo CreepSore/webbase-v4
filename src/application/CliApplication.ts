@@ -40,7 +40,7 @@ export default class CliApplication implements IApplication {
         catch {
             console.log("ERROR", "CliApplication.ts", "Failed to load some extensions. Please check installed npm packages");
         }
-        
+
         try {
             await this.extensionService.startExtensions();
         }

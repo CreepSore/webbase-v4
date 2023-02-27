@@ -92,7 +92,7 @@ export default class CoreCache implements IExtension {
     }
 
     async stop() {
-        
+
     }
 
     createCacheEntry<T>(config: CacheEntryConfig<T>) {

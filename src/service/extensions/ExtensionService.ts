@@ -19,7 +19,7 @@ export default class ExtensionService {
     //#region Public Methods
     /**
      * Sets the current {@link IAppExecutionContext}
-     * @param info 
+     * @param info
      */
     setContextInfo(info: IAppExecutionContext|ICliExecutionContext) {
         this.executionContext = info;

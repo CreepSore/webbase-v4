@@ -174,6 +174,6 @@ export default function LogsPage(props: LogsPageProps) {
                 onClick={() => containerRef.current?.scrollTo?.({top: scroll === 0 ? 999999 : 0})}
             >{scroll === 0 ? "D" : "U"}</button>
         </div>
-        
+
     </div>;;
 }

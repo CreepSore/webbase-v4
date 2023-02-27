@@ -22,7 +22,7 @@ let testModel: TestModel = {
 jest.mock("fs");
 
 describe("ConfigLoader Static Tests", () => {
-    
+
     it("should construct the config path correctly", () => {
         let constructed = ConfigLoader.createConfigPath("Test.json");
         expect(constructed).toBe(path.resolve(".", "cfg", "Test.json"));
@@ -31,7 +31,7 @@ describe("ConfigLoader Static Tests", () => {
     it("should import and parse the config correctly", () => {
         (fs.existsSync as jest.Mock).mockReturnValue(true);
         (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(testModel, null, 2));
-        
+
         let imported = ConfigLoader.import("TEST");
         expect(imported).toEqual(testModel);
     });

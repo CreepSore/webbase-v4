@@ -28,15 +28,15 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
                 this.callbacks.filter(c => c.type === "onConnected").forEach(cb => cb.callback());
                 res();
             };
-    
+
             this.ws.onclose = () => {
                 this.callbacks.filter(c => c.type === "onDisconnected").forEach(cb => cb.callback());
             };
-    
+
             this.ws.onerror = () => {
                 this.callbacks.filter(c => c.type === "onError").forEach(cb => cb.callback());
             };
-    
+
             this.ws.onmessage = (ev) => {
                 let data = JSON.parse(ev.data) as IDatabridgePacket<any, any>;
                 this.callbacks.filter(c => c.type === "onData").forEach(cb => cb.callback(data));

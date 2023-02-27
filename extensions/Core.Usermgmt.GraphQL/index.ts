@@ -59,7 +59,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         if(uid) {
             user = await User.use().where("id", uid).first();
         }
-        
+
         const permGroup = await PermissionGroup.use().where("id", user.permissionGroupId).first() as PermissionGroup;
         const perms: Permission[] = await this.db.columns("p.name", "p.description", "p.created", "p.modified")
             .from(`${Permission.tableName} as p`)
@@ -108,7 +108,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                     createPermissionGroup: (parent, args, context, info) => this.handleCreatePermissionGroupMutation(parent, args, context, info)
                 }
             },
-            
+
         });
     }
 
@@ -147,7 +147,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
             throw new Error("Invalid Permissions");
         }
         const infoTree = this.coreGraphQL.fieldsFromResolveInfo(info);
-        
+
         return await Promise.all((await PermissionGroup.use().select()).map(pg => this.permissionGroupToGraphQlObject(context, pg, infoTree.permissions)));
     }
 
@@ -237,7 +237,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         });
     }
     //#endregion
-    
+
     //#region Usermgmt :: Mutations
     async handleUpdateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.EditUser.name)) {

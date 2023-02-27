@@ -34,7 +34,7 @@ export default class CoreGraphQL implements IExtension {
     graphQlExtensions: Set<IGraphQLExtension> = new Set();
 
     constructor() {
-        this.config = this.loadConfig(); 
+        this.config = this.loadConfig();
     }
 
     async start(executionContext: IExecutionContext) {
@@ -47,7 +47,7 @@ export default class CoreGraphQL implements IExtension {
     }
 
     async stop() {
-        
+
     }
 
     addQueryHandler<T>(key: string, handler: (...props: any) => T) {

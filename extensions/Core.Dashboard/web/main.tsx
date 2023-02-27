@@ -24,7 +24,7 @@ import NotificationManager from "@extensions/Core.ReactComponents/Notifications/
 function Main() {
     let startPage = location.hash.substring(1);
     let [currentDashboardPage, setCurrentDashboardPage] = React.useState(startPage || "home");
-    let [myUser, setMyUser] = React.useState<IUser>();    
+    let [myUser, setMyUser] = React.useState<IUser>();
 
     let myUserQuery = useQuery<{me: IUser}>(
         `{ me { pseudo, id, username, email, permissionGroup { name, permissions { name } } } }`,
@@ -41,7 +41,7 @@ function Main() {
             type: "info",
             message: "text",
             title: "test"
-        }); 
+        });
     }, []);
 
     let onNavigationRequest = (target: string) => {

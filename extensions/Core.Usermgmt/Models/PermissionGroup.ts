@@ -10,7 +10,7 @@ export default class PermissionGroup {
     created?: Date;
     modified?: Date;
 
-    
+
     static async resolve(group: Partial<PermissionGroup>) {
         return await this.use().where(group).select() as Partial<PermissionGroup>[];
     }

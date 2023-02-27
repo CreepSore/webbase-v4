@@ -83,11 +83,11 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
     }
 
     async stop() {
-        
+
     }
 
     registerDashboardPage() {
-        
+
     }
 
     private checkConfig() {

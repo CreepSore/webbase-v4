@@ -10,7 +10,7 @@ import "./style.css";
 
 
 interface PermissionsPageProps {
-    
+
 }
 
 export default function PermissionsPage(props: PermissionsPageProps) {

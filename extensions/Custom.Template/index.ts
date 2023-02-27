@@ -38,7 +38,7 @@ export default class CustomTemplate implements IExtension {
     }
 
     async stop() {
-        
+
     }
 
     private startCli() {

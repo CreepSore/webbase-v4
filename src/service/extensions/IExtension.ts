@@ -54,12 +54,12 @@ export default interface IExtension {
 
     /**
      * Gets called by ExtensionService.startExtensions
-     * @param executionContext 
+     * @param executionContext
      */
     start: (executionContext: IExecutionContext) => Promise<void>;
     /**
      * Gets called by ExtensionService.stopExtensions
-     * @param executionContext 
+     * @param executionContext
      */
     stop: () => Promise<void>;
 }

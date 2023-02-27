@@ -64,7 +64,7 @@ export default class CoreMail implements IExtension {
     }
 
     async stop() {
-        
+
     }
 
     addMailer(name: string, config: MailConfig) {
@@ -112,7 +112,7 @@ export default class CoreMail implements IExtension {
 
     async sendAlertMail(mail: Partial<Mail.Options>) {
         if(!this.config.alerts.enabled) return;
-        
+
         for(let recipient of this.config.alerts.recipients) {
             mail.to = recipient;
             await this.sendMail("ALERT", mail);

@@ -15,7 +15,7 @@ export default class User {
     permissionGroupId?: number;
     created?: Date;
     modified?: Date;
-    
+
     static async resolve(user: Partial<User>) {
         return await this.use().where(user).select() as Partial<User>[];
     }

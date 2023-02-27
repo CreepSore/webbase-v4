@@ -54,7 +54,7 @@ export default class ConfigLoader<T> {
 
     /**
      * Exports the specified model as template
-     * @param config 
+     * @param config
      */
     exportConfigTemplate(config: Partial<T>) {
         ConfigLoader.exportConfig(config, this.templatePath);
