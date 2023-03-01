@@ -13,7 +13,7 @@ export default class ConsoleLogger implements ILogger {
         let level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
         let infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
         let message = log.lines.join("\n");
-        let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]`).join("");
+        let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]]`).join("");
 
         let formatted = `${date}${level}${infos} ${message}${objects ? ` @ ${objects}` : ""}`;
 
