@@ -76,22 +76,7 @@ export default class ConsoleLogger implements ILogger {
             let message = log.lines.join("\n");
             let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]]`).join("");
 
-            let formatted = `${colors.date}${date}${level}${infos}${colors.text} ${message}${objects ? ` @ ${objects}` : ""}`;
-
-            if(infos.length === 0 && !message) {
-                formatted = level;
-            }
-
-            return formatted;
-        }
-        else {
-            let date = `[${log.date.toISOString()}]`;
-            let level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
-            let infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
-            let message = log.lines.join("\n");
-            let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]]`).join("");
-
-            let formatted = `${date}${level}${infos} ${message}${objects ? ` @ ${objects}` : ""}`;
+            let formatted = `${colors.date}${date}${level}${infos}${colors.text} ${message}${objects ? ` @ ${objects}` : ""}${linuxTerminalColors.reset}`;
 
             if(infos.length === 0 && !message) {
                 formatted = level;
@@ -100,5 +85,18 @@ export default class ConsoleLogger implements ILogger {
             return formatted;
         }
 
+        let date = `[${log.date.toISOString()}]`;
+        let level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
+        let infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
+        let message = log.lines.join("\n");
+        let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]]`).join("");
+
+        let formatted = `${date}${level}${infos} ${message}${objects ? ` @ ${objects}` : ""}`;
+
+        if(infos.length === 0 && !message) {
+            formatted = level;
+        }
+
+        return formatted;
     }
 }
