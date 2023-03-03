@@ -41,7 +41,7 @@ const logLevelMapping: {[key: string]: {date: string, text: string}} = {
 };
 
 const logLevelUnicodeMapping: {[key: string]: string} = {
-    note: "N",
+    NOTE: "N",
     INFO: "i",
     WEBINFO: "🌐",
     ERROR: "E",
