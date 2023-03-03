@@ -26,7 +26,7 @@ export default class FileLogger implements ILogger {
         let message = log.lines.join("\n");
         let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]`).join("");
 
-        let formatted = `${date}${level}${infos} ${message}${objects ? ` @ ${objects}` : ""}`;
+        let formatted = `${date}${level}${infos} ${message}${objects ? ` @ ${objects}` : ""}\n`;
 
         if(infos.length === 0 && !message) {
             formatted = level;
