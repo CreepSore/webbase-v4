@@ -31,6 +31,7 @@ const linuxTerminalColors = {
 };
 
 const logLevelMapping: {[key: string]: {date: string, text: string}} = {
+    NOTE: {date: `${linuxTerminalColors.bgblack}${linuxTerminalColors.fgwhite}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgwhite}`},
     INFO: {date: `${linuxTerminalColors.bgblue}${linuxTerminalColors.fgwhite}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgblue}`},
     WEBINFO: {date: `${linuxTerminalColors.bgblue}${linuxTerminalColors.fgwhite}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgblue}`},
     ERROR: {date: `${linuxTerminalColors.bgred}${linuxTerminalColors.fgwhite}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgred}`},
@@ -40,6 +41,7 @@ const logLevelMapping: {[key: string]: {date: string, text: string}} = {
 };
 
 const logLevelUnicodeMapping: {[key: string]: string} = {
+    note: "N",
     INFO: "i",
     WEBINFO: "🌐",
     ERROR: "E",
