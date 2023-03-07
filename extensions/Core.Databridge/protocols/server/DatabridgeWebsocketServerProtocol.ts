@@ -1,3 +1,4 @@
+import LogBuilder from "@service/logger/LogBuilder";
 import {EventEmitter} from "events";
 import expressWs from "express-ws";
 import IDatabridgePacket from "../../IDatabridgePacket";
@@ -14,11 +15,21 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
     }
 
     async start(): Promise<void> {
-        console.log("ERROR", "DatabridgeWebSocketServerProtocol.ts", "Use 'middleware' instead of start!");
+        LogBuilder
+            .start()
+            .level("WARN")
+            .info("DatabridgeWebSocketServerProtocol.ts")
+            .line("Use 'middleware' instead of start!")
+            .done();
     }
 
     async stop(): Promise<void> {
-        console.log("ERROR", "DatabridgeWebSocketServerProtocol.ts", "'stop' function is invalid.");
+        LogBuilder
+            .start()
+            .level("WARN")
+            .info("DatabridgeWebSocketServerProtocol.ts")
+            .line("'stop' function is invalid.")
+            .done();
     }
 
     middleware(): expressWs.WebsocketRequestHandler {
@@ -31,6 +42,10 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
                 },
                 onPacketReceived(callback) {
                     socketEmitter.on("packet-received", callback);
+                    return this;
+                },
+                removePacketReceived(callback: () => void) {
+                    this.emitter.removeListener("packet-received", callback);
                     return this;
                 },
                 waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {

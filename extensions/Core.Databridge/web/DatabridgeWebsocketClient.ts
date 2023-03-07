@@ -75,6 +75,11 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
         return this;
     }
 
+    removePacketReceived(callback: () => void): this {
+        this.callbacks = this.callbacks.filter(c => c.callback !== callback);
+        return this;
+    }
+
     async waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {
         throw new Error("Method not implemented.");
     }

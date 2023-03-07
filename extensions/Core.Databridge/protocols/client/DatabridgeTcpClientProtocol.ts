@@ -68,6 +68,11 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         return this;
     }
 
+    removePacketReceived(callback: () => void): this {
+        this.emitter.removeListener("packet-received", callback);
+        return this;
+    }
+
     waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {
         return new Promise(res => {
             let cb = (packet: IDatabridgePacket<T, T2>) => {
