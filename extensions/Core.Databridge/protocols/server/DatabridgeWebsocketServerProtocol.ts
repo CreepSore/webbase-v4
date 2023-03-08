@@ -9,27 +9,44 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
     port: number;
     hostname: string;
     emitter: EventEmitter;
+    startCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void;
+    stopCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void;
 
-    constructor() {
+    constructor(
+        startCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void = null,
+        stopCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void = null
+    ) {
         this.emitter = new EventEmitter();
+        this.startCallback = startCallback;
+        this.stopCallback = stopCallback;
     }
 
     async start(): Promise<void> {
-        LogBuilder
-            .start()
-            .level("WARN")
-            .info("DatabridgeWebSocketServerProtocol.ts")
-            .line("Use 'middleware' instead of start!")
-            .done();
+        if(!this.startCallback) {
+            LogBuilder
+                .start()
+                .level("WARN")
+                .info("DatabridgeWebSocketServerProtocol.ts")
+                .line("Use 'middleware' instead of start!")
+                .done();
+            return;
+        }
+
+        this.startCallback(this);
     }
 
     async stop(): Promise<void> {
-        LogBuilder
-            .start()
-            .level("WARN")
-            .info("DatabridgeWebSocketServerProtocol.ts")
-            .line("'stop' function is invalid.")
-            .done();
+        if(!this.stopCallback) {
+            LogBuilder
+                .start()
+                .level("WARN")
+                .info("DatabridgeWebSocketServerProtocol.ts")
+                .line("'stop' function is invalid.")
+                .done();
+            return;
+        }
+
+        this.stopCallback(this);
     }
 
     middleware(): expressWs.WebsocketRequestHandler {

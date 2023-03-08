@@ -7,6 +7,7 @@ interface UseDatabridgeSyncProperyOptions<T> {
     databridge: IDatabridgeClientProtocol;
     key: string;
     defaultValue?: T;
+    mapValue?: (value: any) => T;
 }
 
 export function useDatabridgeSyncPropery<T>(options: UseDatabridgeSyncProperyOptions<T>): [T, (newValue: T) => void] {
@@ -16,10 +17,14 @@ export function useDatabridgeSyncPropery<T>(options: UseDatabridgeSyncProperyOpt
         if(!options.databridge) return;
 
         const packetCallback = (packet: IDatabridgePacket<any>) => {
-            if(packet.type === "STATE.UPDATE") {
+            if(packet.type === "SYNC.STATE.UPDATE") {
                 let stateUpdatePacket = packet as IDatabridgePacket<{key: string, value: T}>;
                 if(stateUpdatePacket.data.key === options.key) {
-                    setValue(stateUpdatePacket.data.value);
+                    let newValue = stateUpdatePacket.data.value;
+                    if(options.mapValue) {
+                        newValue = options.mapValue(stateUpdatePacket.data.value);
+                    }
+                    setValue(newValue);
                 }
             }
         };
@@ -33,6 +38,6 @@ export function useDatabridgeSyncPropery<T>(options: UseDatabridgeSyncProperyOpt
 
     return [value, (newValue: T) => {
         setValue(newValue);
-        options.databridge?.sendPacket?.(new DatabridgePacket("STATE.UPDATE", {key: options.key, value: newValue}, {}));
+        options.databridge?.sendPacket?.(new DatabridgePacket("SYNC.STATE.UPDATE", {key: options.key, value: newValue}, {}));
     }];
 }
