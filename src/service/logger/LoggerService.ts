@@ -12,7 +12,7 @@ export default class LoggerService {
      * @param {ILogger} logger
      * @param {string} [name]
      */
-    static addLogger(logger: ILogger, name?: string){
+    static addLogger(logger: ILogger, name?: string) {
         logger.name = name;
         this.loggers.push(logger);
         return this;
@@ -23,7 +23,7 @@ export default class LoggerService {
      * @param {string} level
      * @param {...any[]} args
      */
-    static async log(log: ILogEntry){
+    static async log(log: ILogEntry) {
         await Promise.all(this.loggers.map(logger => logger.log(log)));
     }
 
@@ -31,7 +31,7 @@ export default class LoggerService {
      * Replaces console.log with our own loggers.
      * @memberof LoggerService
      */
-    static hookConsoleLog(){
+    static hookConsoleLog() {
         this.oldLog = console.log;
         LogBuilder.onDone = entry => {
             this.log(entry);
@@ -57,14 +57,14 @@ export default class LoggerService {
      * Gets a Logger by name
      * @param name
      */
-    static getLogger(name: string): ILogger{
+    static getLogger(name: string): ILogger {
         return this.loggers.find(log => log.name === name);
     }
 
     /**
      * Unhooks console.log and replaces it with the original
      */
-    static unhookConsoleLog(){
+    static unhookConsoleLog() {
         if(!this.oldLog) return;
 
         console.log = this.oldLog;

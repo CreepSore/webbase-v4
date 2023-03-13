@@ -11,15 +11,15 @@ export default class PermissionGroup {
     modified?: Date;
 
 
-    static async resolve(group: Partial<PermissionGroup>){
+    static async resolve(group: Partial<PermissionGroup>) {
         return await this.use().where(group).select() as Partial<PermissionGroup>[];
     }
 
-    static use(){
+    static use() {
         return this.knex(this.tableName);
     }
 
-    static async removePermission(group: Partial<PermissionGroup>, permission: Partial<Permission>){
+    static async removePermission(group: Partial<PermissionGroup>, permission: Partial<Permission>) {
         const resolvedPermissionGroup = await this.resolve(group);
         const resolvedPermissions = await Permission.resolve(permission);
 
@@ -31,7 +31,7 @@ export default class PermissionGroup {
         }).whereIn("permission", resolvedPermissions.map(p => p.id));
     }
 
-    static async addPermission(group: Partial<PermissionGroup>, permission: Partial<Permission>){
+    static async addPermission(group: Partial<PermissionGroup>, permission: Partial<Permission>) {
         const resolvedPermissionGroup = await this.resolve(group);
         const resolvedPermission = await Permission.resolve(permission);
 
@@ -50,7 +50,7 @@ export default class PermissionGroup {
         }
     }
 
-    static async hasPermission(group: Partial<PermissionGroup>, permission: Partial<Permission>){
+    static async hasPermission(group: Partial<PermissionGroup>, permission: Partial<Permission>) {
         const resolvedPermissionGroup = await this.resolve(group);
         const resolvedPermission = await Permission.resolve(permission);
 
@@ -63,16 +63,16 @@ export default class PermissionGroup {
         }).select()).length > 0;
     }
 
-    static async create(data: PermissionGroup){
+    static async create(data: PermissionGroup) {
         data.created = data.created || new Date();
         return await this.use().insert(data);
     }
 
-    static async exists(data: Partial<PermissionGroup>){
+    static async exists(data: Partial<PermissionGroup>) {
         return (await this.use().where(data).select()).length > 0;
     }
 
-    static async setup(knex: Knex){
+    static async setup(knex: Knex) {
         this.knex = knex;
         await knex.schema.hasTable(this.tableName)
             .then(val => !val && knex.schema.createTable(this.tableName, table => {

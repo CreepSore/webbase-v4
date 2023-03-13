@@ -9,7 +9,6 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreDb from "@extensions/Core.Db";
 
 import User from "@extensions/Core.Usermgmt/Models/User";
-import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
 import PermissionGroup from "@extensions/Core.Usermgmt/Models/PermissionGroup";
 import Permission from "@extensions/Core.Usermgmt/Models/Permission";
 import CoreWeb from "@extensions/Core.Web";
@@ -26,8 +25,11 @@ declare module "express-session" {
     }
 }
 
+// ! Disabling these rules since they're fucked up
 declare global {
+    // eslint-disable-next-line no-unused-vars
     namespace Express {
+        // eslint-disable-next-line no-unused-vars
         interface Request {
             user: User;
             additionalData: {permissionGroup: string, permissions: string[]}
@@ -57,11 +59,11 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     knex: Knex;
 
-    constructor(){
+    constructor() {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -90,6 +92,8 @@ export default class CoreUsermgmtWeb implements IExtension {
         this.knex = coreDb.db;
 
         const coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
+        // ! We literally can't do shit about that
+        // eslint-disable-next-line new-cap
         const apiRouter = express.Router();
 
         coreWeb.app.use(async(req, res, next) => {
@@ -287,19 +291,20 @@ export default class CoreUsermgmtWeb implements IExtension {
         coreWeb.app.use("/api/core.usermgmt", apiRouter);
     }
 
-    async stop(){
+    async stop() {
 
     }
 
-    checkPermissions(...perms: string[]){
+    checkPermissions(...perms: string[]) {
         return (req: express.Request, res: express.Response, next: express.NextFunction) => {
             const {permissions} = res.locals.additionalData;
-            if(!permissions.some(p => perms.includes(p.name))) return res.status(403).end();
-            next();
+            if(!permissions.some((p: Permission) => perms.includes(p.name))) return res.status(403).end();
+
+            return next();
         };
     }
 
-    checkPermissionsWs(...perms: string[]): expressWs.WebsocketRequestHandler{
+    checkPermissionsWs(...perms: string[]): expressWs.WebsocketRequestHandler {
         return async(ws, req, next) => {
             const res = await User.hasPermissions({id: req.session.uid}, ...perms.map(p => {
                 return {
@@ -308,22 +313,22 @@ export default class CoreUsermgmtWeb implements IExtension {
             }));
 
             if(!res) return ws.close();
-            next();
+            return next();
         };
     }
 
-    hasPermission(res: express.Response, ...perms: string[]){
+    hasPermission(res: express.Response, ...perms: string[]) {
         const {permissions} = res.locals.additionalData;
-        return permissions.some(p => perms.includes(p.name));
+        return permissions.some((p: Permission) => perms.includes(p.name));
     }
 
-    private checkConfig(){
+    private checkConfig() {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig(){
+    private loadConfig() {
         const model = new CoreUsermgmtWebConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -334,7 +339,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames(){
+    private generateConfigNames() {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

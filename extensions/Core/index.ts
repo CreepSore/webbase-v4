@@ -15,7 +15,7 @@ export default class Core implements IExtension {
         dependencies: [],
     };
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         if(!fs.existsSync("logs")) {
             fs.mkdirSync("logs");
         }
@@ -34,11 +34,11 @@ export default class Core implements IExtension {
             .addLogger(new CacheLogger(), "cache");
     }
 
-    async stop(){
+    async stop() {
 
     }
 
-    private setupCli(executionContext: ICliExecutionContext){
+    private setupCli(executionContext: ICliExecutionContext) {
         executionContext.application.cmdHandler.registerCommand({
             triggers: ["help", "h", "?"],
             description: "Shows the help page",
@@ -78,7 +78,7 @@ export default class Core implements IExtension {
         win32?: (platform: string) => T,
         cygwin?: (platform: string) => T,
         netbsd?: (platform: string) => T
-    }): T{
+    }): T {
         const callbackToRun = callbacks[process.platform];
         if(!callbackToRun) {
             throw new Error("Unsupported platform");

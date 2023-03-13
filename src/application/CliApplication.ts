@@ -17,11 +17,11 @@ export default class CliApplication implements IApplication {
     args: minimist.ParsedArgs;
     cmdHandler: CommandHandler = new CommandHandler();
 
-    constructor(args: minimist.ParsedArgs){
+    constructor(args: minimist.ParsedArgs) {
         this.args = args;
     }
 
-    async start(){
+    async start() {
         this.events = new EventEmitter();
         const config = this.loadConfig();
         this.events.emit("config-loaded", config);
@@ -58,11 +58,11 @@ export default class CliApplication implements IApplication {
         }
     }
 
-    async stop(){
+    async stop() {
         await this.extensionService.stopExtensions();
     }
 
-    private loadConfig(){
+    private loadConfig() {
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
         const config = this.configLoader.createTemplateAndImport(new ConfigModel());
 
@@ -72,7 +72,7 @@ export default class CliApplication implements IApplication {
         return config;
     }
 
-    private async startInteractive(){
+    private async startInteractive() {
         console.log("Interactive Shell started");
         readline.createInterface({
             input: process.stdin,
@@ -89,16 +89,16 @@ export default class CliApplication implements IApplication {
         });
     }
 
-    private async startCli(){
+    private async startCli() {
         this.cmdHandler.triggerArgs(this.args);
     }
 
-    onConfigLoaded(callback: (config: ConfigModel) => void){
+    onConfigLoaded(callback: (config: ConfigModel) => void) {
         this.events.on("config-loaded", callback);
         return this;
     }
 
-    onAfterStartup(callback: (context: IExecutionContext) => void){
+    onAfterStartup(callback: (context: IExecutionContext) => void) {
         this.events.on("after-startup", callback);
         return this;
     }

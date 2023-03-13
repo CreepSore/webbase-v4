@@ -10,15 +10,15 @@ export default class ApiKey {
     created?: Date;
     modified?: Date;
 
-    constructor(apiKey: Partial<ApiKey>){
+    constructor(apiKey: Partial<ApiKey>) {
         Object.assign(this, apiKey);
     }
 
-    static use(){
+    static use() {
         return this.knex(this.tableName);
     }
 
-    static async setup(knex: Knex){
+    static async setup(knex: Knex) {
         this.knex = knex;
         await knex.schema.hasTable(this.tableName)
             .then(async val => {
@@ -43,7 +43,7 @@ export default class ApiKey {
             });
     }
 
-    static hashPassword(password: string){
+    static hashPassword(password: string) {
         return crypto.createHash("sha256").update(password).digest("base64");
     }
 }

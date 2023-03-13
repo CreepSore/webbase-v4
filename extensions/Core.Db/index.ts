@@ -4,7 +4,6 @@ import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import * as knex from "knex";
-import MainApplication from "@app/MainApplication";
 import LogBuilder from "@service/logger/LogBuilder";
 
 class CoreDbConfig {
@@ -28,11 +27,11 @@ export default class CoreDb implements IExtension {
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
-    constructor(){
+    constructor() {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         if(executionContext.contextType === "cli") return;
         // Don't load the DB if we aren't required by any extension
         if(!executionContext.extensionService.extensions.find(ext => ext.metadata.dependencies.includes(this.metadata.name))) return;
@@ -41,16 +40,16 @@ export default class CoreDb implements IExtension {
         const config = {...this.config};
         // @ts-ignore
         config.log = {
-            warn(message: string){
+            warn(message: string) {
                 console.log("WARN", "Knex", message);
             },
-            error(message: string){
+            error(message: string) {
                 console.log("ERROR", "Knex", message);
             },
-            deprecate(message: string){
+            deprecate(message: string) {
                 console.log("DEPRECATE", "Knex", message);
             },
-            debug(message: string){
+            debug(message: string) {
                 console.log("DEBUG", "Knex", message);
             },
         };
@@ -67,24 +66,26 @@ export default class CoreDb implements IExtension {
         this.events.emit("db-loaded", this.db);
     }
 
-    async stop(){
+    async stop() {
         this.db.destroy();
     }
 
-    private checkConfig(){
+    private checkConfig() {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig(){
+    private loadConfig() {
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("Core.Db.json"), ConfigLoader.createConfigPath("Core.Db.template.json"));
         const cfg = this.configLoader.createTemplateAndImport(new CoreDbConfig());
 
         return cfg;
     }
 
-    onDbLoaded(callback: (knex: knex.Knex) => void){
+    // ! For aesthetic IntelliSense reasons we don't care about that rule here
+    // eslint-disable-next-line no-shadow
+    onDbLoaded(callback: (knex: knex.Knex) => void) {
         this.events.on("db-loaded", callback);
     }
 }

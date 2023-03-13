@@ -21,11 +21,11 @@ export default class CustomTemplate implements IExtension {
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
-    constructor(){
+    constructor() {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             this.startCli(executionContext);
@@ -37,25 +37,25 @@ export default class CustomTemplate implements IExtension {
         }
     }
 
-    async stop(){
+    async stop() {
 
     }
 
-    private startCli(executionContext: IExecutionContext){
+    private startCli(executionContext: IExecutionContext) {
 
     }
 
-    private startMain(executionContext: IExecutionContext){
+    private startMain(executionContext: IExecutionContext) {
 
     }
 
-    private checkConfig(){
+    private checkConfig() {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig(){
+    private loadConfig() {
         const model = new TemplateConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -66,7 +66,7 @@ export default class CustomTemplate implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames(){
+    private generateConfigNames() {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

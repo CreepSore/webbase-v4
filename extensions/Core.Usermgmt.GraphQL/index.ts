@@ -41,11 +41,11 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     coreGraphQL: CoreGraphQL;
     coreUsermgmt: CoreUsermgmt;
 
-    constructor(){
+    constructor() {
         this.config = this.loadConfig();
     }
 
-    async buildGraphQLContext(req: Request<Request<any, any, any, any, Record<string, any>>, undefined, any, ParsedQs, Record<string, any>>){
+    async buildGraphQLContext(req: Request<Request<any, any, any, any, Record<string, any>>, undefined, any, ParsedQs, Record<string, any>>) {
         // @ts-ignore
         const {session} = req.raw;
         const {uid} = session;
@@ -80,7 +80,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         };
     }
 
-    buildGraphQLSchema(): GraphQLSchema{
+    buildGraphQLSchema(): GraphQLSchema {
         return GraphQLTools.makeExecutableSchema({
             typeDefs: fs.readFileSync(path.join(this.metadata.extensionPath, "schema.graphql"), "utf8"),
             resolvers: {
@@ -114,11 +114,11 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
 
     // #region Usermgmt
     // #region Usermgmt :: Queries
-    async handleMeQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleMeQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         return context.user;
     }
 
-    async handleUsersQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleUsersQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewUser.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -130,7 +130,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         }));
     }
 
-    async handleUserByIdQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleUserByIdQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewUser.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -142,7 +142,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return await this.userToGraphQlObject(context, user, infoTree.permissionGroup, infoTree.permissionGroup?.permissions);
     }
 
-    async handlePermissionGroupsQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handlePermissionGroupsQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -151,7 +151,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return await Promise.all((await PermissionGroup.use().select()).map(pg => this.permissionGroupToGraphQlObject(context, pg, infoTree.permissions)));
     }
 
-    async handlePermissionGroupByIdQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handlePermissionGroupByIdQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -160,7 +160,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return await this.permissionGroupToGraphQlObject(context, await PermissionGroup.use().where("id", args.id).first(), infoTree.permissions);
     }
 
-    async handlePermissionGroupByNameQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handlePermissionGroupByNameQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -168,28 +168,28 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return await this.permissionGroupToGraphQlObject(context, await PermissionGroup.use().where("name", args.name).first(), infoTree.permissions);
     }
 
-    async handlePermissionsQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handlePermissionsQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
         return await this.permissionsToGraphQlObject(await Permission.use().select());
     }
 
-    async handlePermissionByIdQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handlePermissionByIdQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
         return await this.permissionsToGraphQlObject(await Permission.use().where("id", args.id).first());
     }
 
-    async handlePermissionByNameQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handlePermissionByNameQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
         return await this.permissionsToGraphQlObject(await Permission.use().where("name", args.id).first());
     }
 
-    async userToGraphQlObject(context: any, user: Partial<User>, loadPermGroup: boolean, loadPerms: boolean){
+    async userToGraphQlObject(context: any, user: Partial<User>, loadPermGroup: boolean, loadPerms: boolean) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewUser.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -217,7 +217,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         };
     }
 
-    async permissionGroupToGraphQlObject(context: any, group: Partial<PermissionGroup>, loadPerms: boolean){
+    async permissionGroupToGraphQlObject(context: any, group: Partial<PermissionGroup>, loadPerms: boolean) {
         const perms = await this.permissionsByPermissionGroup(group.id);
         return {
             id: group.id,
@@ -227,7 +227,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         };
     }
 
-    async permissionsToGraphQlObject(permissions: Permission[]){
+    async permissionsToGraphQlObject(permissions: Permission[]) {
         return permissions ?? permissions.map(perm => {
             return {
                 id: perm.id,
@@ -239,7 +239,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     // #endregion
 
     // #region Usermgmt :: Mutations
-    async handleUpdateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleUpdateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.EditUser.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -258,13 +258,14 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return true;
     }
 
-    async handleCreateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleCreateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.CreateUser.name)) {
             throw new Error("Invalid Permissions");
         }
 
         const id = uuid.v4();
-        let {username, email, password, isActive, permissionGroupId} = args;
+        const {username} = args;
+        let {email, password, isActive, permissionGroupId} = args;
 
         if(!username || !password) {
             throw new Error("Some mandatory fields are missing");
@@ -287,7 +288,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return true;
     }
 
-    async handleDeleteUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleDeleteUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.DeleteUser.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -298,7 +299,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return true;
     }
 
-    async handleImpersonateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleImpersonateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ImpersonateUser.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -308,7 +309,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return true;
     }
 
-    async handleAddPermissionToGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleAddPermissionToGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.EditPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -319,7 +320,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return true;
     }
 
-    async handleRemovePermissionFromGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleRemovePermissionFromGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.EditPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -329,7 +330,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return true;
     }
 
-    async handleCreatePermissionGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleCreatePermissionGroupMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         if(!this.hasPermissions(context, UsermgmtPermissions.EditPermissions.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -342,7 +343,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     // #endregion
 
     // #region Session
-    async handleLoginByCredentialsMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleLoginByCredentialsMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         const {username, password} = args;
         const result = await this.coreUsermgmt.loginByCredentials({username, password});
         if(result.error) {
@@ -353,7 +354,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return result.user.id;
     }
 
-    async handleLoginByApiKeyMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleLoginByApiKeyMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         const {apiKey} = args;
         const result = await this.coreUsermgmt.loginByApiKey(apiKey);
         if(result.error) {
@@ -364,20 +365,20 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return result.user.id;
     }
 
-    async handleLogoutMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo){
+    async handleLogoutMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         context.req.session.uid = null;
         return true;
     }
     // #endregion
 
-    hasPermissions(context: any, ...permissionNames: string[]){
+    hasPermissions(context: any, ...permissionNames: string[]) {
         if(permissionNames.length === 0) return true;
 
         const permissions: string[] = context.permissions.map((perm: Permission) => perm.name);
         return permissionNames.map(name => permissions.includes(name)).every(Boolean);
     }
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -392,24 +393,24 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         coreGraphQL.registerExtension(this);
     }
 
-    async stop(){
+    async stop() {
 
     }
 
-    private async permissionsByPermissionGroup(permissionGroupId: number){
+    private async permissionsByPermissionGroup(permissionGroupId: number) {
         return await this.db.columns("p.id", "p.name", "p.description", "p.created", "p.modified")
             .from(`${Permission.tableName} as p`)
             .leftJoin("permissiongrouppermissions as pgp", "p.id", "pgp.permission")
             .where({"pgp.permissiongroup": permissionGroupId});
     }
 
-    private checkConfig(){
+    private checkConfig() {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig(){
+    private loadConfig() {
         const model = new CoreUsermgmtGraphQLConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -420,7 +421,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return cfg;
     }
 
-    private generateConfigNames(){
+    private generateConfigNames() {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

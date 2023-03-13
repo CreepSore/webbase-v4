@@ -43,13 +43,13 @@ describe("ConfigLoader Static Tests", () => {
 
     it("should export the config correctly", () => {
         const testPaths = {exportPath: "/a/b/c.json", exportDir: "/a/b"};
-        (fs.existsSync as jest.Mock).mockImplementation((path) => {
-            if(path === testPaths.exportDir) return true;
-            if(path === testPaths.exportPath) return false;
+        (fs.existsSync as jest.Mock).mockImplementation((testPath) => {
+            if(testPath === testPaths.exportDir) return true;
+            if(testPath === testPaths.exportPath) return false;
         });
 
-        (fs.writeFileSync as jest.Mock).mockImplementation((path, data) => {
-            expect(path).toBe(testPaths.exportPath);
+        (fs.writeFileSync as jest.Mock).mockImplementation((testPath, data) => {
+            expect(testPath).toBe(testPaths.exportPath);
             expect(JSON.parse(data)).toEqual(testModel);
         });
 
@@ -58,13 +58,13 @@ describe("ConfigLoader Static Tests", () => {
 
     it("should remove old config files", () => {
         const testPaths = {exportPath: "/a/b/c.json", exportDir: "/a/b"};
-        (fs.existsSync as jest.Mock).mockImplementation((path) => {
-            if(path === testPaths.exportDir) return true;
-            if(path === testPaths.exportPath) return true;
+        (fs.existsSync as jest.Mock).mockImplementation((testPath) => {
+            if(testPath === testPaths.exportDir) return true;
+            if(testPath === testPaths.exportPath) return true;
         });
 
-        (fs.unlinkSync as jest.Mock).mockImplementation((path) => {
-            expect(path).toBe(testPaths.exportPath);
+        (fs.unlinkSync as jest.Mock).mockImplementation((testPath) => {
+            expect(testPath).toBe(testPaths.exportPath);
         });
 
         ConfigLoader.exportConfig(testModel, testPaths.exportPath);
@@ -74,13 +74,13 @@ describe("ConfigLoader Static Tests", () => {
 
     it("should create the config path if it doesn't exist", () => {
         const testPaths = {exportPath: "/a/b/c.json", exportDir: "/a/b"};
-        (fs.existsSync as jest.Mock).mockImplementation((path) => {
-            if(path === testPaths.exportDir) return false;
-            if(path === testPaths.exportPath) return false;
+        (fs.existsSync as jest.Mock).mockImplementation((testPath) => {
+            if(testPath === testPaths.exportDir) return false;
+            if(testPath === testPaths.exportPath) return false;
         });
 
-        (fs.mkdirSync as jest.Mock).mockImplementation((path) => {
-            expect(path).toBe(testPaths.exportDir);
+        (fs.mkdirSync as jest.Mock).mockImplementation((testPath) => {
+            expect(testPath).toBe(testPaths.exportDir);
         });
 
         ConfigLoader.exportConfig(testModel, testPaths.exportPath);

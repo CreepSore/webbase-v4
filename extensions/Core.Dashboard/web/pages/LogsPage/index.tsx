@@ -175,5 +175,5 @@ export default function LogsPage(props: LogsPageProps) {
             >{scroll === 0 ? "D" : "U"}</button>
         </div>
 
-    </div>;;
+    </div>;
 }

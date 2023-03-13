@@ -8,7 +8,7 @@ export default class DatabridgePacket<DataType, MetadataType = any> implements I
     data: DataType;
     metadata: MetadataType;
 
-    constructor(type: string, data: DataType, metadata: MetadataType, id: string | null = null, time: number | null = null){
+    constructor(type: string, data: DataType, metadata: MetadataType, id: string | null = null, time: number | null = null) {
         this.id = id ?? uuid.v4();
         this.time = time ?? Date.now();
         this.type = type;

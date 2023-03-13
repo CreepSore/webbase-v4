@@ -32,7 +32,7 @@ describe("Logger Tests", () => {
         const log: ILogEntry[] = [];
         LoggerService.addLogger({
             name: "TestLogger",
-            async log(logEntry: ILogEntry){
+            async log(logEntry: ILogEntry) {
                 log.push(logEntry);
             },
         });
@@ -75,7 +75,7 @@ describe("Logger Tests", () => {
         const log: ILogEntry[] = [];
         LoggerService.addLogger({
             name: "TestLogger",
-            async log(logEntry: ILogEntry){
+            async log(logEntry: ILogEntry) {
                 log.push(logEntry);
             },
         });

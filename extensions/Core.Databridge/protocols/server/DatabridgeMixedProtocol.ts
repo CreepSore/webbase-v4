@@ -36,7 +36,7 @@ export default class DatabridgeMixedProtocol {
     protected emitter = new EventEmitter();
 
     // #region Implementations -- START
-    async start(): Promise<void>{
+    async start(): Promise<void> {
         await Promise.all(this.protocols.map(proto => proto.protocol.start()));
 
         this.protocols.forEach(proto => {
@@ -62,13 +62,13 @@ export default class DatabridgeMixedProtocol {
         });
     }
 
-    async stop(): Promise<void>{
+    async stop(): Promise<void> {
         await Promise.all(this.protocols.map(proto => proto.protocol.stop()));
     }
     // #endregion Implementations -- END
 
     // #region MIXED PROTOCOL -- START
-    addProtocol(name: string, protocol: IDatabridgeServerProtocol): this{
+    addProtocol(name: string, protocol: IDatabridgeServerProtocol): this {
         this.protocols.push({
             name,
             protocol,
@@ -76,57 +76,57 @@ export default class DatabridgeMixedProtocol {
         return this;
     }
 
-    removeProtocol(name: string): this{
+    removeProtocol(name: string): this {
         this.protocols = this.protocols.filter(p => p.name !== name);
         return this;
     }
 
-    getProtocols(): RegisteredProtocol[]{
+    getProtocols(): RegisteredProtocol[] {
         return [...this.protocols];
     }
 
-    resolveClient(socket: IDatabridgeSocket): MixedClient{
+    resolveClient(socket: IDatabridgeSocket): MixedClient {
         return this.clients.find(client => client.socket === socket);
     }
     // #endregion MIXED PROTOCOL -- END
 
     // #region EVENTS -- START
-    onClientConnected(callback: (args: ClientConnectedEventArgs) => void): this{
+    onClientConnected(callback: (args: ClientConnectedEventArgs) => void): this {
         this.emitter.on("client-connected", callback);
         return this;
     }
 
-    onClientDisconnected(callback: (args: ClientDisconnectedEventArgs) => void): this{
+    onClientDisconnected(callback: (args: ClientDisconnectedEventArgs) => void): this {
         this.emitter.on("client-disconnected", callback);
         return this;
     }
 
-    onPacketReceived(callback: (args: PacketReceivedEventArgs<any, any>) => void): this{
+    onPacketReceived(callback: (args: PacketReceivedEventArgs<any, any>) => void): this {
         this.emitter.on("packet-received", callback);
         return this;
     }
 
-    private handleClientConnected(args: ClientConnectedEventArgs): void{
+    private handleClientConnected(args: ClientConnectedEventArgs): void {
         this.fireClientConnected(args);
     }
 
-    private handleClientDisconnected(args: ClientDisconnectedEventArgs): void{
+    private handleClientDisconnected(args: ClientDisconnectedEventArgs): void {
         this.fireClientDisconnected(args);
     }
 
-    private handlePacketReceived(args: PacketReceivedEventArgs<any, any>): void{
+    private handlePacketReceived(args: PacketReceivedEventArgs<any, any>): void {
         this.firePacketReceived(args);
     }
 
-    private fireClientConnected(args: ClientConnectedEventArgs): void{
+    private fireClientConnected(args: ClientConnectedEventArgs): void {
         this.emitter.emit("client-connected", args);
     }
 
-    private fireClientDisconnected(args: ClientDisconnectedEventArgs): void{
+    private fireClientDisconnected(args: ClientDisconnectedEventArgs): void {
         this.emitter.emit("client-disconnected", args);
     }
 
-    private firePacketReceived(args: PacketReceivedEventArgs<any, any>): void{
+    private firePacketReceived(args: PacketReceivedEventArgs<any, any>): void {
         this.emitter.emit("packet-received", args);
     }
     // #endregion EVENTS -- END

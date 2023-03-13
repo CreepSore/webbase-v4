@@ -54,11 +54,11 @@ export default class CoreWeb implements IExtension {
     } } = {};
     logSkipping: RegExp[] = [];
 
-    constructor(){
+    constructor() {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         if(executionContext.contextType === "cli") return;
         if(!this.config) {
             throw new Error(`Config not found at [${this.configLoader.configPath}]`);
@@ -93,36 +93,37 @@ export default class CoreWeb implements IExtension {
                 .line(`${req.headers["x-forwarded-for"] || req.socket.remoteAddress} requested [${req.url}]`)
                 .debugObject("body", Object.values(req.body).length > 0 ? req.body : null)
                 .done();
-            next();
+
+            return next();
         });
 
         this.events.emit("express-loaded", this.app);
         this.server = this.app.listen(this.config.port, this.config.hostname);
     }
 
-    async stop(){
+    async stop() {
         this.server.removeAllListeners();
         this.server.close();
     }
 
-    private loadConfig(){
+    private loadConfig() {
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("Core.Web.json"), ConfigLoader.createConfigPath("Core.Web.template.json"));
         const cfg = this.configLoader.createTemplateAndImport(new CoreWebConfig());
 
         return cfg;
     }
 
-    onExpressLoaded(callback: (app: express.Express) => void){
+    onExpressLoaded(callback: (app: express.Express) => void) {
         this.events.on("express-loaded", callback);
     }
 
-    addAppRoute(routeUrl: string, scriptUrl: string){
+    addAppRoute(routeUrl: string, scriptUrl: string) {
         this.app.get(routeUrl, (req, res) => {
             res.send(this.generateReactPage(scriptUrl)).end();
         });
     }
 
-    addScript(name: string, source: string | any, url: string = `/${name}/${uuid.v4()}`){
+    addScript(name: string, source: string | any, url: string = `/${name}/${uuid.v4()}`) {
         this.app.get(url, (req, res) => {
             res.setHeader("Cache-Control", "public, max-age=86400, must-revalidate");
 
@@ -139,7 +140,7 @@ export default class CoreWeb implements IExtension {
     addScriptFromFile(name: string, path: string | any, options: {
         url?: string,
         readFileEveryRequest?: boolean
-    } = {}){
+    } = {}) {
         const url = options.url || `/js/${name}/${uuid.v4()}`;
         const readFileEveryRequest = options.readFileEveryRequest || process.env.DEBUG === "true";
 
@@ -165,7 +166,7 @@ export default class CoreWeb implements IExtension {
         return url;
     }
 
-    generateReactPage(scripts: string | string[] = []){
+    generateReactPage(scripts: string | string[] = []) {
         // ! Ignore: lol
         // eslint-disable-next-line no-param-reassign
         if(!Array.isArray(scripts)) scripts = [scripts];
@@ -196,7 +197,7 @@ export default class CoreWeb implements IExtension {
         return src;
     }
 
-    enableLiveReload(waitMs: number = 0, productive: boolean = false){
+    enableLiveReload(waitMs: number = 0, productive: boolean = false) {
         const {env} = process;
 
         if(!productive && env.DEBUG !== "true") return this;
@@ -244,7 +245,7 @@ export default class CoreWeb implements IExtension {
         return this;
     }
 
-    skipLogForUrl(url: RegExp | string){
+    skipLogForUrl(url: RegExp | string) {
         this.logSkipping.push(typeof url === "string" ? new RegExp(url) : url);
         return this;
     }

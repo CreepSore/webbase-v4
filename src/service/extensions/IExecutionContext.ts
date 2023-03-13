@@ -1,4 +1,3 @@
-import IApplication from "@app/IApplication";
 import MainApplication from "@app/MainApplication";
 import ExtensionService from "./ExtensionService";
 import CliApplication from "@app/CliApplication";

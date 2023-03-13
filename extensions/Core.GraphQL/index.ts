@@ -1,6 +1,4 @@
 import {EventEmitter} from "events";
-import * as fs from "fs";
-import * as path from "path";
 
 import * as GraphQL from "graphql";
 import * as GraphQLToolsSchema from "@graphql-tools/schema";
@@ -33,11 +31,11 @@ export default class CoreGraphQL implements IExtension {
     rootSchema: GraphQL.GraphQLSchema;
     graphQlExtensions: Set<IGraphQLExtension> = new Set();
 
-    constructor(){
+    constructor() {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -46,23 +44,23 @@ export default class CoreGraphQL implements IExtension {
         executionContext.extensionService.onAllExtensionsStarted(ctx => this.onAllExtensionsStarted(ctx));
     }
 
-    async stop(){
+    async stop() {
 
     }
 
-    addQueryHandler<T>(key: string, handler: (...props: any) => T){
+    addQueryHandler<T>(key: string, handler: (...props: any) => T) {
 
     }
 
-    registerExtension(extension: IGraphQLExtension){
+    registerExtension(extension: IGraphQLExtension) {
         this.graphQlExtensions.add(extension);
     }
 
-    unregisterExtension(extension: IGraphQLExtension){
+    unregisterExtension(extension: IGraphQLExtension) {
         this.graphQlExtensions.delete(extension);
     }
 
-    private onAllExtensionsStarted(context: IExecutionContext){
+    private onAllExtensionsStarted(context: IExecutionContext) {
         if(context.contextType === "cli") {
             return;
         }
@@ -131,11 +129,11 @@ export default class CoreGraphQL implements IExtension {
         }
     }
 
-    fieldsFromResolveInfo(info: GraphQL.GraphQLResolveInfo){
+    fieldsFromResolveInfo(info: GraphQL.GraphQLResolveInfo) {
         return this.nodeToObject(info.fieldNodes[0]);
     }
 
-    private nodeToObject(node: GraphQL.SelectionNode){
+    private nodeToObject(node: GraphQL.SelectionNode) {
         if(node.kind !== GraphQL.Kind.FIELD) return {};
         if(!node.selectionSet) return {};
         const result: any = {};
@@ -152,18 +150,19 @@ export default class CoreGraphQL implements IExtension {
             }
 
             result[selection.name.value] = nodeRes;
+            return null;
         });
 
         return result;
     }
 
-    private checkConfig(){
+    private checkConfig() {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig(){
+    private loadConfig() {
         const model = new CoreGraphQLConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -174,7 +173,7 @@ export default class CoreGraphQL implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames(){
+    private generateConfigNames() {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

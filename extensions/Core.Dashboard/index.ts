@@ -36,15 +36,15 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
     umgmtGql: CoreUsermgmtGraphQL;
 
-    constructor(){
+    constructor() {
         this.config = this.loadConfig();
     }
 
-    async buildGraphQLContext(req: any){
+    async buildGraphQLContext(req: any) {
         return {};
     }
 
-    buildGraphQLSchema(): GraphQLSchema{
+    buildGraphQLSchema(): GraphQLSchema {
         return GraphQLTools.makeExecutableSchema({
             typeDefs: fs.readFileSync(path.join(this.metadata.extensionPath, "schema.graphql"), "utf8"),
             resolvers: {
@@ -67,7 +67,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         });
     }
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -82,21 +82,21 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         coreGraphQl.registerExtension(this);
     }
 
-    async stop(){
+    async stop() {
 
     }
 
-    registerDashboardPage(){
+    registerDashboardPage() {
 
     }
 
-    private checkConfig(){
+    private checkConfig() {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig(){
+    private loadConfig() {
         const model = new CoreDashboardConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -107,7 +107,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         return cfg;
     }
 
-    private generateConfigNames(){
+    private generateConfigNames() {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

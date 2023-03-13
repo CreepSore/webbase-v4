@@ -28,11 +28,11 @@ export default class CoreUsermgmt implements IExtension {
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
-    constructor(){
+    constructor() {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext){
+    async start(executionContext: IExecutionContext) {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -42,11 +42,11 @@ export default class CoreUsermgmt implements IExtension {
         await this.setupSchema(coreDb.db);
     }
 
-    async stop(){
+    async stop() {
 
     }
 
-    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<{user?: Partial<User>, error?: string}>{
+    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<{user?: Partial<User>, error?: string}> {
         if(credentials.email && credentials.username) return null;
         const where: Partial<User> = {password: User.hashPassword(credentials.password)};
         if(credentials.email) {
@@ -78,7 +78,7 @@ export default class CoreUsermgmt implements IExtension {
         };
     }
 
-    async loginByApiKey(apiKey: string): Promise<{user?: Partial<User>, error?: string}>{
+    async loginByApiKey(apiKey: string): Promise<{user?: Partial<User>, error?: string}> {
         const foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
         if(!foundApiKey) return null;
 
@@ -101,7 +101,7 @@ export default class CoreUsermgmt implements IExtension {
         };
     }
 
-    async createPermissions(...permissions: Partial<Permission>[]): Promise<Partial<Permission>[]>{
+    async createPermissions(...permissions: Partial<Permission>[]): Promise<Partial<Permission>[]> {
         return await Promise.all(permissions.map(async p => {
             const foundPerm = await Permission.use().where({name: p.name}).first();
             if(foundPerm) {
@@ -114,7 +114,7 @@ export default class CoreUsermgmt implements IExtension {
         }));
     }
 
-    private async setupSchema(knex: Knex){
+    private async setupSchema(knex: Knex) {
         await Permission.setup(knex);
         await PermissionGroup.setup(knex);
 
@@ -151,13 +151,13 @@ export default class CoreUsermgmt implements IExtension {
         }
     }
 
-    private checkConfig(){
+    private checkConfig() {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig(){
+    private loadConfig() {
         const model = new TemplateConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -168,7 +168,7 @@ export default class CoreUsermgmt implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames(){
+    private generateConfigNames() {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

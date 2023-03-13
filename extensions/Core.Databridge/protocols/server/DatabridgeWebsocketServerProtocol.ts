@@ -15,13 +15,13 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
     constructor(
         startCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void = null,
         stopCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void = null,
-    ){
+    ) {
         this.emitter = new EventEmitter();
         this.startCallback = startCallback;
         this.stopCallback = stopCallback;
     }
 
-    async start(): Promise<void>{
+    async start(): Promise<void> {
         if(!this.startCallback) {
             LogBuilder
                 .start()
@@ -35,7 +35,7 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         this.startCallback(this);
     }
 
-    async stop(): Promise<void>{
+    async stop(): Promise<void> {
         if(!this.stopCallback) {
             LogBuilder
                 .start()
@@ -49,23 +49,23 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         this.stopCallback(this);
     }
 
-    middleware(): expressWs.WebsocketRequestHandler{
+    middleware(): expressWs.WebsocketRequestHandler {
         return (ws, req, next) => {
             const socketEmitter = new EventEmitter();
             const socket: IDatabridgeSocket = {
-                sendPacket(packet){
+                sendPacket(packet) {
                     ws.send(DatabridgeWebsocketServerProtocol.packetToString(packet));
                     return this;
                 },
-                onPacketReceived(callback){
+                onPacketReceived(callback) {
                     socketEmitter.on("packet-received", callback);
                     return this;
                 },
-                removePacketReceived(callback: () => void){
+                removePacketReceived(callback: () => void) {
                     this.emitter.removeListener("packet-received", callback);
                     return this;
                 },
-                waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>>{
+                waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {
                     return new Promise(res => {
                         const cb = (packet: IDatabridgePacket<T, T2>) => {
                             if(packet.type !== type) {
@@ -78,7 +78,7 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
                         socketEmitter.once("packet-received", cb);
                     });
                 },
-                close(){
+                close() {
                     socketEmitter.removeAllListeners();
                     ws.close();
                     return this;
@@ -105,22 +105,22 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         };
     }
 
-    onError(callback: (err: Error) => void){
+    onError(callback: (err: Error) => void) {
         this.emitter.on("error", callback);
         return this;
     }
 
-    onClientConnected(callback: (client: IDatabridgeSocket) => void): this{
+    onClientConnected(callback: (client: IDatabridgeSocket) => void): this {
         this.emitter.on("client-connected", callback);
         return this;
     }
 
-    onClientDisconnected(callback: (client: IDatabridgeSocket) => void): this{
+    onClientDisconnected(callback: (client: IDatabridgeSocket) => void): this {
         this.emitter.on("client-disconnected", callback);
         return this;
     }
 
-    static stringToPacket(str: string){
+    static stringToPacket(str: string) {
         try {
             const {id, time, type, data} = JSON.parse(str);
             const dbPacket: IDatabridgePacket<any, any> = {
@@ -138,7 +138,7 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         }
     }
 
-    static packetToString(packet: IDatabridgePacket<any, any>){
+    static packetToString(packet: IDatabridgePacket<any, any>) {
         // @ts-ignore
         const clonedPacket: typeof packet = {};
         Object.assign(clonedPacket, packet);
