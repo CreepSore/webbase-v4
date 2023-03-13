@@ -26,7 +26,7 @@ class CacheEntry<T> {
     updateEveryMs?: number;
     private updateCallback: () => Promise<T> | T;
 
-    constructor(config: CacheEntryConfig<T>) {
+    constructor(config: CacheEntryConfig<T>){
         this.key = config.key;
         this.updateCallback = config.updateCallback;
         this.currentValue = this.defaultValue = config.defaultValue;
@@ -35,7 +35,7 @@ class CacheEntry<T> {
         this.refreshNextUpdate = !this.defaultValue;
     }
 
-    async getValue() {
+    async getValue(){
         if(this.refreshNextUpdate || (this.updateEveryMs > 0 && (Date.now() - Number(this.lastUpdate) > this.updateEveryMs))) {
             this.refreshNextUpdate = false;
             LogBuilder
@@ -57,7 +57,7 @@ class CacheEntry<T> {
         return this.currentValue;
     }
 
-    invalidate(updateNow = false): void | Promise<T> {
+    invalidate(updateNow = false): void | Promise<T>{
         this.refreshNextUpdate = true;
         if(updateNow) {
             return this.getValue();
@@ -72,7 +72,7 @@ export default class CoreCache implements IExtension {
         version: "1.0.0",
         description: "Caching Module",
         author: "ehdes",
-        dependencies: ["Core"]
+        dependencies: ["Core"],
     };
 
     config: CacheConfig;
@@ -80,71 +80,71 @@ export default class CoreCache implements IExtension {
     events: EventEmitter = new EventEmitter();
     cache: Map<string, CacheEntry<any>> = new Map();
 
-    constructor() {
+    constructor(){
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext){
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
         }
     }
 
-    async stop() {
+    async stop(){
 
     }
 
-    createCacheEntry<T>(config: CacheEntryConfig<T>) {
-        let entry = new CacheEntry<T>(config);
+    createCacheEntry<T>(config: CacheEntryConfig<T>){
+        const entry = new CacheEntry<T>(config);
         this.cache.set(entry.key, entry);
         return entry;
     }
 
-    cacheEntryExists(key: string) {
+    cacheEntryExists(key: string){
         return this.cache.has(key);
     }
 
-    getCacheEntry<T>(key: string) {
+    getCacheEntry<T>(key: string){
         return this.cache.get(key) as CacheEntry<T>;
     }
 
-    getCachedValue<T>(key: string, defaultValue: T) {
+    getCachedValue<T>(key: string, defaultValue: T){
         return (this.getCacheEntry(key)?.currentValue || defaultValue) as T;
     }
 
-    invalidateCache(key: string, updateNow = false) {
-        let entry = this.cache.get(key);
+    invalidateCache(key: string, updateNow = false){
+        const entry = this.cache.get(key);
         if(entry) {
             entry.invalidate(updateNow);
         }
     }
 
-    clearCache() {
+    clearCache(){
         this.cache.clear();
     }
 
-    private checkConfig() {
+    private checkConfig(){
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
-        let model = new CacheConfig();
+    private loadConfig(){
+        const model = new CacheConfig();
         if(Object.keys(model).length === 0) return model;
 
-        let [cfgname, templatename] = this.generateConfigNames();
+        const [cfgname, templatename] = this.generateConfigNames();
         this.configLoader = new ConfigLoader(cfgname, templatename);
-        let cfg = this.configLoader.createTemplateAndImport(model);
+        const cfg = this.configLoader.createTemplateAndImport(model);
 
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(){
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`)
+            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
         ];
     }
 }

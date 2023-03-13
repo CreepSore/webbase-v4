@@ -12,10 +12,10 @@ export default class Core implements IExtension {
         version: "1.0.0",
         description: "Core Module",
         author: "ehdes",
-        dependencies: []
+        dependencies: [],
     };
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext){
         if(!fs.existsSync("logs")) {
             fs.mkdirSync("logs");
         }
@@ -34,35 +34,35 @@ export default class Core implements IExtension {
             .addLogger(new CacheLogger(), "cache");
     }
 
-    async stop() {
+    async stop(){
 
     }
 
-    private setupCli(executionContext: ICliExecutionContext) {
+    private setupCli(executionContext: ICliExecutionContext){
         executionContext.application.cmdHandler.registerCommand({
             triggers: ["help", "h", "?"],
             description: "Shows the help page",
             parameters: [{
                 name: "cmd",
-                description: "Name of the command you want to see the help of"
+                description: "Name of the command you want to see the help of",
             }],
             examples: ["help", "help --cmd=<command>"],
             callback: (args) => {
-                let cmd = args.lp
+                const cmd = args.lp;
                 cmd || args.command;
                 if(!cmd) {
                     console.log(executionContext.application.cmdHandler.getHelpPage());
                     return;
                 }
 
-                let command = executionContext.application.cmdHandler.getCommand(cmd);
+                const command = executionContext.application.cmdHandler.getCommand(cmd);
                 if(!command) {
                     console.log("Command does not exist");
                     return "ERROR_HANDLED_BY_COMMAND";
                 }
 
                 console.log(executionContext.application.cmdHandler.getHelpString(command));
-            }
+            },
         });
     }
 
@@ -78,7 +78,7 @@ export default class Core implements IExtension {
         win32?: (platform: string) => T,
         cygwin?: (platform: string) => T,
         netbsd?: (platform: string) => T
-    }): T {
+    }): T{
         const callbackToRun = callbacks[process.platform];
         if(!callbackToRun) {
             throw new Error("Unsupported platform");

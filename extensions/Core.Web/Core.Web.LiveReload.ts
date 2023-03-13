@@ -2,7 +2,7 @@ import DatabridgePacket from "@extensions/Core.Databridge/DatabridgePacket";
 import DatabridgeWebsocketClient from "@extensions/Core.Databridge/web/DatabridgeWebsocketClient";
 
 window.addEventListener("load", async() => {
-    let databridge = new DatabridgeWebsocketClient("/Core.Web/LiveReload");
+    const databridge = new DatabridgeWebsocketClient("/Core.Web/LiveReload");
 
     const pingInterval = setInterval(() => {
         databridge.sendPacket(new DatabridgePacket("PING", {}, {}));

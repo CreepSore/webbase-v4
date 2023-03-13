@@ -15,7 +15,7 @@ export default class ConfigLoader<T> {
      * @param {string} configPath absolute path to the main config file
      * @param {string} templatePath absolute path to the template file
      */
-    constructor(configPath: string, templatePath: string) {
+    constructor(configPath: string, templatePath: string){
         this.configPath = configPath;
         this.templatePath = templatePath;
     }
@@ -26,7 +26,7 @@ export default class ConfigLoader<T> {
      *
      * @param {Partial<T>} model
      */
-    createTemplateAndImport(model: Partial<T>) {
+    createTemplateAndImport(model: Partial<T>){
         this.exportConfigTemplate(model);
         return this.import();
     }
@@ -34,21 +34,21 @@ export default class ConfigLoader<T> {
     /**
      * Imports a ConfigModel from {@link ConfigLoader.configPath}
      */
-    import() {
+    import(){
         return ConfigLoader.import<T>(this.configPath);
     }
 
     /**
      * Checks if the config exists
      */
-    configExists() {
+    configExists(){
         return fs.existsSync(this.configPath);
     }
 
     /**
      * Checks if the template exists
      */
-    templateExists() {
+    templateExists(){
         return fs.existsSync(this.templatePath);
     }
 
@@ -56,7 +56,7 @@ export default class ConfigLoader<T> {
      * Exports the specified model as template
      * @param config
      */
-    exportConfigTemplate(config: Partial<T>) {
+    exportConfigTemplate(config: Partial<T>){
         ConfigLoader.exportConfig(config, this.templatePath);
     }
 
@@ -64,9 +64,9 @@ export default class ConfigLoader<T> {
      * Imports a file as a ConfigModel from the specified path
      * @param path file to import
      */
-    static import<T>(path: string) {
+    static import<T>(path: string){
         if(!fs.existsSync(path)) return null;
-        let config: T = JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
+        const config: T = JSON.parse(fs.readFileSync(path, { encoding: "utf8" }));
 
         return config;
     }
@@ -76,7 +76,7 @@ export default class ConfigLoader<T> {
      * @param config the ConfigModel to export
      * @param exportPath the export path
      */
-    static exportConfig<T>(config: Partial<T>, exportPath: string) {
+    static exportConfig<T>(config: Partial<T>, exportPath: string){
         if(fs.existsSync(exportPath)) {
             fs.unlinkSync(exportPath);
         }
@@ -87,7 +87,7 @@ export default class ConfigLoader<T> {
         fs.writeFileSync(exportPath, JSON.stringify(config, null, 4), { encoding: "utf8" });
     }
 
-    static createConfigPath(configName: string) {
+    static createConfigPath(configName: string){
         return path.resolve(".", "cfg", configName);
     }
 }

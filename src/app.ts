@@ -7,9 +7,9 @@ import minimist from "minimist";
 (async() => {
     const args = minimist(process.argv.slice(2), {
         alias: {
-            command: "c"
+            command: "c",
         },
-        string: ["command"]
+        string: ["command"],
     });
 
     let app: IApplication;

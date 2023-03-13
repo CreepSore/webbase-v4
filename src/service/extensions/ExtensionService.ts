@@ -14,23 +14,23 @@ export default class ExtensionService {
     emitter: EventEmitter = new EventEmitter();
     doSkipLogs: boolean = false;
 
-    constructor() {}
+    constructor(){}
 
-    //#region Public Methods
+    // #region Public Methods
     /**
      * Sets the current {@link IAppExecutionContext}
      * @param info
      */
-    setContextInfo(info: IAppExecutionContext|ICliExecutionContext) {
+    setContextInfo(info: IAppExecutionContext|ICliExecutionContext){
         this.executionContext = info;
         this.executionContext.extensionService = this;
     }
 
-    async loadExtensions() {
+    async loadExtensions(){
         if(this.extensionsStarted) return false;
         if(!fs.existsSync(this.extensionPath)) return false;
-        let disabled = this.getDisabledExtensions();
-        let extBaseDir = fs.readdirSync(this.extensionPath);
+        const disabled = this.getDisabledExtensions();
+        const extBaseDir = fs.readdirSync(this.extensionPath);
 
         this.extensions = (await Promise.all(
             extBaseDir
@@ -45,7 +45,7 @@ export default class ExtensionService {
                     const extension: IExtension = new ImportedExtension();
                     extension.metadata.extensionPath = path.resolve(this.extensionPath, extDir);
                     return extension;
-                })
+                }),
         )).filter(x => Boolean(x));
 
         this.extensions.forEach(extension => {
@@ -55,16 +55,16 @@ export default class ExtensionService {
         return true;
     }
 
-    unloadExtensions() {
+    unloadExtensions(){
         this.stopExtensions();
         this.extensions = [];
     }
 
-    async startExtensions() {
+    async startExtensions(){
         if(this.extensionsStarted) return;
-        let baseNodes = this.extensions.filter(ext => ext.metadata.dependencies.length === 0);
+        const baseNodes = this.extensions.filter(ext => ext.metadata.dependencies.length === 0);
 
-        for(let baseNode of baseNodes) {
+        for(const baseNode of baseNodes) {
             await this.startExtensionRecursive(baseNode);
         }
 
@@ -72,10 +72,10 @@ export default class ExtensionService {
         this.fireAllExtensionsStarted({...this.executionContext});
     }
 
-    async stopExtensions() {
+    async stopExtensions(){
         if(!this.extensionsStarted) return;
 
-        for(let extension of this.extensions) {
+        for(const extension of this.extensions) {
             await extension.stop();
         }
 
@@ -86,7 +86,7 @@ export default class ExtensionService {
      * Gets an extension by its name
      * @param name the name of the extension
      */
-    getExtension(name: string) {
+    getExtension(name: string){
         const result = this.extensions.find(ext => ext.metadata.name === name);
         if(!result) {
             LogBuilder
@@ -102,48 +102,48 @@ export default class ExtensionService {
     /**
      * Gets multiple extensions by their names
      */
-    getExtensions(...names: string[]) {
+    getExtensions(...names: string[]){
         return names.map(name => this.getExtension(name));
     }
 
-    skipLogs() {
+    skipLogs(){
         this.doSkipLogs = true;
     }
-    //#endregion
+    // #endregion
 
-    //#region Events
+    // #region Events
     /**
      * Gets called after all extensions have been started
      */
-    onAllExtensionsStarted(cb: (context: IExecutionContext) => void) {
+    onAllExtensionsStarted(cb: (context: IExecutionContext) => void){
         this.emitter.on("all-extensions-started", cb);
     }
 
-    private fireAllExtensionsStarted(context: IExecutionContext) {
+    private fireAllExtensionsStarted(context: IExecutionContext){
         this.emitter.emit("all-extensions-started", context);
     }
 
     /**
      * Gets called after the specified extension has been started
      */
-    onExtensionStarted(extensionName: string, cb: (context: IExecutionContext) => void) {
+    onExtensionStarted(extensionName: string, cb: (context: IExecutionContext) => void){
         this.emitter.on(`extension-started-${extensionName}`, cb);
     }
 
-    private fireOnExtensionStarted(extensionName: string, context: IExecutionContext) {
+    private fireOnExtensionStarted(extensionName: string, context: IExecutionContext){
         this.emitter.emit(`extension-started-${extensionName}`, context);
     }
-    //#endregion
+    // #endregion
 
-    //#region Private Methods
-    private async startExtensionRecursive(node: IExtension) {
+    // #region Private Methods
+    private async startExtensionRecursive(node: IExtension){
         let runStart = false;
         if(!node.metadata.isLoaded) {
             node.metadata.isLoaded = true;
             runStart = true;
         }
 
-        for(let dep of node.metadata.resolvedDependencies) {
+        for(const dep of node.metadata.resolvedDependencies) {
             await this.startExtensionRecursive(dep);
         }
 
@@ -163,14 +163,14 @@ export default class ExtensionService {
                     .done();
             }
 
-            for(let child of this.extensions.filter(ext => ext.metadata.resolvedDependencies.includes(node))) {
+            for(const child of this.extensions.filter(ext => ext.metadata.resolvedDependencies.includes(node))) {
                 await this.startExtensionRecursive(child);
             }
         }
     }
 
-    private getDisabledExtensions() {
-        let disabledPath = path.join(this.extensionPath, "disabled.json");
+    private getDisabledExtensions(){
+        const disabledPath = path.join(this.extensionPath, "disabled.json");
         let disabledResult: string[] = [];
         if(!fs.existsSync(disabledPath)) {
             fs.writeFileSync(disabledPath, JSON.stringify(disabledResult, null, 4), "utf8");
@@ -181,5 +181,5 @@ export default class ExtensionService {
 
         return disabledResult;
     }
-    //#endregion
+    // #endregion
 }

@@ -4,7 +4,7 @@ import LoggerService from "../src/service/logger/LoggerService";
 
 describe("Logger Tests", () => {
     it("should correctly hook console.log", () => {
-        let consoleLog = console.log;
+        const consoleLog = console.log;
         LoggerService.hookConsoleLog();
 
         expect(console.log).not.toBe(consoleLog);
@@ -13,7 +13,7 @@ describe("Logger Tests", () => {
     });
 
     it("should not destroy the original console.log when unhooking when not hooked", () => {
-        let consoleLog = console.log;
+        const consoleLog = console.log;
         LoggerService.unhookConsoleLog();
 
         expect(consoleLog).toBe(console.log);
@@ -26,15 +26,15 @@ describe("Logger Tests", () => {
             level: "INFO",
             infos: ["TestInfo"],
             lines: ["Test1", "Test2"],
-            objects: {testObj: {a: 1, b: "2"}}
+            objects: {testObj: {a: 1, b: "2"}},
         };
 
         const log: ILogEntry[] = [];
         LoggerService.addLogger({
             name: "TestLogger",
-            async log(logEntry: ILogEntry) {
+            async log(logEntry: ILogEntry){
                 log.push(logEntry);
-            }
+            },
         });
 
         LoggerService.hookConsoleLog();
@@ -51,7 +51,7 @@ describe("Logger Tests", () => {
         builder.done();
 
         expect(log.length).toBe(1);
-        let logEntry = log[0];
+        const logEntry = log[0];
 
         expect(logEntry.level).toBe(testData.level);
         expect(Object.entries(logEntry.objects).length).toBe(Object.entries(testData.objects).length);
@@ -67,23 +67,23 @@ describe("Logger Tests", () => {
             level: "INFO",
             infos: ["TestInfo", "TestInfo2"],
             lines: ["Test1"],
-            objects: {}
-        }
-        
+            objects: {},
+        };
+
         LoggerService.hookConsoleLog();
 
         const log: ILogEntry[] = [];
         LoggerService.addLogger({
             name: "TestLogger",
-            async log(logEntry: ILogEntry) {
+            async log(logEntry: ILogEntry){
                 log.push(logEntry);
-            }
+            },
         });
 
         console.log(testData.level, ...testData.infos, ...testData.lines);
 
         expect(log.length).toBe(1);
-        let logEntry = log[0];
+        const logEntry = log[0];
 
         expect(logEntry.level).toBe(testData.level);
         testData.lines.forEach(line => expect(logEntry.lines).toContain(line));

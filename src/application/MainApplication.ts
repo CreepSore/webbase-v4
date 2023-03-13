@@ -10,15 +10,15 @@ export default class MainAppliation implements IApplication {
     events: EventEmitter = new EventEmitter();
     extensionService: ExtensionService = new ExtensionService();
 
-    async start() {
+    async start(){
         this.events = new EventEmitter();
-        let config = this.loadConfig();
+        const config = this.loadConfig();
         this.events.emit("config-loaded", config);
 
         this.extensionService.setContextInfo({
             contextType: "app",
             application: this,
-            extensionService: this.extensionService
+            extensionService: this.extensionService,
         });
         await this.extensionService.loadExtensions();
         await this.extensionService.startExtensions();
@@ -27,13 +27,13 @@ export default class MainAppliation implements IApplication {
         this.events.emit("after-startup", this.extensionService.executionContext);
     }
 
-    async stop() {
+    async stop(){
         await this.extensionService.stopExtensions();
     }
 
-    loadConfig() {
+    loadConfig(){
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
-        let config = this.configLoader.createTemplateAndImport(new ConfigModel());
+        const config = this.configLoader.createTemplateAndImport(new ConfigModel());
 
         if(!config) {
             throw new Error(`Config does not exist at [${this.configLoader.configPath}]`);
@@ -41,12 +41,12 @@ export default class MainAppliation implements IApplication {
         return config;
     }
 
-    onConfigLoaded(callback: (config: ConfigModel) => void) {
+    onConfigLoaded(callback: (config: ConfigModel) => void){
         this.events.on("config-loaded", callback);
         return this;
     }
 
-    onAfterStartup(callback: (context: IExecutionContext) => void) {
+    onAfterStartup(callback: (context: IExecutionContext) => void){
         this.events.on("after-startup", callback);
         return this;
     }

@@ -14,18 +14,18 @@ export default class CustomTemplate implements IExtension {
         version: "1.0.0",
         description: "Template Module",
         author: "ehdes",
-        dependencies: ["Core"]
+        dependencies: ["Core"],
     };
 
     config: TemplateConfig;
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
-    constructor() {
+    constructor(){
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext){
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             this.startCli(executionContext);
@@ -37,39 +37,39 @@ export default class CustomTemplate implements IExtension {
         }
     }
 
-    async stop() {
+    async stop(){
 
     }
 
-    private startCli(executionContext: IExecutionContext) {
+    private startCli(executionContext: IExecutionContext){
 
     }
 
-    private startMain(executionContext: IExecutionContext) {
+    private startMain(executionContext: IExecutionContext){
 
     }
 
-    private checkConfig() {
+    private checkConfig(){
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
-        let model = new TemplateConfig();
+    private loadConfig(){
+        const model = new TemplateConfig();
         if(Object.keys(model).length === 0) return model;
 
-        let [cfgname, templatename] = this.generateConfigNames();
+        const [cfgname, templatename] = this.generateConfigNames();
         this.configLoader = new ConfigLoader(cfgname, templatename);
-        let cfg = this.configLoader.createTemplateAndImport(model);
+        const cfg = this.configLoader.createTemplateAndImport(model);
 
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(){
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`)
+            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
         ];
     }
 }

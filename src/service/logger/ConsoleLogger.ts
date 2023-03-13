@@ -27,7 +27,7 @@ const linuxTerminalColors = {
     bgblue: "\x1b[44m",
     bgmagenta: "\x1b[45m",
     bgcyan: "\x1b[46m",
-    bgwhite: "\x1b[47m"
+    bgwhite: "\x1b[47m",
 };
 
 const logLevelMapping: {[key: string]: {date: string, text: string}} = {
@@ -37,7 +37,7 @@ const logLevelMapping: {[key: string]: {date: string, text: string}} = {
     ERROR: {date: `${linuxTerminalColors.bgred}${linuxTerminalColors.fgwhite}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgred}`},
     WARN: {date: `${linuxTerminalColors.bgyellow}${linuxTerminalColors.fgblack}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgyellow}`},
     CRITICAL: {date: `${linuxTerminalColors.bgred}${linuxTerminalColors.fgwhite}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgred}`},
-    SQL: {date: `${linuxTerminalColors.bgyellow}${linuxTerminalColors.fgblack}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgyellow}`}
+    SQL: {date: `${linuxTerminalColors.bgyellow}${linuxTerminalColors.fgblack}`, text: `${linuxTerminalColors.reset}${linuxTerminalColors.fgyellow}`},
 };
 
 const logLevelUnicodeMapping: {[key: string]: string} = {
@@ -47,7 +47,7 @@ const logLevelUnicodeMapping: {[key: string]: string} = {
     ERROR: "E",
     WARN: "!",
     CRITICAL: "🚨",
-    SQL: "🔎"
+    SQL: "🔎",
 };
 
 /**
@@ -57,7 +57,7 @@ export default class ConsoleLogger implements ILogger {
     // For now we only support linux
     fancy: boolean = process.platform === "linux";
 
-    async log(log: ILogEntry) {
+    async log(log: ILogEntry){
         const formatted = this.formatLog(log);
 
         if(Boolean(LoggerService.oldLog)) {
@@ -68,15 +68,15 @@ export default class ConsoleLogger implements ILogger {
         }
     }
 
-    formatLog(log: ILogEntry) {
+    formatLog(log: ILogEntry){
         if(this.fancy && Object.keys(logLevelMapping).includes(log.level)) {
-            let colors = logLevelMapping[log.level];
-            let emoji = logLevelUnicodeMapping[log.level];
-            let date = `[${log.date.toISOString()}]`;
-            let level = log.level ? ` ${emoji} ` : "";
-            let infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
-            let message = log.lines.join("\n");
-            let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]]`).join("");
+            const colors = logLevelMapping[log.level];
+            const emoji = logLevelUnicodeMapping[log.level];
+            const date = `[${log.date.toISOString()}]`;
+            const level = log.level ? ` ${emoji} ` : "";
+            const infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
+            const message = log.lines.join("\n");
+            const objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]]`).join("");
 
             let formatted = `${colors.date}${date}${level}${infos}${colors.text} ${message}${objects ? ` @ ${objects}` : ""}${linuxTerminalColors.reset}`;
 
@@ -87,11 +87,11 @@ export default class ConsoleLogger implements ILogger {
             return formatted;
         }
 
-        let date = `[${log.date.toISOString()}]`;
-        let level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
-        let infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
-        let message = log.lines.join("\n");
-        let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]]`).join("");
+        const date = `[${log.date.toISOString()}]`;
+        const level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
+        const infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
+        const message = log.lines.join("\n");
+        const objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]]`).join("");
 
         let formatted = `${date}${level}${infos} ${message}${objects ? ` @ ${objects}` : ""}`;
 

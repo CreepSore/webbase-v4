@@ -20,7 +20,7 @@ import { Knex } from "knex";
 import expressWs from "express-ws";
 import LogBuilder from "@service/logger/LogBuilder";
 
-declare module 'express-session' {
+declare module "express-session" {
     export interface SessionData {
       uid: string
     }
@@ -38,7 +38,7 @@ declare global {
 class CoreUsermgmtWebConfig {
     autologin = [
         {ip: "127.0.0.1", userid: "2"},
-        {dns: "localhost", userid: "2"}
+        {dns: "localhost", userid: "2"},
     ];
 }
 
@@ -48,7 +48,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         version: "1.0.0",
         description: "Usermanagement Web Module",
         author: "ehdes",
-        dependencies: ["Core.Usermgmt", "Core.Web"]
+        dependencies: ["Core.Usermgmt", "Core.Web"],
     };
 
     config: CoreUsermgmtWebConfig;
@@ -57,11 +57,11 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     knex: Knex;
 
-    constructor() {
+    constructor(){
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext){
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -78,22 +78,22 @@ export default class CoreUsermgmtWeb implements IExtension {
             if(!al.ip) return null;
             return {
                 ip: al.ip,
-                userid: al.userid
-            }
+                userid: al.userid,
+            };
         }))).filter(Boolean);
 
-        let coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
-        let perms = await coreUsermgmt.createPermissions(...Object.values(Permissions));
+        const coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
+        const perms = await coreUsermgmt.createPermissions(...Object.values(Permissions));
         await Promise.all(perms.map(p => PermissionGroup.addPermission({name: "Administrator"}, p)));
 
-        let coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
+        const coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
         this.knex = coreDb.db;
 
-        let coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
-        let apiRouter = express.Router();
+        const coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
+        const apiRouter = express.Router();
 
         coreWeb.app.use(async(req, res, next) => {
-            let autologin = this.config.autologin.find(login => login.ip === req.headers['x-forwarded-for'] || login.ip === req.socket.remoteAddress)?.userid;
+            const autologin = this.config.autologin.find(login => login.ip === req.headers["x-forwarded-for"] || login.ip === req.socket.remoteAddress)?.userid;
             if(autologin && !req.session.uid) {
                 LogBuilder
                     .start()
@@ -101,28 +101,28 @@ export default class CoreUsermgmtWeb implements IExtension {
                     .info("Core.Usermgmt.Web")
                     .line("Automatic logon occured")
                     .object("info", {
-                        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-                        uid: autologin
+                        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+                        uid: autologin,
                     }).done();
                 req.session.uid = autologin;
             }
 
             let useAnonGroup = true;
             if(req.session.uid) {
-                let user = await User.use().where({id: req.session.uid}).first();
+                const user = await User.use().where({id: req.session.uid}).first();
                 if(!user) {
                     delete req.session.uid;
                 }
                 else {
-                    let permGroup: Partial<PermissionGroup> = await PermissionGroup.use().where({id: user.permissionGroupId}).first();
+                    const permGroup: Partial<PermissionGroup> = await PermissionGroup.use().where({id: user.permissionGroupId}).first();
                     if(permGroup) {
                         res.locals.additionalData = {
                             permissionGroup: permGroup.name,
                             permissions: await coreDb.db.columns("p.name", "p.description", "p.created", "p.modified")
                                 .from(`${Permission.tableName} as p`)
                                 .leftJoin("permissiongrouppermissions as pgp", "p.id", "pgp.permission")
-                                .where({"pgp.permissiongroup": permGroup.id})
-                        }
+                                .where({"pgp.permissiongroup": permGroup.id}),
+                        };
                         useAnonGroup = false;
                     }
 
@@ -131,13 +131,13 @@ export default class CoreUsermgmtWeb implements IExtension {
             }
 
             if(useAnonGroup) {
-                let anonGroup = await PermissionGroup.use().where({name: "Anonymous"}).first();
+                const anonGroup = await PermissionGroup.use().where({name: "Anonymous"}).first();
                 req.additionalData = res.locals.additionalData = {
                     permissionGroup: anonGroup.name,
                     permissions: await coreDb.db.columns("p.name", "p.description", "p.created", "p.modified")
                         .from(`${Permission.tableName} as p`)
                         .leftJoin("permissiongrouppermissions as pgp", "p.id", "pgp.permission")
-                        .where({"pgp.permissiongroup": anonGroup.id})
+                        .where({"pgp.permissiongroup": anonGroup.id}),
                 };
             }
             next();
@@ -159,8 +159,8 @@ export default class CoreUsermgmtWeb implements IExtension {
                 .info("Core.Usermgmt.Web")
                 .line("Impersonation occured")
                 .object("info", {
-                    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-                    uid: req.params.id
+                    ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+                    uid: req.params.id,
                 }).done();
             req.session.uid = req.params.id;
             res.json({success: true});
@@ -175,7 +175,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         });
 
         apiRouter.put("/user", this.checkPermissions(Permissions.CreateUser.name), async(req, res) => {
-            let data = req.body;
+            const data = req.body;
             data.password = User.hashPassword(data.password);
             data.isActive = Boolean(data.isActive);
 
@@ -189,13 +189,13 @@ export default class CoreUsermgmtWeb implements IExtension {
         });
 
         apiRouter.patch("/user/:id", this.checkPermissions(Permissions.EditUser.name), async(req, res) => {
-            let user = await User.use().where({id: req.params.id}).first();
+            const user = await User.use().where({id: req.params.id}).first();
             if(!user) {
                 res.json({success: false});
                 return;
             }
 
-            let data = req.body;
+            const data = req.body;
             if(data.password !== user.password) {
                 data.password = User.hashPassword(data.password);
             }
@@ -211,7 +211,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         });
 
         apiRouter.post("/login", async(req, res) => {
-            let logon = await coreUsermgmt.loginByCredentials(req.body);
+            const logon = await coreUsermgmt.loginByCredentials(req.body);
             if(logon.error) {
                 LogBuilder
                     .start()
@@ -219,7 +219,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                     .info("Core.Usermgmt.Web")
                     .line("Impersonation occured")
                     .object("info", {
-                        ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+                        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
                     }).debugObject("credentials", req.body).done();
                 return res.json({success: false, error: logon.error});
             }
@@ -230,7 +230,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                 .info("Core.Usermgmt.Web")
                 .line("Impersonation occured")
                 .object("info", {
-                    ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+                    ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
                 }).debugObject("credentials", req.body).done();
 
             req.session.uid = logon.user.id;
@@ -249,11 +249,11 @@ export default class CoreUsermgmtWeb implements IExtension {
         apiRouter.get("/permission-group", this.checkPermissions(Permissions.ViewPermissions.name), async(req, res) => {
             const permissionGroups = await PermissionGroup.use().select();
             await Promise.all(permissionGroups.map(async pg => {
-                let permissions = await Permission.use()
+                const permissions = await Permission.use()
                     .select("permissions.id", "permissions.name", "permissions.description")
-                        .join("permissiongrouppermissions as pgp", "permissions.id", "permission")
-                        .join(`${PermissionGroup.tableName} as pg`, "permissiongroup", "pg.id")
-                        .where("pg.id", pg.id);
+                    .join("permissiongrouppermissions as pgp", "permissions.id", "permission")
+                    .join(`${PermissionGroup.tableName} as pg`, "permissiongroup", "pg.id")
+                    .where("pg.id", pg.id);
 
                 pg.permissions = permissions;
             }));
@@ -268,9 +268,9 @@ export default class CoreUsermgmtWeb implements IExtension {
             await coreDb.db("permissiongrouppermissions").insert({
                 permission: pid,
                 permissiongroup: pgid,
-                created: Date.now()
+                created: Date.now(),
             }).then(() => res.json({success: true}))
-            .catch(() => res.json({success: false}));
+                .catch(() => res.json({success: false}));
         });
 
         apiRouter.delete("/permission-group/:pgid/permission/:pid", this.checkPermissions(Permissions.EditPermissions.name), async(req, res) => {
@@ -279,7 +279,7 @@ export default class CoreUsermgmtWeb implements IExtension {
 
             await coreDb.db("permissiongrouppermissions").where({
                 permissiongroup: pgid,
-                permission: pid
+                permission: pid,
             }).delete();
             res.json({success: true});
         });
@@ -287,57 +287,57 @@ export default class CoreUsermgmtWeb implements IExtension {
         coreWeb.app.use("/api/core.usermgmt", apiRouter);
     }
 
-    async stop() {
+    async stop(){
 
     }
 
-    checkPermissions(...perms: string[]) {
+    checkPermissions(...perms: string[]){
         return (req: express.Request, res: express.Response, next: express.NextFunction) => {
-            let permissions: Permission[] = res.locals.additionalData.permissions;
+            const {permissions} = res.locals.additionalData;
             if(!permissions.some(p => perms.includes(p.name))) return res.status(403).end();
             next();
         };
     }
 
-    checkPermissionsWs(...perms: string[]): expressWs.WebsocketRequestHandler {
+    checkPermissionsWs(...perms: string[]): expressWs.WebsocketRequestHandler{
         return async(ws, req, next) => {
-            let res = await User.hasPermissions({id: req.session.uid}, ...perms.map(p => {
+            const res = await User.hasPermissions({id: req.session.uid}, ...perms.map(p => {
                 return {
-                    name: p
+                    name: p,
                 };
-            }))
+            }));
 
             if(!res) return ws.close();
             next();
         };
     }
 
-    hasPermission(res: express.Response, ...perms: string[]) {
-        let permissions: Permission[] = res.locals.additionalData.permissions;
+    hasPermission(res: express.Response, ...perms: string[]){
+        const {permissions} = res.locals.additionalData;
         return permissions.some(p => perms.includes(p.name));
     }
 
-    private checkConfig() {
+    private checkConfig(){
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
-        let model = new CoreUsermgmtWebConfig();
+    private loadConfig(){
+        const model = new CoreUsermgmtWebConfig();
         if(Object.keys(model).length === 0) return model;
 
-        let [cfgname, templatename] = this.generateConfigNames();
+        const [cfgname, templatename] = this.generateConfigNames();
         this.configLoader = new ConfigLoader(cfgname, templatename);
-        let cfg = this.configLoader.createTemplateAndImport(model);
+        const cfg = this.configLoader.createTemplateAndImport(model);
 
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(){
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`)
+            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
         ];
     }
 }

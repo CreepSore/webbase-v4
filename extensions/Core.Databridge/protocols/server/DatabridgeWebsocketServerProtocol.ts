@@ -14,14 +14,14 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
 
     constructor(
         startCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void = null,
-        stopCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void = null
-    ) {
+        stopCallback: (wsProtocol?: DatabridgeWebsocketServerProtocol) => void = null,
+    ){
         this.emitter = new EventEmitter();
         this.startCallback = startCallback;
         this.stopCallback = stopCallback;
     }
 
-    async start(): Promise<void> {
+    async start(): Promise<void>{
         if(!this.startCallback) {
             LogBuilder
                 .start()
@@ -35,7 +35,7 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         this.startCallback(this);
     }
 
-    async stop(): Promise<void> {
+    async stop(): Promise<void>{
         if(!this.stopCallback) {
             LogBuilder
                 .start()
@@ -49,25 +49,25 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         this.stopCallback(this);
     }
 
-    middleware(): expressWs.WebsocketRequestHandler {
+    middleware(): expressWs.WebsocketRequestHandler{
         return (ws, req, next) => {
-            let socketEmitter = new EventEmitter();
-            let socket: IDatabridgeSocket = {
-                sendPacket(packet) {
+            const socketEmitter = new EventEmitter();
+            const socket: IDatabridgeSocket = {
+                sendPacket(packet){
                     ws.send(DatabridgeWebsocketServerProtocol.packetToString(packet));
                     return this;
                 },
-                onPacketReceived(callback) {
+                onPacketReceived(callback){
                     socketEmitter.on("packet-received", callback);
                     return this;
                 },
-                removePacketReceived(callback: () => void) {
+                removePacketReceived(callback: () => void){
                     this.emitter.removeListener("packet-received", callback);
                     return this;
                 },
-                waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {
+                waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>>{
                     return new Promise(res => {
-                        let cb = (packet: IDatabridgePacket<T, T2>) => {
+                        const cb = (packet: IDatabridgePacket<T, T2>) => {
                             if(packet.type !== type) {
                                 socketEmitter.once("packet-received", cb);
                                 return;
@@ -78,16 +78,16 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
                         socketEmitter.once("packet-received", cb);
                     });
                 },
-                close() {
+                close(){
                     socketEmitter.removeAllListeners();
                     ws.close();
                     return this;
-                }
+                },
             };
 
             ws.on("message", data => {
-                let bufStr = data.toString("utf8");
-                let dbPacket = DatabridgeWebsocketServerProtocol.stringToPacket(bufStr);
+                const bufStr = data.toString("utf8");
+                const dbPacket = DatabridgeWebsocketServerProtocol.stringToPacket(bufStr);
                 if(!dbPacket) return;
                 socketEmitter.emit("packet-received", dbPacket);
             });
@@ -101,34 +101,34 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
                 socketEmitter.removeAllListeners();
             });
 
-            this.emitter.emit("client-connected", socket);;
+            this.emitter.emit("client-connected", socket);
         };
     }
 
-    onError(callback: (err: Error) => void) {
+    onError(callback: (err: Error) => void){
         this.emitter.on("error", callback);
         return this;
     }
 
-    onClientConnected(callback: (client: IDatabridgeSocket) => void): this {
+    onClientConnected(callback: (client: IDatabridgeSocket) => void): this{
         this.emitter.on("client-connected", callback);
         return this;
     }
 
-    onClientDisconnected(callback: (client: IDatabridgeSocket) => void): this {
+    onClientDisconnected(callback: (client: IDatabridgeSocket) => void): this{
         this.emitter.on("client-disconnected", callback);
         return this;
     }
 
-    static stringToPacket(str: string) {
+    static stringToPacket(str: string){
         try {
-            let {id, time, type, data} = JSON.parse(str);
-            let dbPacket: IDatabridgePacket<any, any> = {
+            const {id, time, type, data} = JSON.parse(str);
+            const dbPacket: IDatabridgePacket<any, any> = {
                 id,
                 time,
                 data,
                 type,
-                metadata: {}
+                metadata: {},
             };
 
             return dbPacket;
@@ -138,9 +138,9 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         }
     }
 
-    static packetToString(packet: IDatabridgePacket<any, any>) {
+    static packetToString(packet: IDatabridgePacket<any, any>){
         // @ts-ignore
-        let clonedPacket: typeof packet = {};
+        const clonedPacket: typeof packet = {};
         Object.assign(clonedPacket, packet);
         delete clonedPacket.metadata;
         return `${JSON.stringify(clonedPacket || {})}\n`;

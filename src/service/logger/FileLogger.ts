@@ -10,21 +10,21 @@ import ILogger from "./ILogger";
 export default class FileLogger implements ILogger {
     logfilePath: string;
 
-    constructor(logPath: string) {
+    constructor(logPath: string){
         this.logfilePath = logPath;
 
-        let logDir = path.dirname(this.logfilePath);
+        const logDir = path.dirname(this.logfilePath);
         if(!fs.existsSync(logDir)) {
             fs.mkdirSync(logDir);
         }
     }
 
-    async log(log: ILogEntry) {
-        let date = `[${log.date.toISOString()}]`;
-        let level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
-        let infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
-        let message = log.lines.join("\n");
-        let objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]`).join("");
+    async log(log: ILogEntry){
+        const date = `[${log.date.toISOString()}]`;
+        const level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
+        const infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";
+        const message = log.lines.join("\n");
+        const objects = Object.entries(log.objects).map(([key, value]) => `[${key}: [${util.inspect(value, {breakLength: Infinity})}]`).join("");
 
         let formatted = `${date}${level}${infos} ${message}${objects ? ` @ ${objects}` : ""}\n`;
 

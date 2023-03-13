@@ -21,34 +21,34 @@ export default class CoreUsermgmt implements IExtension {
         version: "1.0.0",
         description: "Usermanagement Module",
         author: "ehdes",
-        dependencies: ["Core.Db"]
+        dependencies: ["Core.Db"],
     };
 
     config: TemplateConfig;
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
-    constructor() {
+    constructor(){
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext){
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
         }
 
-        let coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
+        const coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
         await this.setupSchema(coreDb.db);
     }
 
-    async stop() {
+    async stop(){
 
     }
 
-    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<{user?: Partial<User>, error?: string}> {
+    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<{user?: Partial<User>, error?: string}>{
         if(credentials.email && credentials.username) return null;
-        let where: Partial<User> = {password: User.hashPassword(credentials.password)};
+        const where: Partial<User> = {password: User.hashPassword(credentials.password)};
         if(credentials.email) {
             where.email = credentials.email;
         }
@@ -57,49 +57,53 @@ export default class CoreUsermgmt implements IExtension {
         }
         else {
             return {
-                error: "INVALID_CREDENTIALS"
+                error: "INVALID_CREDENTIALS",
             };
         }
 
-        let user = await User.use().where(where).first();
+        const user = await User.use().where(where).first();
         if(!user) {
             return {
-                error: "INVALID_CREDENTIALS"
+                error: "INVALID_CREDENTIALS",
             };
         }
         else if(!user.isActive) {
             return {
-                error: "USER_INACTIVE"
+                error: "USER_INACTIVE",
             };
         }
 
         return {
-            user
+            user,
         };
     }
 
-    async loginByApiKey(apiKey: string): Promise<{user?: Partial<User>, error?: string}> {
-        let foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
+    async loginByApiKey(apiKey: string): Promise<{user?: Partial<User>, error?: string}>{
+        const foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
         if(!foundApiKey) return null;
 
-        let user = await User.use().where({id: foundApiKey.id}).first() as Partial<User>;
-        if(!user) return {
-            error: "INVALID_API_KEY"
-        };
+        const user = await User.use().where({id: foundApiKey.id}).first() as Partial<User>;
+        if(!user) {
+            return {
+                error: "INVALID_API_KEY",
+            };
+        }
 
-        if(!user.isActive) return {
-            error: "USER_INACTIVE"
-        };
+        if(!user.isActive) {
+            return {
+                error: "USER_INACTIVE",
+            };
+        }
 
         return {
             user,
-            error: null
+            error: null,
         };
     }
 
-    async createPermissions(...permissions: Partial<Permission>[]): Promise<Partial<Permission>[]> {
+    async createPermissions(...permissions: Partial<Permission>[]): Promise<Partial<Permission>[]>{
         return await Promise.all(permissions.map(async p => {
-            let foundPerm = await Permission.use().where({name: p.name}).first();
+            const foundPerm = await Permission.use().where({name: p.name}).first();
             if(foundPerm) {
                 return foundPerm;
             }
@@ -110,7 +114,7 @@ export default class CoreUsermgmt implements IExtension {
         }));
     }
 
-    private async setupSchema(knex: Knex) {
+    private async setupSchema(knex: Knex){
         await Permission.setup(knex);
         await PermissionGroup.setup(knex);
 
@@ -135,39 +139,39 @@ export default class CoreUsermgmt implements IExtension {
         if(!await PermissionGroup.exists({name: "Anonymous"})) {
             await PermissionGroup.create({
                 name: "Anonymous",
-                description: "Default Group"
+                description: "Default Group",
             });
         }
 
         if(!await PermissionGroup.exists({name: "Administrator"})) {
             await PermissionGroup.create({
                 name: "Administrator",
-                description: "Administrator Group"
+                description: "Administrator Group",
             });
         }
     }
 
-    private checkConfig() {
+    private checkConfig(){
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
-        let model = new TemplateConfig();
+    private loadConfig(){
+        const model = new TemplateConfig();
         if(Object.keys(model).length === 0) return model;
 
-        let [cfgname, templatename] = this.generateConfigNames();
+        const [cfgname, templatename] = this.generateConfigNames();
         this.configLoader = new ConfigLoader(cfgname, templatename);
-        let cfg = this.configLoader.createTemplateAndImport(model);
+        const cfg = this.configLoader.createTemplateAndImport(model);
 
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(){
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`)
+            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
         ];
     }
 }

@@ -10,13 +10,13 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
     emitter: EventEmitter;
     socket: net.Socket;
 
-    constructor(port: number, hostname: string) {
+    constructor(port: number, hostname: string){
         this.port = port;
         this.hostname = hostname;
         this.emitter = new EventEmitter();
     }
 
-    async connect(): Promise<any> {
+    async connect(): Promise<any>{
         this.socket = net.connect(this.port, this.hostname);
         this.socket.on("connect", () => {
             this.emitter.emit("connected");
@@ -24,10 +24,10 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
 
         this.socket.on("data", (buf) => {
             buf.toString("utf8").split("\n").filter(str => Boolean(str)).forEach(packetstr => {
-                let dbPacket = DatabridgeTcpClientProtocol.stringToPacket(packetstr);
+                const dbPacket = DatabridgeTcpClientProtocol.stringToPacket(packetstr);
                 if(!dbPacket) return;
                 this.emitter.emit("packet-received", dbPacket);
-            })
+            });
         });
 
         this.socket.on("error", err => {
@@ -39,43 +39,43 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         });
     }
 
-    async disconnect(): Promise<any> {
+    async disconnect(): Promise<any>{
         this.socket.destroy();
     }
 
-    onConnected(callback: () => void) {
+    onConnected(callback: () => void){
         this.emitter.on("connected", callback);
         return this;
     }
 
-    onDisconnected(callback: () => void) {
+    onDisconnected(callback: () => void){
         this.emitter.on("disconnected", callback);
         return this;
     }
 
-    onError(callback: (err: Error) => void) {
+    onError(callback: (err: Error) => void){
         this.emitter.on("error", callback);
         return this;
     }
 
-    sendPacket(packet: IDatabridgePacket<any, any>) {
+    sendPacket(packet: IDatabridgePacket<any, any>){
         this.socket.write(DatabridgeTcpClientProtocol.packetToString(packet));
         return this;
     }
 
-    onPacketReceived(callback: (packet: IDatabridgePacket<any, any>) => void) {
+    onPacketReceived(callback: (packet: IDatabridgePacket<any, any>) => void){
         this.emitter.on("packet-received", callback);
         return this;
     }
 
-    removePacketReceived(callback: () => void): this {
+    removePacketReceived(callback: () => void): this{
         this.emitter.removeListener("packet-received", callback);
         return this;
     }
 
-    waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {
+    waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>>{
         return new Promise(res => {
-            let cb = (packet: IDatabridgePacket<T, T2>) => {
+            const cb = (packet: IDatabridgePacket<T, T2>) => {
                 if(packet.type !== type) {
                     this.emitter.once("packet-received", cb);
                     return;
@@ -87,20 +87,20 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         });
     }
 
-    close() {
+    close(){
         this.disconnect();
         return this;
     }
 
-    static stringToPacket(str: string) {
+    static stringToPacket(str: string){
         try {
-            let {id, time, type, data} = JSON.parse(str);
-            let dbPacket: IDatabridgePacket<any, any> = {
+            const {id, time, type, data} = JSON.parse(str);
+            const dbPacket: IDatabridgePacket<any, any> = {
                 id,
                 time,
                 data,
                 type,
-                metadata: {}
+                metadata: {},
             };
             return dbPacket;
         }
@@ -109,9 +109,9 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         }
     }
 
-    static packetToString(packet: IDatabridgePacket<any, any>) {
+    static packetToString(packet: IDatabridgePacket<any, any>){
         // @ts-ignore
-        let clonedPacket: typeof packet = {};
+        const clonedPacket: typeof packet = {};
         Object.assign(clonedPacket, packet);
         delete clonedPacket.metadata;
         return `${JSON.stringify(clonedPacket)}\n`;

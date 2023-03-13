@@ -10,15 +10,15 @@ class NexusChannel {
     secret: string | null;
     clients: IDatabridgeSocket[] = [];
 
-    subscribeClient(client: IDatabridgeSocket) {
+    subscribeClient(client: IDatabridgeSocket){
         this.clients.push(client);
     }
 
-    unsubscribeClient(client: IDatabridgeSocket) {
+    unsubscribeClient(client: IDatabridgeSocket){
         this.clients = this.clients.filter(c => c !== client);
     }
 
-    broadcast(packet: IDatabridgePacket<any, any>, filterFunc: ((client: IDatabridgeSocket) => boolean) | null = null) {
+    broadcast(packet: IDatabridgePacket<any, any>, filterFunc: ((client: IDatabridgeSocket) => boolean) | null = null){
         this.clients.filter(filterFunc || (() => true)).forEach(client => {
             client.sendPacket(packet);
         });
@@ -29,12 +29,12 @@ export default class DatabridgeNexusServer {
     protocols: IDatabridgeServerProtocol[];
     channels: NexusChannel[];
 
-    constructor() {
+    constructor(){
         this.protocols = [];
         this.channels = [];
     }
 
-    async start() {
+    async start(){
         await Promise.all(this.protocols.map(async protocol => {
             protocol.onClientConnected(client => {
                 this.onClientConnected(client);
@@ -42,35 +42,35 @@ export default class DatabridgeNexusServer {
 
             protocol.onClientDisconnected(client => {
                 this.onClientDisconnected(client);
-            })
+            });
 
             await protocol.start();
         }));
     }
 
-    async stop() {
+    async stop(){
         await Promise.all(this.protocols.map(async protocol => {
             await protocol.stop();
         }));
     }
 
-    addProtocol(protocol: IDatabridgeServerProtocol) {
+    addProtocol(protocol: IDatabridgeServerProtocol){
         this.protocols.push(protocol);
         return this;
     }
 
-    onClientConnected(client: IDatabridgeSocket) {
-        let clientId = uuid.v4();
+    onClientConnected(client: IDatabridgeSocket){
+        const clientId = uuid.v4();
         console.log("INFO", "NexusServer", `Client with id ${clientId} connected.`);
 
         client.sendPacket(new DatabridgePacket("HANDSHAKE", {
-            clientId
+            clientId,
         }, {}));
 
         client.onPacketReceived(packet => {
             if(packet.type === "SUBSCRIBE") {
-                let subPacket = packet as IDatabridgePacket<{channelName: string, secret?: string}>;
-                let {channelName, secret} = subPacket.data;
+                const subPacket = packet as IDatabridgePacket<{channelName: string, secret?: string}>;
+                const {channelName, secret} = subPacket.data;
                 let channel = this.channels.find(channel => channel.name === channelName);
                 if(!channel) {
                     channel = new NexusChannel();
@@ -86,8 +86,8 @@ export default class DatabridgeNexusServer {
                 }
             }
             else if(packet.type === "UNSUBSCRIBE") {
-                let unsubPacket = packet as IDatabridgePacket<{channelName: string}>;
-                let channel = this.channels.find(channel => channel.name === unsubPacket.data.channelName);
+                const unsubPacket = packet as IDatabridgePacket<{channelName: string}>;
+                const channel = this.channels.find(channel => channel.name === unsubPacket.data.channelName);
                 if(!channel || !channel.clients.includes(client)) return;
 
                 channel.broadcast(new DatabridgePacket("LEAVED", {clientId, channel: channel.name}, {}));
@@ -95,8 +95,8 @@ export default class DatabridgeNexusServer {
                 console.log("INFO", "NexusServer", `Client ${clientId} unsubscribed from ${unsubPacket.data.channelName}.`);
             }
             else if(packet.type === "BROADCAST") {
-                let bcPacket = packet as IDatabridgePacket<{channelName: string, clientId: string}>;
-                let channel = this.channels.find(channel => channel.name === bcPacket.data.channelName);
+                const bcPacket = packet as IDatabridgePacket<{channelName: string, clientId: string}>;
+                const channel = this.channels.find(channel => channel.name === bcPacket.data.channelName);
                 if(!channel || !channel.clients.includes(client)) return;
                 bcPacket.data.clientId = clientId;
 
@@ -106,7 +106,7 @@ export default class DatabridgeNexusServer {
         });
     }
 
-    onClientDisconnected(client: IDatabridgeSocket) {
+    onClientDisconnected(client: IDatabridgeSocket){
         this.channels.forEach(channel => {
             channel.unsubscribeClient(client);
         });

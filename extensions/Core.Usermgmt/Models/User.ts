@@ -16,13 +16,13 @@ export default class User {
     created?: Date;
     modified?: Date;
 
-    static async resolve(user: Partial<User>) {
+    static async resolve(user: Partial<User>){
         return await this.use().where(user).select() as Partial<User>[];
     }
 
-    static async setPermissionGroup(user: Partial<User>, permissionGroup: Partial<PermissionGroup>) {
-        let resolvedUser = await this.resolve(user);
-        let resolvedPermissionGroup = await PermissionGroup.resolve(permissionGroup);
+    static async setPermissionGroup(user: Partial<User>, permissionGroup: Partial<PermissionGroup>){
+        const resolvedUser = await this.resolve(user);
+        const resolvedPermissionGroup = await PermissionGroup.resolve(permissionGroup);
 
         if(resolvedUser.length !== 1) return false;
         if(resolvedPermissionGroup.length !== 1) return false;
@@ -32,9 +32,9 @@ export default class User {
         return true;
     }
 
-    static async hasPermission(user: Partial<User>, permission: Partial<Permission>) {
-        let resolvedUser = await this.resolve(user);
-        let resolvedPermission = await Permission.use().where(permission).select() as Partial<Permission>[];
+    static async hasPermission(user: Partial<User>, permission: Partial<Permission>){
+        const resolvedUser = await this.resolve(user);
+        const resolvedPermission = await Permission.use().where(permission).select() as Partial<Permission>[];
 
         if(resolvedUser.length !== 1) return false;
         if(resolvedPermission.length !== 1) return false;
@@ -42,26 +42,26 @@ export default class User {
         return await PermissionGroup.hasPermission({id: resolvedUser[0].permissionGroupId}, {id: resolvedPermission[0].id});
     }
 
-    static async hasPermissions(user: Partial<User>, ...permissions: Array<Partial<Permission>>) {
+    static async hasPermissions(user: Partial<User>, ...permissions: Array<Partial<Permission>>){
         return (await Promise.all(permissions.map(p => this.hasPermission(user, p)))).every(b => Boolean(b));
     }
 
-    static use() {
+    static use(){
         return this.knex(this.tableName);
     }
 
-    static async exists(data: Partial<User>) {
+    static async exists(data: Partial<User>){
         return (await this.use().where(data).select()).length > 0;
     }
 
-    static construct(data: Partial<User> | Partial<User>[]) {
+    static construct(data: Partial<User> | Partial<User>[]){
         let result: Partial<User>[] = data as Partial<User[]>;
         if(!Array.isArray(data)) {
             result = [data];
         }
 
         result = (result as Partial<User>[]).map(data => {
-            let user = new User();
+            const user = new User();
             user.id = data.id;
             user.username = data.username;
             user.password = data.password;
@@ -76,7 +76,7 @@ export default class User {
         return Array.isArray(data) ? result : result[0];
     }
 
-    static async create(user: User) {
+    static async create(user: User){
         user.id = user.id || uuid.v4();
         user.created = user.created || new Date();
         user.permissionGroupId = user.permissionGroupId || (await PermissionGroup.use().where({name: "Anonymous"}))[0].id;
@@ -85,7 +85,7 @@ export default class User {
         return await this.knex.insert(user).into(this.tableName);
     }
 
-    static async setup(knex: Knex) {
+    static async setup(knex: Knex){
         this.knex = knex;
         await knex.schema.hasTable(this.tableName)
             .then(val => !val && knex.schema.createTable(this.tableName, table => {
@@ -113,7 +113,7 @@ export default class User {
             }));
     }
 
-    static hashPassword(password: string) {
+    static hashPassword(password: string){
         return crypto.createHash("sha256").update(password).digest("hex");
     }
 }

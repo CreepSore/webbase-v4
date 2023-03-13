@@ -9,22 +9,21 @@ class TestModel {
     array: string[];
 }
 
-let testModel: TestModel = {
+const testModel: TestModel = {
     hello: "world",
     num: 1234,
     obj: {
         a: 4,
-        b: 999
-    }  ,
-    array: ["Hello", "World"]
+        b: 999,
+    },
+    array: ["Hello", "World"],
 };
 
 jest.mock("fs");
 
 describe("ConfigLoader Static Tests", () => {
-
     it("should construct the config path correctly", () => {
-        let constructed = ConfigLoader.createConfigPath("Test.json");
+        const constructed = ConfigLoader.createConfigPath("Test.json");
         expect(constructed).toBe(path.resolve(".", "cfg", "Test.json"));
     });
 
@@ -32,13 +31,13 @@ describe("ConfigLoader Static Tests", () => {
         (fs.existsSync as jest.Mock).mockReturnValue(true);
         (fs.readFileSync as jest.Mock).mockReturnValue(JSON.stringify(testModel, null, 2));
 
-        let imported = ConfigLoader.import("TEST");
+        const imported = ConfigLoader.import("TEST");
         expect(imported).toEqual(testModel);
     });
 
     it("should return null if the config does not exist", () => {
         (fs.existsSync as jest.Mock).mockReturnValue(false);
-        let imported = ConfigLoader.import("TEST");
+        const imported = ConfigLoader.import("TEST");
         expect(imported).toBeNull();
     });
 

@@ -9,24 +9,24 @@ export default class Permission {
     created?: Date;
     modified?: Date;
 
-    static async resolve(permission: Partial<Permission>) {
+    static async resolve(permission: Partial<Permission>){
         return await this.use().where(permission).select() as Partial<Permission>[];
     }
 
-    static use() {
+    static use(){
         return this.knex(this.tableName);
     }
 
-    static async create(data: Permission) {
+    static async create(data: Permission){
         data.created = data.created || new Date();
         return await this.use().insert(data);
     }
 
-    static async exists(data: Partial<Permission>) {
+    static async exists(data: Partial<Permission>){
         return (await this.use().where(data).select()).length > 0;
     }
 
-    static async setup(knex: Knex) {
+    static async setup(knex: Knex){
         this.knex = knex;
         await knex.schema.hasTable(this.tableName)
             .then(val => !val && knex.schema.createTable(this.tableName, table => {

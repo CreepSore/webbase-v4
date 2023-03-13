@@ -4,7 +4,7 @@ import * as path from "path";
 
 import * as GraphQL from "graphql";
 import * as GraphQLToolsSchema from "@graphql-tools/schema";
-import * as GraphQLExpress from 'graphql-http/lib/use/express';
+import * as GraphQLExpress from "graphql-http/lib/use/express";
 
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
@@ -23,7 +23,7 @@ export default class CoreGraphQL implements IExtension {
         version: "1.0.0",
         description: "Template Module",
         author: "ehdes",
-        dependencies: ["Core", "Core.Web"]
+        dependencies: ["Core", "Core.Web"],
     };
 
     config: CoreGraphQLConfig;
@@ -33,11 +33,11 @@ export default class CoreGraphQL implements IExtension {
     rootSchema: GraphQL.GraphQLSchema;
     graphQlExtensions: Set<IGraphQLExtension> = new Set();
 
-    constructor() {
+    constructor(){
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext){
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -46,23 +46,23 @@ export default class CoreGraphQL implements IExtension {
         executionContext.extensionService.onAllExtensionsStarted(ctx => this.onAllExtensionsStarted(ctx));
     }
 
-    async stop() {
+    async stop(){
 
     }
 
-    addQueryHandler<T>(key: string, handler: (...props: any) => T) {
+    addQueryHandler<T>(key: string, handler: (...props: any) => T){
 
     }
 
-    registerExtension(extension: IGraphQLExtension) {
+    registerExtension(extension: IGraphQLExtension){
         this.graphQlExtensions.add(extension);
     }
 
-    unregisterExtension(extension: IGraphQLExtension) {
+    unregisterExtension(extension: IGraphQLExtension){
         this.graphQlExtensions.delete(extension);
     }
 
-    private onAllExtensionsStarted(context: IExecutionContext) {
+    private onAllExtensionsStarted(context: IExecutionContext){
         if(context.contextType === "cli") {
             return;
         }
@@ -107,7 +107,7 @@ export default class CoreGraphQL implements IExtension {
                         });
                     }
                     return ctx;
-                }
+                },
             };
             const handler = GraphQLExpress.createHandler(opt);
             coreWeb.skipLogForUrl("/api/core.graphql");
@@ -116,7 +116,7 @@ export default class CoreGraphQL implements IExtension {
                     .start()
                     .level("NOTE")
                     .info("Core.GraphQL")
-                    .line(`${req.headers['x-forwarded-for'] || req.socket.remoteAddress} ran Query`)
+                    .line(`${req.headers["x-forwarded-for"] || req.socket.remoteAddress} ran Query`)
                     .object("query", req.body.query)
                     .debugObject("variables", req.body.variables)
                     .done();
@@ -131,13 +131,13 @@ export default class CoreGraphQL implements IExtension {
         }
     }
 
-    fieldsFromResolveInfo(info: GraphQL.GraphQLResolveInfo) {
+    fieldsFromResolveInfo(info: GraphQL.GraphQLResolveInfo){
         return this.nodeToObject(info.fieldNodes[0]);
     }
 
-    private nodeToObject(node: GraphQL.SelectionNode) {
+    private nodeToObject(node: GraphQL.SelectionNode){
         if(node.kind !== GraphQL.Kind.FIELD) return {};
-        if(!node.selectionSet) return {}
+        if(!node.selectionSet) return {};
         const result: any = {};
 
         node.selectionSet.selections.forEach(selection => {
@@ -148,8 +148,8 @@ export default class CoreGraphQL implements IExtension {
             let nodeRes = {};
             if(selection.kind === GraphQL.Kind.FIELD
                 && selection.selectionSet) {
-                    nodeRes = this.nodeToObject(selection);
-                }
+                nodeRes = this.nodeToObject(selection);
+            }
 
             result[selection.name.value] = nodeRes;
         });
@@ -157,27 +157,27 @@ export default class CoreGraphQL implements IExtension {
         return result;
     }
 
-    private checkConfig() {
+    private checkConfig(){
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
-        let model = new CoreGraphQLConfig();
+    private loadConfig(){
+        const model = new CoreGraphQLConfig();
         if(Object.keys(model).length === 0) return model;
 
-        let [cfgname, templatename] = this.generateConfigNames();
+        const [cfgname, templatename] = this.generateConfigNames();
         this.configLoader = new ConfigLoader(cfgname, templatename);
-        let cfg = this.configLoader.createTemplateAndImport(model);
+        const cfg = this.configLoader.createTemplateAndImport(model);
 
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(){
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`)
+            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
         ];
     }
 }

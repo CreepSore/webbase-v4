@@ -27,7 +27,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         version: "2.0.0",
         description: "Dashboard Module",
         author: "ehdes",
-        dependencies: ["Core", "Core.Usermgmt.GraphQL", "Core.GraphQL"]
+        dependencies: ["Core", "Core.Usermgmt.GraphQL", "Core.GraphQL"],
     };
 
     config: CoreDashboardConfig;
@@ -36,15 +36,15 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
     umgmtGql: CoreUsermgmtGraphQL;
 
-    constructor() {
+    constructor(){
         this.config = this.loadConfig();
     }
 
-    async buildGraphQLContext(req: any) {
+    async buildGraphQLContext(req: any){
         return {};
     }
 
-    buildGraphQLSchema(): GraphQLSchema {
+    buildGraphQLSchema(): GraphQLSchema{
         return GraphQLTools.makeExecutableSchema({
             typeDefs: fs.readFileSync(path.join(this.metadata.extensionPath, "schema.graphql"), "utf8"),
             resolvers: {
@@ -58,16 +58,16 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
                         return cacheLogger.logEntries.map(le => {
                             return {
                                 ...le,
-                                date: new Date(le.date).toISOString()
+                                date: new Date(le.date).toISOString(),
                             };
                         });
-                    }
-                }
-            }
+                    },
+                },
+            },
         });
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext){
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -82,35 +82,35 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         coreGraphQl.registerExtension(this);
     }
 
-    async stop() {
+    async stop(){
 
     }
 
-    registerDashboardPage() {
+    registerDashboardPage(){
 
     }
 
-    private checkConfig() {
+    private checkConfig(){
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
-        let model = new CoreDashboardConfig();
+    private loadConfig(){
+        const model = new CoreDashboardConfig();
         if(Object.keys(model).length === 0) return model;
 
-        let [cfgname, templatename] = this.generateConfigNames();
+        const [cfgname, templatename] = this.generateConfigNames();
         this.configLoader = new ConfigLoader(cfgname, templatename);
-        let cfg = this.configLoader.createTemplateAndImport(model);
+        const cfg = this.configLoader.createTemplateAndImport(model);
 
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(){
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`)
+            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
         ];
     }
 }

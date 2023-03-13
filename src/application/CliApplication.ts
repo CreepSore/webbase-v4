@@ -17,19 +17,19 @@ export default class CliApplication implements IApplication {
     args: minimist.ParsedArgs;
     cmdHandler: CommandHandler = new CommandHandler();
 
-    constructor(args: minimist.ParsedArgs) {
+    constructor(args: minimist.ParsedArgs){
         this.args = args;
     }
 
-    async start() {
+    async start(){
         this.events = new EventEmitter();
-        let config = this.loadConfig();
+        const config = this.loadConfig();
         this.events.emit("config-loaded", config);
 
         this.extensionService.setContextInfo({
             contextType: "cli",
             application: this,
-            extensionService: this.extensionService
+            extensionService: this.extensionService,
         });
 
         this.extensionService.skipLogs();
@@ -58,13 +58,13 @@ export default class CliApplication implements IApplication {
         }
     }
 
-    async stop() {
+    async stop(){
         await this.extensionService.stopExtensions();
     }
 
-    private loadConfig() {
+    private loadConfig(){
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
-        let config = this.configLoader.createTemplateAndImport(new ConfigModel());
+        const config = this.configLoader.createTemplateAndImport(new ConfigModel());
 
         if(!config) {
             throw new Error(`Config does not exist at [${this.configLoader.configPath}]`);
@@ -72,12 +72,12 @@ export default class CliApplication implements IApplication {
         return config;
     }
 
-    private async startInteractive() {
+    private async startInteractive(){
         console.log("Interactive Shell started");
         readline.createInterface({
             input: process.stdin,
-            output: process.stdout
-        }).addListener("line", async (line) => {
+            output: process.stdout,
+        }).addListener("line", async(line) => {
             if(!line) return;
             const result = await this.cmdHandler.triggerString(line);
             if(result === "INVALID_COMMAND") {
@@ -89,16 +89,16 @@ export default class CliApplication implements IApplication {
         });
     }
 
-    private async startCli() {
+    private async startCli(){
         this.cmdHandler.triggerArgs(this.args);
     }
 
-    onConfigLoaded(callback: (config: ConfigModel) => void) {
+    onConfigLoaded(callback: (config: ConfigModel) => void){
         this.events.on("config-loaded", callback);
         return this;
     }
 
-    onAfterStartup(callback: (context: IExecutionContext) => void) {
+    onAfterStartup(callback: (context: IExecutionContext) => void){
         this.events.on("after-startup", callback);
         return this;
     }
