@@ -1,14 +1,14 @@
-let path = require("path");
-let fs = require("fs");
-let {merge: webpackMerge} = require("webpack-merge");
+const path = require("path");
+const fs = require("fs");
+const {merge: webpackMerge} = require("webpack-merge");
 
-let extPath = path.join(__dirname, "extensions");
+const extPath = path.join(__dirname, "extensions");
 
 let extensionConfigs = fs.readdirSync(extPath)
     .filter(file => !file.startsWith("Custom.Template") && file.endsWith("webpack.json"))
     .map(file => {
-        let filePath = path.join(extPath, file);
-        let data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        const filePath = path.join(extPath, file);
+        const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
         return data || {};
     });
 
@@ -17,21 +17,21 @@ const buildAppConfig = (env, argv) => {
 
     return webpackMerge([{
         entry: {
-            "app.js": path.resolve(__dirname, "src", "app.ts")
+            "app.js": path.resolve(__dirname, "src", "app.ts"),
         },
         output: {
             path: path.resolve(__dirname, "out"),
             filename: "[name].js",
-            clean: true
+            clean: true,
         },
         devtool: argv.mode === "development" ? "inline-source-map" : false,
         resolve: {
             extensions: [".ts", ".js", ".json"],
             alias: {
                 wpextensions: path.resolve(__dirname, "extensions"),
-                "@extensions": path.resolve(__dirname, "extensions")
+                "@extensions": path.resolve(__dirname, "extensions"),
             },
-            modules: ['node_modules']
+            modules: ["node_modules"],
         },
         externals: {},
         module: {
@@ -47,13 +47,13 @@ const buildAppConfig = (env, argv) => {
                                     ["babel-plugin-tsconfig-paths", {
                                         rootDir: ".",
                                         tsconfig: "tsconfig.json",
-                                    }]
+                                    }],
                                 ],
                                 presets: ["@babel/typescript", ["@babel/preset-env", {
                                     targets: {
-                                        node: "17"
-                                    }
-                                }]]
+                                        node: "17",
+                                    },
+                                }]],
                             },
                         },
                         {
@@ -65,33 +65,33 @@ const buildAppConfig = (env, argv) => {
                                     options: {
                                         presets: ["@babel/typescript", "@babel/preset-react", ["@babel/preset-env", {
                                             targets: {
-                                                node: "17"
-                                            }
-                                        }]]
-                                    }
-                                }
+                                                node: "17",
+                                            },
+                                        }]],
+                                    },
+                                },
                             ],
-                            type: "asset/resource"
+                            type: "asset/resource",
                         },
                         {
                             test: /\.(json)$/i,
-                            exclude: /(node_modules)/
+                            exclude: /(node_modules)/,
                         },
                         {
                             test: /\.png$/i,
-                            type: "asset/inline"
+                            type: "asset/inline",
                         },
-                        { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
-                    ]
-                }
-            ]
+                        { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] },
+                    ],
+                },
+            ],
         },
         optimization: {
             minimize: argv.mode === "productive",
-            mangleExports: false
+            mangleExports: false,
         },
         plugins: [ ],
-        target: "node"
+        target: "node",
     }, ...extensionConfigs]);
 };
 
@@ -102,15 +102,15 @@ const buildWebConfig = (env, argv) => {
         entry: {},
         output: {
             path: path.resolve(__dirname, "out"),
-            filename: "[name]"
+            filename: "[name]",
         },
         devtool: argv.mode === "development" ? "inline-source-map" : false,
         resolve: {
             extensions: [".ts", ".tsx", ".js", ".jsx"],
-            modules: ['node_modules'],
+            modules: ["node_modules"],
             alias: {
-                "@extensions": extPath
-            }
+                "@extensions": extPath,
+            },
         },
         module: {
             rules: [
@@ -121,8 +121,8 @@ const buildWebConfig = (env, argv) => {
                     options: {
                         plugins: [],
                         presets: [["@babel/preset-env", {
-                            targets: "> 0.25%, not dead"
-                        }], "@babel/typescript"]
+                            targets: "> 0.25%, not dead",
+                        }], "@babel/typescript"],
                     },
                 },
                 {
@@ -132,30 +132,30 @@ const buildWebConfig = (env, argv) => {
                         {
                             loader: "babel-loader",
                             options: {
-                                presets: ["@babel/typescript", "@babel/preset-react", "@babel/preset-env"]
-                            }
-                        }
-                    ]
+                                presets: ["@babel/typescript", "@babel/preset-react", "@babel/preset-env"],
+                            },
+                        },
+                    ],
                 },
                 {
                     test: /\.png$/i,
-                    type: "asset/inline"
+                    type: "asset/inline",
                 },
-                { test: /\.(css)$/i, exclude: /(node_modules)/, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] }
-            ]
+                { test: /\.(css)$/i, exclude: /(node_modules)/, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] },
+            ],
         },
         optimization: {
             minimize: argv.mode === "productive",
             mangleExports: false,
-            chunkIds: "named"
+            chunkIds: "named",
         },
         plugins: [ ],
     }, ...extensionConfigs]);
-}
+};
 
-module.exports = function(env, argv) {
+module.exports = function(env, argv){
     let buildType;
-    if(!env.buildtype) {
+    if(!env.buildtype){
         console.warn("[WARN] No Build Type specified, defaulting to ['app']");
         buildType = "app";
     }
@@ -166,13 +166,12 @@ module.exports = function(env, argv) {
         console.error("[ERROR] Invalid Build Type specified.");
     }
 
-    if(buildType === "app") {
+    if(buildType === "app"){
         return buildAppConfig(env, argv);
     }
-    else if(buildType === "web") {
+    else if(buildType === "web"){
         return buildWebConfig(env, argv);
     }
-    else {
-        return null;
-    }
-}
+
+    return null;
+};

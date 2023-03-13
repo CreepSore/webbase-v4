@@ -1,12 +1,12 @@
-let tailwindcss = require("tailwindcss");
-let tailwindNesting = require("tailwindcss/nesting");
-let postcssImport = require("postcss-import");
+const tailwindcss = require("tailwindcss");
+const tailwindNesting = require("tailwindcss/nesting");
+const postcssImport = require("postcss-import");
 
 module.exports = {
     plugins: [
         "postcss-preset-env",
         postcssImport,
         tailwindNesting,
-        tailwindcss
-    ]
+        tailwindcss,
+    ],
 };
