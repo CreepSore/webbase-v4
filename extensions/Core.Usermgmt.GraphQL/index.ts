@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+// ! No, thank you very much
 import * as fs from "fs";
 import * as path from "path";
 
@@ -45,7 +47,16 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         this.config = this.loadConfig();
     }
 
-    async buildGraphQLContext(req: Request<Request<any, any, any, any, Record<string, any>>, undefined, any, ParsedQs, Record<string, any>>) {
+    async buildGraphQLContext(req: Request<Request<any, any, any, any, Record<string, any>>, undefined, any, ParsedQs, Record<string, any>>): Promise<{
+        user: Partial<User> & {
+            permissionGroup: PermissionGroup & {
+                permissions: Permission[],
+            },
+            pseudo: boolean,
+        },
+        permissionGroup: PermissionGroup,
+        permissions: Permission[],
+    }> {
         // @ts-ignore
         const {session} = req.raw;
         const {uid} = session;

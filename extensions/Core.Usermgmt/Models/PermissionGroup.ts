@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+// ! No, thank you very much
 import { Knex } from "knex";
 import Permission from "./Permission";
 

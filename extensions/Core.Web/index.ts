@@ -113,17 +113,17 @@ export default class CoreWeb implements IExtension {
         return cfg;
     }
 
-    onExpressLoaded(callback: (app: express.Express) => void) {
+    onExpressLoaded(callback: (app: express.Express) => void): void {
         this.events.on("express-loaded", callback);
     }
 
-    addAppRoute(routeUrl: string, scriptUrl: string) {
+    addAppRoute(routeUrl: string, scriptUrl: string): void {
         this.app.get(routeUrl, (req, res) => {
             res.send(this.generateReactPage(scriptUrl)).end();
         });
     }
 
-    addScript(name: string, source: string | any, url: string = `/${name}/${uuid.v4()}`) {
+    addScript(name: string, source: string | any, url: string = `/${name}/${uuid.v4()}`): string {
         this.app.get(url, (req, res) => {
             res.setHeader("Cache-Control", "public, max-age=86400, must-revalidate");
 
@@ -140,7 +140,7 @@ export default class CoreWeb implements IExtension {
     addScriptFromFile(name: string, path: string | any, options: {
         url?: string,
         readFileEveryRequest?: boolean
-    } = {}) {
+    } = {}): string {
         const url = options.url || `/js/${name}/${uuid.v4()}`;
         const readFileEveryRequest = options.readFileEveryRequest || process.env.DEBUG === "true";
 
@@ -166,7 +166,7 @@ export default class CoreWeb implements IExtension {
         return url;
     }
 
-    generateReactPage(scripts: string | string[] = []) {
+    generateReactPage(scripts: string | string[] = []): string {
         // ! Ignore: lol
         // eslint-disable-next-line no-param-reassign
         if(!Array.isArray(scripts)) scripts = [scripts];
@@ -197,7 +197,7 @@ export default class CoreWeb implements IExtension {
         return src;
     }
 
-    enableLiveReload(waitMs: number = 0, productive: boolean = false) {
+    enableLiveReload(waitMs: number = 0, productive: boolean = false): CoreWeb {
         const {env} = process;
 
         if(!productive && env.DEBUG !== "true") return this;
@@ -230,7 +230,7 @@ export default class CoreWeb implements IExtension {
 
         const expressWsApp = this.app as unknown as expressWs.Application;
         expressWsApp.ws("/Core.Web/LiveReload", (ws) => {
-            const onReloadCallback = () => {
+            const onReloadCallback = (): void => {
                 ws.send(JSON.stringify({type: "REQUEST_REFRESH"}));
             };
 
@@ -245,7 +245,7 @@ export default class CoreWeb implements IExtension {
         return this;
     }
 
-    skipLogForUrl(url: RegExp | string) {
+    skipLogForUrl(url: RegExp | string): CoreWeb {
         this.logSkipping.push(typeof url === "string" ? new RegExp(url) : url);
         return this;
     }

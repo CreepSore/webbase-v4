@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+// ! No, thank you very much
 import { Knex } from "knex";
 
 export default class Permission {
@@ -9,7 +11,7 @@ export default class Permission {
     created?: Date;
     modified?: Date;
 
-    static async resolve(permission: Partial<Permission>) {
+    static async resolve(permission: Partial<Permission>)  {
         return await this.use().where(permission).select() as Partial<Permission>[];
     }
 

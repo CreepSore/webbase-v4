@@ -38,7 +38,7 @@ export default class Core implements IExtension {
 
     }
 
-    private setupCli(executionContext: ICliExecutionContext) {
+    private setupCli(executionContext: ICliExecutionContext): void {
         executionContext.application.cmdHandler.registerCommand({
             triggers: ["help", "h", "?"],
             description: "Shows the help page",

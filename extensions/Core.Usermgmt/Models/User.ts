@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+// ! No, thank you very much
 import * as crypto from "crypto";
 import { Knex } from "knex";
 import * as uuid from "uuid";

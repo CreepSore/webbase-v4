@@ -114,7 +114,7 @@ export default class CoreUsermgmt implements IExtension {
         }));
     }
 
-    private async setupSchema(knex: Knex) {
+    private async setupSchema(knex: Knex): Promise<void> {
         await Permission.setup(knex);
         await PermissionGroup.setup(knex);
 
