@@ -34,7 +34,7 @@ class CacheEntry<T> {
         this.refreshNextUpdate = !this.defaultValue;
     }
 
-    async getValue() {
+    async getValue(): Promise<T> {
         if(this.refreshNextUpdate || (this.updateEveryMs > 0 && (Date.now() - Number(this.lastUpdate) > this.updateEveryMs))) {
             this.refreshNextUpdate = false;
             LogBuilder
@@ -84,53 +84,53 @@ export default class CoreCache implements IExtension {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
         }
     }
 
-    async stop() {
+    async stop(): Promise<void> {
 
     }
 
-    createCacheEntry<T>(config: CacheEntryConfig<T>) {
+    createCacheEntry<T>(config: CacheEntryConfig<T>): CacheEntry<T> {
         const entry = new CacheEntry<T>(config);
         this.cache.set(entry.key, entry);
         return entry;
     }
 
-    cacheEntryExists(key: string) {
+    cacheEntryExists(key: string): boolean {
         return this.cache.has(key);
     }
 
-    getCacheEntry<T>(key: string) {
+    getCacheEntry<T>(key: string): CacheEntry<T> {
         return this.cache.get(key) as CacheEntry<T>;
     }
 
-    getCachedValue<T>(key: string, defaultValue: T) {
+    getCachedValue<T>(key: string, defaultValue: T): T {
         return (this.getCacheEntry(key)?.currentValue || defaultValue) as T;
     }
 
-    invalidateCache(key: string, updateNow = false) {
+    invalidateCache(key: string, updateNow = false): void {
         const entry = this.cache.get(key);
         if(entry) {
             entry.invalidate(updateNow);
         }
     }
 
-    clearCache() {
+    clearCache(): void {
         this.cache.clear();
     }
 
-    private checkConfig() {
+    private checkConfig(): void {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         const model = new CacheConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -141,7 +141,7 @@ export default class CoreCache implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

@@ -14,11 +14,13 @@ export default class ApiKey {
         Object.assign(this, apiKey);
     }
 
+    // ! We don't care about this
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     static use() {
         return this.knex(this.tableName);
     }
 
-    static async setup(knex: Knex) {
+    static async setup(knex: Knex): Promise<void> {
         this.knex = knex;
         await knex.schema.hasTable(this.tableName)
             .then(async val => {
@@ -43,7 +45,7 @@ export default class ApiKey {
             });
     }
 
-    static hashPassword(password: string) {
+    static hashPassword(password: string): string {
         return crypto.createHash("sha256").update(password).digest("base64");
     }
 }

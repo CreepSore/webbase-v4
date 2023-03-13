@@ -32,7 +32,7 @@ export default class CoreUsermgmt implements IExtension {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -42,7 +42,7 @@ export default class CoreUsermgmt implements IExtension {
         await this.setupSchema(coreDb.db);
     }
 
-    async stop() {
+    async stop(): Promise<void> {
 
     }
 
@@ -151,13 +151,13 @@ export default class CoreUsermgmt implements IExtension {
         }
     }
 
-    private checkConfig() {
+    private checkConfig(): void {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         const model = new TemplateConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -168,7 +168,7 @@ export default class CoreUsermgmt implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

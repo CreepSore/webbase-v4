@@ -63,7 +63,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -291,7 +291,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         coreWeb.app.use("/api/core.usermgmt", apiRouter);
     }
 
-    async stop() {
+    async stop(): Promise<void> {
 
     }
 
@@ -317,18 +317,18 @@ export default class CoreUsermgmtWeb implements IExtension {
         };
     }
 
-    hasPermission(res: express.Response, ...perms: string[]) {
+    hasPermission(res: express.Response, ...perms: string[]): boolean {
         const {permissions} = res.locals.additionalData;
         return permissions.some((p: Permission) => perms.includes(p.name));
     }
 
-    private checkConfig() {
+    private checkConfig(): void {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         const model = new CoreUsermgmtWebConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -339,7 +339,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

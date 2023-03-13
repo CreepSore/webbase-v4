@@ -17,7 +17,7 @@ class NexusChannel {
         this.emitter = new EventEmitter();
     }
 
-    async subscribe() {
+    async subscribe(): Promise<void> {
         this.protocol.onPacketReceived(packet => {
             if(packet.type === "BROADCAST") {
                 const bcPacket = packet as IDatabridgePacket<{clientId: string, channelName: string, data: any}>;
@@ -27,16 +27,16 @@ class NexusChannel {
         this.protocol.sendPacket(new DatabridgePacket("SUBSCRIBE", {channelName: this.name, secret: this.secret}, {}));
     }
 
-    async unsubscribe() {
+    async unsubscribe(): Promise<void> {
         this.protocol.sendPacket(new DatabridgePacket("UNSUBSCRIBE", {channelName: this.name}, {}));
         this.emitter.removeAllListeners();
     }
 
-    async broadcast<T>(packet: T) {
+    async broadcast<T>(packet: T): Promise<void> {
         this.protocol.sendPacket(new DatabridgePacket("BROADCAST", {channelName: this.name, ...packet}, {}));
     }
 
-    onBroadcast<T>(callback: (packet: IDatabridgePacket<T & {clientId: string, channelName: string}>) => void) {
+    onBroadcast<T>(callback: (packet: IDatabridgePacket<T & {clientId: string, channelName: string}>) => void): void {
         this.emitter.on("broadcast", callback);
     }
 }
@@ -49,7 +49,7 @@ export default class DatabridgeNexusServer {
         this.protocol = protocol;
     }
 
-    async connect() {
+    async connect(): Promise<void> {
         this.protocol.onPacketReceived(packet => {
             if(packet.type === "HANDSHAKE") {
                 const {clientId} = packet.data as {clientId: string};
@@ -60,11 +60,11 @@ export default class DatabridgeNexusServer {
         await this.protocol.connect();
     }
 
-    async disconnect() {
+    async disconnect(): Promise<void> {
         await this.protocol.disconnect();
     }
 
-    createChannel(channelName: string, secret: string, callback: (channel: NexusChannel) => void) {
+    createChannel(channelName: string, secret: string, callback: (channel: NexusChannel) => void): this {
         const channel = new NexusChannel(channelName, secret, this.protocol);
         callback(channel);
         return this;

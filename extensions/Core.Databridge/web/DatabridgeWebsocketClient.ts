@@ -65,7 +65,7 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
         return this;
     }
 
-    close() {
+    close(): this {
         this.disconnect();
         return this;
     }

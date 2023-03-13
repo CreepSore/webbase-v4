@@ -26,7 +26,7 @@ export default class ConfigLoader<T> {
      *
      * @param {Partial<T>} model
      */
-    createTemplateAndImport(model: Partial<T>) {
+    createTemplateAndImport(model: Partial<T>): T {
         this.exportConfigTemplate(model);
         return this.import();
     }
@@ -34,21 +34,21 @@ export default class ConfigLoader<T> {
     /**
      * Imports a ConfigModel from {@link ConfigLoader.configPath}
      */
-    import() {
+    import(): T {
         return ConfigLoader.import<T>(this.configPath);
     }
 
     /**
      * Checks if the config exists
      */
-    configExists() {
+    configExists(): boolean {
         return fs.existsSync(this.configPath);
     }
 
     /**
      * Checks if the template exists
      */
-    templateExists() {
+    templateExists(): boolean {
         return fs.existsSync(this.templatePath);
     }
 
@@ -56,7 +56,7 @@ export default class ConfigLoader<T> {
      * Exports the specified model as template
      * @param config
      */
-    exportConfigTemplate(config: Partial<T>) {
+    exportConfigTemplate(config: Partial<T>): void {
         ConfigLoader.exportConfig(config, this.templatePath);
     }
 
@@ -64,7 +64,7 @@ export default class ConfigLoader<T> {
      * Imports a file as a ConfigModel from the specified path
      * @param importPath file to import
      */
-    static import<T>(importPath: string) {
+    static import<T>(importPath: string): T {
         if(!fs.existsSync(importPath)) return null;
         const config: T = JSON.parse(fs.readFileSync(importPath, { encoding: "utf8" }));
 
@@ -76,7 +76,7 @@ export default class ConfigLoader<T> {
      * @param config the ConfigModel to export
      * @param exportPath the export path
      */
-    static exportConfig<T>(config: Partial<T>, exportPath: string) {
+    static exportConfig<T>(config: Partial<T>, exportPath: string): void {
         if(fs.existsSync(exportPath)) {
             fs.unlinkSync(exportPath);
         }
@@ -87,7 +87,7 @@ export default class ConfigLoader<T> {
         fs.writeFileSync(exportPath, JSON.stringify(config, null, 4), { encoding: "utf8" });
     }
 
-    static createConfigPath(configName: string) {
+    static createConfigPath(configName: string): string {
         return path.resolve(".", "cfg", configName);
     }
 }

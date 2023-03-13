@@ -57,7 +57,7 @@ export default class ConsoleLogger implements ILogger {
     // For now we only support linux
     fancy: boolean = process.platform === "linux";
 
-    async log(log: ILogEntry) {
+    async log(log: ILogEntry): Promise<void> {
         const formatted = this.formatLog(log);
 
         if(Boolean(LoggerService.oldLog)) {
@@ -68,7 +68,7 @@ export default class ConsoleLogger implements ILogger {
         }
     }
 
-    formatLog(log: ILogEntry) {
+    formatLog(log: ILogEntry): string {
         if(this.fancy && Object.keys(logLevelMapping).includes(log.level)) {
             const colors = logLevelMapping[log.level];
             const emoji = logLevelUnicodeMapping[log.level];

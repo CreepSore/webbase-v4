@@ -35,7 +35,7 @@ export default class CoreGraphQL implements IExtension {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -44,23 +44,23 @@ export default class CoreGraphQL implements IExtension {
         executionContext.extensionService.onAllExtensionsStarted(ctx => this.onAllExtensionsStarted(ctx));
     }
 
-    async stop() {
+    async stop(): Promise<void> {
 
     }
 
-    addQueryHandler<T>(key: string, handler: (...props: any) => T) {
+    addQueryHandler<T>(key: string, handler: (...props: any) => T): void {
 
     }
 
-    registerExtension(extension: IGraphQLExtension) {
+    registerExtension(extension: IGraphQLExtension): void {
         this.graphQlExtensions.add(extension);
     }
 
-    unregisterExtension(extension: IGraphQLExtension) {
+    unregisterExtension(extension: IGraphQLExtension): void {
         this.graphQlExtensions.delete(extension);
     }
 
-    private onAllExtensionsStarted(context: IExecutionContext) {
+    private onAllExtensionsStarted(context: IExecutionContext): void {
         if(context.contextType === "cli") {
             return;
         }
@@ -129,11 +129,11 @@ export default class CoreGraphQL implements IExtension {
         }
     }
 
-    fieldsFromResolveInfo(info: GraphQL.GraphQLResolveInfo) {
+    fieldsFromResolveInfo(info: GraphQL.GraphQLResolveInfo): any {
         return this.nodeToObject(info.fieldNodes[0]);
     }
 
-    private nodeToObject(node: GraphQL.SelectionNode) {
+    private nodeToObject(node: GraphQL.SelectionNode): any {
         if(node.kind !== GraphQL.Kind.FIELD) return {};
         if(!node.selectionSet) return {};
         const result: any = {};
@@ -156,13 +156,13 @@ export default class CoreGraphQL implements IExtension {
         return result;
     }
 
-    private checkConfig() {
+    private checkConfig(): void {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         const model = new CoreGraphQLConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -173,7 +173,7 @@ export default class CoreGraphQL implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

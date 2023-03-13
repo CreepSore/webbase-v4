@@ -8,7 +8,7 @@ export default class CacheLogger implements ILogger {
     maxEntries: number = 500;
     logEntries: {id: string, date: number, level: string, infos: string[], message: string, objects: any}[] = [];
 
-    async log(log: ILogEntry) {
+    async log(log: ILogEntry): Promise<void> {
         if(!log.level) return;
 
         this.logEntries.push({
@@ -25,7 +25,7 @@ export default class CacheLogger implements ILogger {
         }
     }
 
-    clear() {
+    clear(): void {
         this.logEntries = [];
     }
 }

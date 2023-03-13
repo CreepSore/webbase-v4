@@ -31,7 +31,7 @@ export default class CoreDb implements IExtension {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         if(executionContext.contextType === "cli") return;
         // Don't load the DB if we aren't required by any extension
         if(!executionContext.extensionService.extensions.find(ext => ext.metadata.dependencies.includes(this.metadata.name))) return;
@@ -66,17 +66,17 @@ export default class CoreDb implements IExtension {
         this.events.emit("db-loaded", this.db);
     }
 
-    async stop() {
+    async stop(): Promise<void> {
         this.db.destroy();
     }
 
-    private checkConfig() {
+    private checkConfig(): void {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("Core.Db.json"), ConfigLoader.createConfigPath("Core.Db.template.json"));
         const cfg = this.configLoader.createTemplateAndImport(new CoreDbConfig());
 
@@ -85,7 +85,7 @@ export default class CoreDb implements IExtension {
 
     // ! For aesthetic IntelliSense reasons we don't care about that rule here
     // eslint-disable-next-line no-shadow
-    onDbLoaded(callback: (knex: knex.Knex) => void) {
+    onDbLoaded(callback: (knex: knex.Knex) => void): void {
         this.events.on("db-loaded", callback);
     }
 }

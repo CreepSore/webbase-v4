@@ -103,10 +103,9 @@
             "allowImplicit": true
         }],
         //"consistent-return": 1,           // http://eslint.org/docs/rules/consistent-return
-        // TODO: enable this rule
-        //"@typescript-eslint/explicit-function-return-type": [2, {
-        //    "allowExpressions": true
-        //}],
+        "@typescript-eslint/explicit-function-return-type": [2, {
+            "allowExpressions": true
+        }],
         "curly": [2, "multi-line"],         // http://eslint.org/docs/rules/curly
         "default-case": 2,                  // http://eslint.org/docs/rules/default-case
         "dot-notation": [2, {               // http://eslint.org/docs/rules/dot-notation

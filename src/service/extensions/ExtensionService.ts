@@ -21,12 +21,12 @@ export default class ExtensionService {
      * Sets the current {@link IAppExecutionContext}
      * @param info
      */
-    setContextInfo(info: IAppExecutionContext|ICliExecutionContext) {
+    setContextInfo(info: IAppExecutionContext|ICliExecutionContext): void {
         this.executionContext = info;
         this.executionContext.extensionService = this;
     }
 
-    async loadExtensions() {
+    async loadExtensions(): Promise<boolean> {
         if(this.extensionsStarted) return false;
         if(!fs.existsSync(this.extensionPath)) return false;
         const disabled = this.getDisabledExtensions();
@@ -55,12 +55,12 @@ export default class ExtensionService {
         return true;
     }
 
-    unloadExtensions() {
+    unloadExtensions(): void {
         this.stopExtensions();
         this.extensions = [];
     }
 
-    async startExtensions() {
+    async startExtensions(): Promise<void> {
         if(this.extensionsStarted) return;
         const baseNodes = this.extensions.filter(ext => ext.metadata.dependencies.length === 0);
 
@@ -72,7 +72,7 @@ export default class ExtensionService {
         this.fireAllExtensionsStarted({...this.executionContext});
     }
 
-    async stopExtensions() {
+    async stopExtensions(): Promise<void> {
         if(!this.extensionsStarted) return;
 
         for(const extension of this.extensions) {
@@ -86,7 +86,7 @@ export default class ExtensionService {
      * Gets an extension by its name
      * @param name the name of the extension
      */
-    getExtension(name: string) {
+    getExtension(name: string): IExtension {
         const result = this.extensions.find(ext => ext.metadata.name === name);
         if(!result) {
             LogBuilder
@@ -102,11 +102,11 @@ export default class ExtensionService {
     /**
      * Gets multiple extensions by their names
      */
-    getExtensions(...names: string[]) {
+    getExtensions(...names: string[]): IExtension[] {
         return names.map(name => this.getExtension(name));
     }
 
-    skipLogs() {
+    skipLogs(): void {
         this.doSkipLogs = true;
     }
     // #endregion
@@ -115,28 +115,28 @@ export default class ExtensionService {
     /**
      * Gets called after all extensions have been started
      */
-    onAllExtensionsStarted(cb: (context: IExecutionContext) => void) {
+    onAllExtensionsStarted(cb: (context: IExecutionContext) => void): void {
         this.emitter.on("all-extensions-started", cb);
     }
 
-    private fireAllExtensionsStarted(context: IExecutionContext) {
+    private fireAllExtensionsStarted(context: IExecutionContext): void {
         this.emitter.emit("all-extensions-started", context);
     }
 
     /**
      * Gets called after the specified extension has been started
      */
-    onExtensionStarted(extensionName: string, cb: (context: IExecutionContext) => void) {
+    onExtensionStarted(extensionName: string, cb: (context: IExecutionContext) => void): void {
         this.emitter.on(`extension-started-${extensionName}`, cb);
     }
 
-    private fireOnExtensionStarted(extensionName: string, context: IExecutionContext) {
+    private fireOnExtensionStarted(extensionName: string, context: IExecutionContext): void {
         this.emitter.emit(`extension-started-${extensionName}`, context);
     }
     // #endregion
 
     // #region Private Methods
-    private async startExtensionRecursive(node: IExtension) {
+    private async startExtensionRecursive(node: IExtension): Promise<void> {
         let runStart = false;
         if(!node.metadata.isLoaded) {
             node.metadata.isLoaded = true;
@@ -169,7 +169,7 @@ export default class ExtensionService {
         }
     }
 
-    private getDisabledExtensions() {
+    private getDisabledExtensions(): string[] {
         const disabledPath = path.join(this.extensionPath, "disabled.json");
         let disabledResult: string[] = [];
         if(!fs.existsSync(disabledPath)) {

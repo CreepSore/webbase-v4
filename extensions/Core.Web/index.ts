@@ -58,7 +58,7 @@ export default class CoreWeb implements IExtension {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         if(executionContext.contextType === "cli") return;
         if(!this.config) {
             throw new Error(`Config not found at [${this.configLoader.configPath}]`);
@@ -101,12 +101,12 @@ export default class CoreWeb implements IExtension {
         this.server = this.app.listen(this.config.port, this.config.hostname);
     }
 
-    async stop() {
+    async stop(): Promise<void> {
         this.server.removeAllListeners();
         this.server.close();
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("Core.Web.json"), ConfigLoader.createConfigPath("Core.Web.template.json"));
         const cfg = this.configLoader.createTemplateAndImport(new CoreWebConfig());
 

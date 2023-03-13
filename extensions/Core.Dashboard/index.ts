@@ -40,7 +40,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         this.config = this.loadConfig();
     }
 
-    async buildGraphQLContext(req: any) {
+    async buildGraphQLContext(req: any): Promise<{[key: string]: any}> {
         return {};
     }
 
@@ -67,7 +67,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         });
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -82,21 +82,22 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         coreGraphQl.registerExtension(this);
     }
 
-    async stop() {
+    async stop(): Promise<void> {
 
     }
 
-    registerDashboardPage() {
+    // TODO: Implement this again
+    registerDashboardPage(): void {
 
     }
 
-    private checkConfig() {
+    private checkConfig(): void {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         const model = new CoreDashboardConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -107,7 +108,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

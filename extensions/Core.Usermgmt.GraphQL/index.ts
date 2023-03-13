@@ -378,7 +378,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return permissionNames.map(name => permissions.includes(name)).every(Boolean);
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -393,7 +393,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         coreGraphQL.registerExtension(this);
     }
 
-    async stop() {
+    async stop(): Promise<void> {
 
     }
 
@@ -404,13 +404,13 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
             .where({"pgp.permissiongroup": permissionGroupId});
     }
 
-    private checkConfig() {
+    private checkConfig(): void {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         const model = new CoreUsermgmtGraphQLConfig();
         if(Object.keys(model).length === 0) return model;
 
@@ -421,7 +421,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

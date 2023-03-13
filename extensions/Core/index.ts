@@ -15,7 +15,7 @@ export default class Core implements IExtension {
         dependencies: [],
     };
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         if(!fs.existsSync("logs")) {
             fs.mkdirSync("logs");
         }
@@ -34,7 +34,7 @@ export default class Core implements IExtension {
             .addLogger(new CacheLogger(), "cache");
     }
 
-    async stop() {
+    async stop(): Promise<void> {
 
     }
 

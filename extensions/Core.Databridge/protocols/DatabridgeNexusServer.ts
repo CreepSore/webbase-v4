@@ -10,15 +10,15 @@ class NexusChannel {
     secret: string | null;
     clients: IDatabridgeSocket[] = [];
 
-    subscribeClient(client: IDatabridgeSocket) {
+    subscribeClient(client: IDatabridgeSocket): void {
         this.clients.push(client);
     }
 
-    unsubscribeClient(client: IDatabridgeSocket) {
+    unsubscribeClient(client: IDatabridgeSocket): void {
         this.clients = this.clients.filter(c => c !== client);
     }
 
-    broadcast(packet: IDatabridgePacket<any, any>, filterFunc: ((client: IDatabridgeSocket) => boolean) | null = null) {
+    broadcast(packet: IDatabridgePacket<any, any>, filterFunc: ((client: IDatabridgeSocket) => boolean) | null = null): void {
         this.clients.filter(filterFunc || (() => true)).forEach(client => {
             client.sendPacket(packet);
         });
@@ -34,7 +34,7 @@ export default class DatabridgeNexusServer {
         this.channels = [];
     }
 
-    async start() {
+    async start(): Promise<void> {
         await Promise.all(this.protocols.map(async protocol => {
             protocol.onClientConnected(client => {
                 this.onClientConnected(client);
@@ -48,18 +48,18 @@ export default class DatabridgeNexusServer {
         }));
     }
 
-    async stop() {
+    async stop(): Promise<void> {
         await Promise.all(this.protocols.map(async protocol => {
             await protocol.stop();
         }));
     }
 
-    addProtocol(protocol: IDatabridgeServerProtocol) {
+    addProtocol(protocol: IDatabridgeServerProtocol): this {
         this.protocols.push(protocol);
         return this;
     }
 
-    onClientConnected(client: IDatabridgeSocket) {
+    onClientConnected(client: IDatabridgeSocket): void {
         const clientId = uuid.v4();
         console.log("INFO", "NexusServer", `Client with id ${clientId} connected.`);
 
@@ -106,7 +106,7 @@ export default class DatabridgeNexusServer {
         });
     }
 
-    onClientDisconnected(client: IDatabridgeSocket) {
+    onClientDisconnected(client: IDatabridgeSocket): void {
         this.channels.forEach(channel => {
             channel.unsubscribeClient(client);
         });

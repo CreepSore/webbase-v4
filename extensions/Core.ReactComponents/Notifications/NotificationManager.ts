@@ -15,7 +15,7 @@ export default class NotificationManager {
     static closeTime: number = 500;
     static interval: NodeJS.Timer = null;
 
-    static startWatching() {
+    static startWatching(): typeof NotificationManager {
         if(this.interval) return this;
 
         this.interval = setInterval(() => {
@@ -34,13 +34,13 @@ export default class NotificationManager {
         return this;
     }
 
-    static stopWatching() {
+    static stopWatching(): typeof NotificationManager {
         clearInterval(this.interval);
         this.interval = null;
         return this;
     }
 
-    static addNotification(notification: NotificationProps) {
+    static addNotification(notification: NotificationProps): typeof NotificationManager {
         this.notifications.push({
             ...notification,
             id: uuid.v4(),
@@ -51,7 +51,7 @@ export default class NotificationManager {
         return this;
     }
 
-    static clearAllNotifications() {
+    static clearAllNotifications(): typeof NotificationManager {
         this.notifications = [];
         return this;
     }

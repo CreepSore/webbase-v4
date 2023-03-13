@@ -19,7 +19,7 @@ export default class FileLogger implements ILogger {
         }
     }
 
-    async log(log: ILogEntry) {
+    async log(log: ILogEntry): Promise<void> {
         const date = `[${log.date.toISOString()}]`;
         const level = log.level ? `[${log.level.padStart(8, " ")}]` : "";
         const infos = log.infos ? log.infos.map(i => `[${i}]`).join("") : "";

@@ -51,7 +51,7 @@ export default class CoreMail implements IExtension {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext) {
+    async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             return;
@@ -63,11 +63,11 @@ export default class CoreMail implements IExtension {
         }
     }
 
-    async stop() {
+    async stop(): Promise<void> {
 
     }
 
-    addMailer(name: string, config: MailConfig) {
+    addMailer(name: string, config: MailConfig): nodemailer.Transporter<SMTPTransport.SentMessageInfo> {
         const transporter = nodemailer.createTransport({
             host: config.host,
             auth: {
@@ -87,11 +87,11 @@ export default class CoreMail implements IExtension {
         return transporter;
     }
 
-    getMailer(name: string) {
+    getMailer(name: string): nodemailer.Transporter<any> {
         return this.transporters.get(name);
     }
 
-    async sendMail(mailerName: string, mail: Partial<Mail.Options>) {
+    async sendMail(mailerName: string, mail: Partial<Mail.Options>): Promise<boolean> {
         const mailer = this.getMailer(mailerName);
         if(!mailer) return false;
         const mailerOptions = mailer.options as SMTPTransport;
@@ -110,7 +110,7 @@ export default class CoreMail implements IExtension {
         return true;
     }
 
-    async sendAlertMail(mail: Partial<Mail.Options>) {
+    async sendAlertMail(mail: Partial<Mail.Options>): Promise<void> {
         if(!this.config.alerts.enabled) return;
 
         for(const recipient of this.config.alerts.recipients) {
@@ -119,13 +119,13 @@ export default class CoreMail implements IExtension {
         }
     }
 
-    private checkConfig() {
+    private checkConfig(): void {
         if(!this.config) {
             throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
         }
     }
 
-    private loadConfig() {
+    private loadConfig(): typeof this.config {
         const model = new CoreMailTemplate();
         if(Object.keys(model).length === 0) return model;
 
@@ -136,7 +136,7 @@ export default class CoreMail implements IExtension {
         return cfg;
     }
 
-    private generateConfigNames() {
+    private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
             ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),

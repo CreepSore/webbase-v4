@@ -42,27 +42,27 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         this.socket.destroy();
     }
 
-    onConnected(callback: () => void) {
+    onConnected(callback: () => void): this {
         this.emitter.on("connected", callback);
         return this;
     }
 
-    onDisconnected(callback: () => void) {
+    onDisconnected(callback: () => void): this {
         this.emitter.on("disconnected", callback);
         return this;
     }
 
-    onError(callback: (err: Error) => void) {
+    onError(callback: (err: Error) => void): this {
         this.emitter.on("error", callback);
         return this;
     }
 
-    sendPacket(packet: IDatabridgePacket<any, any>) {
+    sendPacket(packet: IDatabridgePacket<any, any>): this {
         this.socket.write(DatabridgeTcpClientProtocol.packetToString(packet));
         return this;
     }
 
-    onPacketReceived(callback: (packet: IDatabridgePacket<any, any>) => void) {
+    onPacketReceived(callback: (packet: IDatabridgePacket<any, any>) => void): this {
         this.emitter.on("packet-received", callback);
         return this;
     }
@@ -74,7 +74,7 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
 
     waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {
         return new Promise(res => {
-            const cb = (packet: IDatabridgePacket<T, T2>) => {
+            const cb = (packet: IDatabridgePacket<T, T2>): IDatabridgePacket<T, T2> => {
                 if(packet.type !== type) {
                     this.emitter.once("packet-received", cb);
                     return;
@@ -86,15 +86,15 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         });
     }
 
-    close() {
+    close(): this {
         this.disconnect();
         return this;
     }
 
-    static stringToPacket(str: string) {
+    static stringToPacket<T, T2>(str: string): IDatabridgePacket<T, T2> {
         try {
             const {id, time, type, data} = JSON.parse(str);
-            const dbPacket: IDatabridgePacket<any, any> = {
+            const dbPacket: IDatabridgePacket<T, any> = {
                 id,
                 time,
                 data,
@@ -108,7 +108,7 @@ export default class DatabridgeTcpClientProtocol implements IDatabridgeClientPro
         }
     }
 
-    static packetToString(packet: IDatabridgePacket<any, any>) {
+    static packetToString(packet: IDatabridgePacket<any, any>): string {
         // @ts-ignore
         const clonedPacket: typeof packet = {};
         Object.assign(clonedPacket, packet);

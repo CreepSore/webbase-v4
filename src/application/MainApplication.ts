@@ -10,7 +10,7 @@ export default class MainAppliation implements IApplication {
     events: EventEmitter = new EventEmitter();
     extensionService: ExtensionService = new ExtensionService();
 
-    async start() {
+    async start(): Promise<void> {
         this.events = new EventEmitter();
         const config = this.loadConfig();
         this.events.emit("config-loaded", config);
@@ -27,11 +27,11 @@ export default class MainAppliation implements IApplication {
         this.events.emit("after-startup", this.extensionService.executionContext);
     }
 
-    async stop() {
+    async stop(): Promise<void> {
         await this.extensionService.stopExtensions();
     }
 
-    loadConfig() {
+    loadConfig(): ConfigModel {
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
         const config = this.configLoader.createTemplateAndImport(new ConfigModel());
 
@@ -41,12 +41,12 @@ export default class MainAppliation implements IApplication {
         return config;
     }
 
-    onConfigLoaded(callback: (config: ConfigModel) => void) {
+    onConfigLoaded(callback: (config: ConfigModel) => void): MainAppliation {
         this.events.on("config-loaded", callback);
         return this;
     }
 
-    onAfterStartup(callback: (context: IExecutionContext) => void) {
+    onAfterStartup(callback: (context: IExecutionContext) => void): MainAppliation {
         this.events.on("after-startup", callback);
         return this;
     }

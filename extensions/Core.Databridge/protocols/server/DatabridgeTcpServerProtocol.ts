@@ -34,7 +34,7 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
                 },
                 waitForPacket<T, T2 = any>(type: string): Promise<IDatabridgePacket<T, T2>> {
                     return new Promise(res => {
-                        const cb = (packet: IDatabridgePacket<T, T2>) => {
+                        const cb = (packet: IDatabridgePacket<T, T2>): IDatabridgePacket<T, T2> => {
                             if(packet.type !== type) {
                                 dbSocketEmitter.once("packet-received", cb);
                                 return;
@@ -86,7 +86,7 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
         this.server.removeAllListeners();
     }
 
-    onError(callback: (err: Error) => void) {
+    onError(callback: (err: Error) => void): this {
         this.emitter.on("error", callback);
         return this;
     }
@@ -101,10 +101,10 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
         return this;
     }
 
-    static stringToPacket(str: string) {
+    static stringToPacket<T, T2>(str: string): IDatabridgePacket<T, T2> {
         try {
             const {id, time, type, data} = JSON.parse(str);
-            const dbPacket: IDatabridgePacket<any, any> = {
+            const dbPacket: IDatabridgePacket<T, any> = {
                 id,
                 time,
                 data,
@@ -119,7 +119,7 @@ export default class DatabridgeTcpServerProtocol implements IDatabridgeServerPro
         }
     }
 
-    static packetToString(packet: IDatabridgePacket<any, any>) {
+    static packetToString(packet: IDatabridgePacket<any, any>): string {
         // @ts-ignore
         const clonedPacket: typeof packet = {};
         Object.assign(clonedPacket, packet);
