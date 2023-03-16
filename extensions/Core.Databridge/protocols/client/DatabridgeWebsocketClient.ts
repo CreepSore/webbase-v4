@@ -1,5 +1,5 @@
-import IDatabridgePacket from "../IDatabridgePacket";
-import IDatabridgeClientProtocol from "../protocols/IDatabridgeClientProtocol";
+import IDatabridgePacket from "../../IDatabridgePacket";
+import IDatabridgeClientProtocol from "../IDatabridgeClientProtocol";
 
 export default class DatabridgeWebsocketClient implements IDatabridgeClientProtocol {
     websocketUrl: string;

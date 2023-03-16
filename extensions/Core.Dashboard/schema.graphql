@@ -6,6 +6,14 @@ type Log {
     message: String
 }
 
+type DashboardPage {
+    id: String!
+    name: String!
+    href: String!
+    neededPermissions: [String]
+}
+
 type Query {
     logs: [Log]
+    pages: [DashboardPage]
 }

@@ -1,8 +1,8 @@
 import {EventEmitter} from "events";
 
-import IDatabridgeClientProtocol from "./IDatabridgeClientProtocol";
-import IDatabridgePacket from "../IDatabridgePacket";
-import DatabridgePacket from "../DatabridgePacket";
+import IDatabridgeClientProtocol from "../IDatabridgeClientProtocol";
+import IDatabridgePacket from "../../IDatabridgePacket";
+import DatabridgePacket from "../../DatabridgePacket";
 
 class NexusChannel {
     name: string;

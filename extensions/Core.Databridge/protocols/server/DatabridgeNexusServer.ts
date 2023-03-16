@@ -1,9 +1,9 @@
 import * as uuid from "uuid";
 
-import IDatabridgeServerProtocol from "./IDatabridgeServerProtocol";
-import IDatabridgePacket from "../IDatabridgePacket";
-import DatabridgePacket from "../DatabridgePacket";
-import IDatabridgeSocket from "./IDatabridgeSocket";
+import IDatabridgeServerProtocol from "../IDatabridgeServerProtocol";
+import IDatabridgePacket from "../../IDatabridgePacket";
+import DatabridgePacket from "../../DatabridgePacket";
+import IDatabridgeSocket from "../IDatabridgeSocket";
 
 class NexusChannel {
     name: string;

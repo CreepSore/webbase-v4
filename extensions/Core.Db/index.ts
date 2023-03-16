@@ -76,16 +76,27 @@ export default class CoreDb implements IExtension {
         }
     }
 
-    private loadConfig(): typeof this.config {
-        this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("Core.Db.json"), ConfigLoader.createConfigPath("Core.Db.template.json"));
-        const cfg = this.configLoader.createTemplateAndImport(new CoreDbConfig());
-
-        return cfg;
-    }
-
     // ! For aesthetic IntelliSense reasons we don't care about that rule here
     // eslint-disable-next-line no-shadow
     onDbLoaded(callback: (knex: knex.Knex) => void): void {
         this.events.on("db-loaded", callback);
+    }
+
+    private loadConfig(): typeof this.config {
+        const model = new CoreDbConfig();
+        if(Object.keys(model).length === 0) return model;
+
+        const [cfgname, templatename] = this.generateConfigNames();
+        this.configLoader = new ConfigLoader(cfgname, templatename);
+        const cfg = this.configLoader.createTemplateAndImport(model);
+
+        return cfg;
+    }
+
+    private generateConfigNames(): string[] {
+        return [
+            ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
+            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
+        ];
     }
 }

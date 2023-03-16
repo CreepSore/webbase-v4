@@ -17,6 +17,13 @@ import CacheLogger from "@service/logger/CacheLogger";
 import Permissions from "./permissions";
 import CoreGraphQL from "@extensions/Core.GraphQL";
 
+export interface IDashboardPage {
+    id: string;
+    name: string;
+    href: string;
+    neededPermissions: string[];
+}
+
 class CoreDashboardConfig {
 
 }
@@ -34,10 +41,13 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
+    pages: IDashboardPage[];
     umgmtGql: CoreUsermgmtGraphQL;
+
 
     constructor() {
         this.config = this.loadConfig();
+        this.pages = [];
     }
 
     async buildGraphQLContext(req: any): Promise<{[key: string]: any}> {
@@ -62,6 +72,9 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
                             };
                         });
                     },
+                    pages: (parent, args, context, info) => {
+                        return this.pages.filter(page => this.umgmtGql.hasPermissions(context, ...page.neededPermissions));
+                    }
                 },
             },
         });
@@ -87,8 +100,8 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
     }
 
     // TODO: Implement this again
-    registerDashboardPage(): void {
-
+    registerDashboardPage(page: IDashboardPage): void {
+        this.pages.push(page);
     }
 
     private checkConfig(): void {
