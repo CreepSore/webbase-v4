@@ -9,9 +9,11 @@ import ILogger from "./ILogger";
  */
 export default class JsonFileLogger implements ILogger {
     logfilePath: string;
+    removeId: boolean;
 
-    constructor(logPath: string) {
+    constructor(logPath: string, removeId: boolean = false) {
         this.logfilePath = logPath;
+        this.removeId = removeId;
 
         const logDir = path.dirname(this.logfilePath);
         if(!fs.existsSync(logDir)) {
@@ -22,14 +24,17 @@ export default class JsonFileLogger implements ILogger {
     async log(log: ILogEntry): Promise<void> {
         const objects: {[key: string]: string} = {};
 
-        const logObj = {
-            id: log.id,
+        const logObj: any = {
             date: log.date.getTime(),
             level: log.level,
             infos: log.infos,
             message: log.lines,
             objects: log.objects,
         };
+
+        if(!this.removeId) {
+            logObj.id = log.id;
+        }
 
         let cache: any[] = [];
         fs.appendFileSync(this.logfilePath, `${JSON.stringify(logObj, (key, value) => {
