@@ -7,6 +7,7 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import nodemailer from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
+import LogBuilder from "@service/logger/LogBuilder";
 
 interface MailConfig {
     host: string,
@@ -82,7 +83,12 @@ export default class CoreMail implements IExtension {
         });
         this.transporters.set(name, transporter);
 
-        console.log("INFO", "Core.Mail", `Added Mail-Transporter [${name}]@][${config.username}]`);
+        LogBuilder
+            .start()
+            .level("INFO")
+            .info("Core.Mail")
+            .line(`Added Mail-Transporter [${name}]@][${config.username}]`)
+            .done();
 
         return transporter;
     }
@@ -93,17 +99,44 @@ export default class CoreMail implements IExtension {
 
     async sendMail(mailerName: string, mail: Partial<Mail.Options>): Promise<boolean> {
         const mailer = this.getMailer(mailerName);
-        if(!mailer) return false;
+        if(!mailer) {
+            LogBuilder
+                .start()
+                .level("WARN")
+                .info("Core.Mail")
+                .line(`Mailer with name [${mailerName}] does not exist`)
+                .done();
+            return false;
+        }
         const mailerOptions = mailer.options as SMTPTransport;
         mail.from = mail.from ?? mailerOptions.auth.user;
 
-        console.log("INFO", "Core.Mail", `Sending mail to [${mail.to}] from [${mail.from}]`);
+        LogBuilder
+            .start()
+            .level("INFO")
+            .info("Core.Mail")
+            .line(`Sending mail to [${mail.to}] from [${mail.from}]`)
+            .done();
+
         try {
+            LogBuilder
+                .start()
+                .level("INFO")
+                .info("Core.Mail")
+                .line(`Sent mail to [${mail.to}] from [${mail.from}]`)
+                .done();
+
             await mailer.sendMail(mail);
-            console.log("INFO", "Core.Mail", `Sent mail to [${mail.to}] from [${mail.from}]`);
         }
         catch(err) {
-            console.log("ERROR", "Core.Mail", `Failed to send mail to [${mail.to}] from [${mail.from}]: ${err.message}`);
+            LogBuilder
+                .start()
+                .level("INFO")
+                .info("Core.Mail")
+                .line(`Failed to send mail to [${mail.to}] from [${mail.from}]: ${err.message}`)
+                .debugObject("error", err)
+                .done();
+
             return false;
         }
 
