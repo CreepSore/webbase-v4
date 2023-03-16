@@ -5,6 +5,12 @@ import LoggerService from "@service/logger/LoggerService";
 import ConsoleLogger from "@service/logger/ConsoleLogger";
 import FileLogger from "@service/logger/FileLogger";
 import CacheLogger from "@service/logger/CacheLogger";
+import ConfigLoader from "@logic/config/ConfigLoader";
+import JsonFileLogger from "@service/logger/JsonFileLogger";
+
+class CoreConfig {
+    enableJsonLogger: boolean = false;
+}
 
 export default class Core implements IExtension {
     metadata: ExtensionMetadata = {
@@ -14,6 +20,13 @@ export default class Core implements IExtension {
         author: "ehdes",
         dependencies: [],
     };
+
+    config: CoreConfig;
+    configLoader: ConfigLoader<typeof this.config>;
+
+    constructor() {
+        this.config = this.loadConfig();
+    }
 
     async start(executionContext: IExecutionContext): Promise<void> {
         if(!fs.existsSync("logs")) {
@@ -32,6 +45,15 @@ export default class Core implements IExtension {
         LoggerService
             .addLogger(new FileLogger(`logs/out_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`))
             .addLogger(new CacheLogger(), "cache");
+
+        if(this.config?.enableJsonLogger === true) {
+            if(!fs.existsSync("jsonlogs")) {
+                fs.mkdirSync("jsonlogs");
+            }
+
+            LoggerService
+                .addLogger(new JsonFileLogger(`jsonlogs/out_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`))
+        }
     }
 
     async stop(): Promise<void> {
@@ -85,5 +107,23 @@ export default class Core implements IExtension {
         }
 
         return callbackToRun(process.platform);
+    }
+
+    private loadConfig(): typeof this.config {
+        const model = new CoreConfig();
+        if(Object.keys(model).length === 0) return model;
+
+        const [cfgname, templatename] = this.generateConfigNames();
+        this.configLoader = new ConfigLoader(cfgname, templatename);
+        const cfg = this.configLoader.createTemplateAndImport(model);
+
+        return cfg;
+    }
+
+    private generateConfigNames(): string[] {
+        return [
+            ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
+            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
+        ];
     }
 }

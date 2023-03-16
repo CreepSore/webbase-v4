@@ -151,7 +151,14 @@ export default class ExtensionService {
             try {
                 await node.start({...this.executionContext});
                 this.fireOnExtensionStarted(node.metadata.name, {...this.executionContext});
-                if(!this.doSkipLogs) console.log("INFO", "ExtensionService.ts", `Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`);
+                if(!this.doSkipLogs) {
+                    LogBuilder
+                        .start()
+                        .level("INFO")
+                        .info("ExtensionService.ts")
+                        .line(`Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`)
+                        .done();
+                }
             }
             catch(err) {
                 LogBuilder
