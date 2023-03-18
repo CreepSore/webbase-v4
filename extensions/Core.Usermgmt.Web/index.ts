@@ -9,6 +9,7 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreDb from "@extensions/Core.Db";
 
 import User from "@extensions/Core.Usermgmt/Models/User";
+import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
 import PermissionGroup from "@extensions/Core.Usermgmt/Models/PermissionGroup";
 import Permission from "@extensions/Core.Usermgmt/Models/Permission";
 import CoreWeb from "@extensions/Core.Web";
@@ -32,7 +33,7 @@ declare global {
         // eslint-disable-next-line no-unused-vars
         interface Request {
             user: User;
-            additionalData: {permissionGroup: string, permissions: string[]}
+            additionalData: {permissionGroup: string, permissions: Permission[]}
         }
     }
 }
@@ -97,6 +98,11 @@ export default class CoreUsermgmtWeb implements IExtension {
         const apiRouter = express.Router();
 
         coreWeb.app.use(async(req, res, next) => {
+            if(req.query.apiKey) {
+                next();
+                return;
+            }
+
             const autologin = this.config.autologin.find(login => login.ip === req.headers["x-forwarded-for"] || login.ip === req.socket.remoteAddress)?.userid;
             if(autologin && !req.session.uid) {
                 LogBuilder
@@ -111,39 +117,79 @@ export default class CoreUsermgmtWeb implements IExtension {
                 req.session.uid = autologin;
             }
 
-            let useAnonGroup = true;
-            if(req.session.uid) {
-                const user = await User.use().where({id: req.session.uid}).first();
-                if(!user) {
-                    delete req.session.uid;
-                }
-                else {
-                    const permGroup: Partial<PermissionGroup> = await PermissionGroup.use().where({id: user.permissionGroupId}).first();
-                    if(permGroup) {
-                        res.locals.additionalData = {
-                            permissionGroup: permGroup.name,
-                            permissions: await coreDb.db.columns("p.name", "p.description", "p.created", "p.modified")
-                                .from(`${Permission.tableName} as p`)
-                                .leftJoin("permissiongrouppermissions as pgp", "p.id", "pgp.permission")
-                                .where({"pgp.permissiongroup": permGroup.id}),
-                        };
-                        useAnonGroup = false;
-                    }
+            await this.handleUidLogon(req, res, req.session.uid);
 
-                    req.user = res.locals.user = user;
-                }
+            next();
+        }, async(req, res, next) => {
+            const {apiKey} = req.query;
+            if(!apiKey) {
+                next();
+                return;
             }
 
-            if(useAnonGroup) {
-                const anonGroup = await PermissionGroup.use().where({name: "Anonymous"}).first();
-                req.additionalData = res.locals.additionalData = {
-                    permissionGroup: anonGroup.name,
-                    permissions: await coreDb.db.columns("p.name", "p.description", "p.created", "p.modified")
-                        .from(`${Permission.tableName} as p`)
-                        .leftJoin("permissiongrouppermissions as pgp", "p.id", "pgp.permission")
-                        .where({"pgp.permissiongroup": anonGroup.id}),
-                };
+            const apiKeyObject: ApiKey = await ApiKey.use().where({
+                id: apiKey,
+            }).first();
+
+            if(!apiKeyObject) {
+                LogBuilder
+                    .start()
+                    .level("WARN")
+                    .info("Core.Usermgmt.Web")
+                    .line("Failed API Key logon: Invalid API Key")
+                    .object("info", {
+                        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+                        apiKey,
+                    }).done();
+
+                next();
+                return;
             }
+
+            if(!ApiKey.isValid(apiKeyObject)) {
+                LogBuilder
+                    .start()
+                    .level("WARN")
+                    .info("Core.Usermgmt.Web")
+                    .line("Failed API Key logon: API Key expired")
+                    .object("info", {
+                        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+                        apiKey,
+                    }).done();
+
+                next();
+                return;
+            }
+
+            const user: User = await User.use().where({id: apiKeyObject.userId}).first();
+            if(!user) {
+                LogBuilder
+                    .start()
+                    .level("WARN")
+                    .info("Core.Usermgmt.Web")
+                    .line("Failed API Key logon: Invalid User on API Key")
+                    .object("info", {
+                        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+                        apiKey,
+                    }).done();
+
+                next();
+                return;
+            }
+
+            await this.handleUidLogon(req, res, user.id);
+
+            LogBuilder
+                .start()
+                .level("WARN")
+                .info("Core.Usermgmt.Web")
+                .line("API Key Logon occured")
+                .object("info", {
+                    ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+                    apiKey,
+                    uid: user.id,
+                }).done();
+
             next();
         });
 
@@ -320,6 +366,49 @@ export default class CoreUsermgmtWeb implements IExtension {
     hasPermission(res: express.Response, ...perms: string[]): boolean {
         const {permissions} = res.locals.additionalData;
         return permissions.some((p: Permission) => perms.includes(p.name));
+    }
+
+    private async constructAdditionalDataObject(permGroup: PermissionGroup): Promise<{
+        permissionGroup: string;
+        permissions: Permission[];
+    }> {
+        return {
+            permissionGroup: permGroup.name,
+            permissions: await this.knex.columns("p.name", "p.description", "p.created", "p.modified")
+                .from(`${Permission.tableName} as p`)
+                .leftJoin("permissiongrouppermissions as pgp", "p.id", "pgp.permission")
+                .where({"pgp.permissiongroup": permGroup.id}) as any,
+        };
+    }
+
+    private async handleUidLogon(
+        req: express.Request,
+        res: express.Response,
+        uid: string = null,
+    ): Promise<void> {
+        req.session.uid = uid;
+
+        let useAnonGroup = true;
+        if(req.session.uid) {
+            const user = await User.use().where({id: req.session.uid}).first();
+            if(!user) {
+                delete req.session.uid;
+            }
+            else {
+                const permGroup: PermissionGroup = await PermissionGroup.use().where({id: user.permissionGroupId}).first();
+                if(permGroup) {
+                    req.additionalData = res.locals.additionalData = await this.constructAdditionalDataObject(permGroup);
+                    useAnonGroup = false;
+                }
+
+                req.user = res.locals.user = user;
+            }
+        }
+
+        if(useAnonGroup) {
+            const anonGroup = await PermissionGroup.use().where({name: "Anonymous"}).first();
+            req.additionalData = res.locals.additionalData = await this.constructAdditionalDataObject(anonGroup);
+        }
     }
 
     private checkConfig(): void {
