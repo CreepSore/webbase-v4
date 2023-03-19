@@ -1,4 +1,3 @@
-import util from "util";
 import * as fs from "fs";
 import * as path from "path";
 import ILogEntry from "./ILogEntry";
@@ -22,8 +21,6 @@ export default class JsonFileLogger implements ILogger {
     }
 
     async log(log: ILogEntry): Promise<void> {
-        const objects: {[key: string]: string} = {};
-
         const logObj: any = {
             date: log.date.getTime(),
             level: log.level,
@@ -38,12 +35,8 @@ export default class JsonFileLogger implements ILogger {
 
         let cache: any[] = [];
         fs.appendFileSync(this.logfilePath, `${JSON.stringify(logObj, (key, value) => {
-            if (typeof value === 'object' && value !== null) {
-            // Duplicate reference found, discard key
-            if (cache.includes(value)) return;
-
-            // Store value in our collection
-            cache.push(value);
+            if (typeof value === "object" && value !== null && !cache.includes(value)) {
+                cache.push(value);
             }
             return value;
         })}\n`);

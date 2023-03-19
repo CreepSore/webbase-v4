@@ -74,7 +74,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
                     },
                     pages: (parent, args, context, info) => {
                         return this.pages.filter(page => this.umgmtGql.hasPermissions(context, ...page.neededPermissions));
-                    }
+                    },
                 },
             },
         });
