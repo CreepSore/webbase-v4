@@ -16,6 +16,7 @@ import CacheLogger from "@service/logger/CacheLogger";
 
 import Permissions from "./permissions";
 import CoreGraphQL from "@extensions/Core.GraphQL";
+import CoreUsermgmt from "@extensions/Core.Usermgmt";
 
 export interface IDashboardPage {
     id: string;
@@ -34,7 +35,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         version: "2.0.0",
         description: "Dashboard Module",
         author: "ehdes",
-        dependencies: ["Core", "Core.Usermgmt.GraphQL", "Core.GraphQL"],
+        dependencies: ["Core", "Core.Usermgmt", "Core.Usermgmt.GraphQL", "Core.GraphQL"],
     };
 
     config: CoreDashboardConfig;
@@ -86,8 +87,14 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
             return;
         }
 
-        const [coreWeb, umgmtGraphQl, coreGraphQl]
-            = executionContext.extensionService.getExtensions("Core.Web", "Core.Usermgmt.GraphQL", "Core.GraphQL") as [CoreWeb, CoreUsermgmtGraphQL, CoreGraphQL];
+        const [coreWeb, umgmtGraphQl, coreGraphQl, coreUsermgmt]
+            = executionContext.extensionService.getExtensions(
+                "Core.Web",
+                "Core.Usermgmt.GraphQL",
+                "Core.GraphQL",
+                "Core.Usermgmt",
+            ) as [CoreWeb, CoreUsermgmtGraphQL, CoreGraphQL, CoreUsermgmt];
+        await coreUsermgmt.createPermissions(...Object.values(Permissions));
         this.umgmtGql = umgmtGraphQl;
         const mainUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
         coreWeb.addAppRoute("/core.dashboard", mainUrl);

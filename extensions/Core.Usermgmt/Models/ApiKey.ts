@@ -1,4 +1,3 @@
-import * as crypto from "crypto";
 import { Knex } from "knex";
 
 export default class ApiKey {
@@ -6,7 +5,7 @@ export default class ApiKey {
     static knex: Knex;
     id?: string;
     validUntil?: Date;
-    user: string;
+    userId: string;
     created?: Date;
     modified?: Date;
 
@@ -45,7 +44,9 @@ export default class ApiKey {
             });
     }
 
-    static hashPassword(password: string): string {
-        return crypto.createHash("sha256").update(password).digest("base64");
+    static isValid(apiKey: ApiKey): boolean {
+        if(!apiKey) return false;
+        if(!apiKey.validUntil) return true;
+        return apiKey.validUntil > new Date();
     }
 }
