@@ -13,11 +13,11 @@ interface SidebarButtonProps {
     onClick?: () => void;
 }
 
-function SidebarButton(props: SidebarButtonProps) {
+function SidebarButton(props: SidebarButtonProps): JSX.Element {
     return <button
         className={props.active === true ? "active" : ""}
         onClick={() => props.onClick?.()}
-    ><p>{props.label}</p></button>
+    ><p>{props.label}</p></button>;
 }
 
 interface SidebarNavigationButtonProps extends INavigator {
@@ -26,20 +26,20 @@ interface SidebarNavigationButtonProps extends INavigator {
     label: string;
 }
 
-function SidebarNavigationButton(props: SidebarNavigationButtonProps) {
+function SidebarNavigationButton(props: SidebarNavigationButtonProps): JSX.Element {
     return <button
         className={props.activePage === props.pageKey ? "active" : ""}
         onClick={() => {
             props.onNavigationRequest(props.pageKey);
         }}
-    ><p>{props.label}</p></button>
+    ><p>{props.label}</p></button>;
 }
 
 interface SidebarRegisteredPagesProps {
     pages: { id: string, name: string, href: string, neededPermissions: string[] }[];
 }
 
-function SidebarRegisteredPages(props: SidebarRegisteredPagesProps) {
+function SidebarRegisteredPages(props: SidebarRegisteredPagesProps): JSX.Element {
     const [menuOpen, setMenuOpen] = React.useState(false);
     const menuRef = React.useRef<HTMLDivElement>(null);
     const [menuX, setMenuX] = React.useState(0);
@@ -64,11 +64,14 @@ function SidebarRegisteredPages(props: SidebarRegisteredPagesProps) {
             }}
         ><p>Views</p></button>}
 
-        <div className={`fixed ${menuOpen ? "block" : "hidden"} min-w-[200px] max-w-[80%]`} ref={menuRef}>
+        <div
+            className={`fixed ${menuOpen ? "block" : "hidden"} min-w-[200px] max-w-[80%]`}
+            ref={menuRef}
+        >
             {props.pages.map(page => <button
                 className="bg-black w-full text-center"
                 key={page.id}
-                onClick={() => location.href = page.href}
+                onClick={() => (location.href = page.href)}
             >{page.name}</button>)}
         </div>
     </>;
@@ -87,7 +90,7 @@ interface SidebarProps extends INavigator, ILogonStateManager {
     myPermissions: string[];
 }
 
-export default function Sidebar(props: SidebarProps) {
+export default function Sidebar(props: SidebarProps): JSX.Element {
     const menuRef = React.useRef<HTMLDivElement>(null);
     const [pages, setPages] = React.useState<DashboardPage[]>([]);
 
@@ -97,7 +100,7 @@ export default function Sidebar(props: SidebarProps) {
         props.onLogout?.();
     }});
 
-    useQuery<{pages: DashboardPage[]}>(`{ pages { id, name, href, neededPermissions } }`, {onSuccess: (data: {pages: DashboardPage[]}, errors) => {
+    useQuery<{pages: DashboardPage[]}>("{ pages { id, name, href, neededPermissions } }", {onSuccess: (data: {pages: DashboardPage[]}, errors) => {
         setPages(data.pages);
     }});
 
@@ -115,4 +118,3 @@ export default function Sidebar(props: SidebarProps) {
         </div>
     </> : <></>;
 }
-

@@ -9,11 +9,11 @@ interface SyncedTextAreaProps {
     defaultValue?: React.HTMLProps<HTMLTextAreaElement>["value"];
 }
 
-export default function SyncedTextArea(props: SyncedTextAreaProps) {
+export default function SyncedTextArea(props: SyncedTextAreaProps): JSX.Element {
     const [value, setValue] = useDatabridgeSyncPropery({
         databridge: props.databridge,
         key: props.dbKey,
-        defaultValue: props.defaultValue || ""
+        defaultValue: props.defaultValue || "",
     });
 
     return <textarea

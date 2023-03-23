@@ -9,14 +9,14 @@ interface SyncedCheckboxProps {
     defaultValue?: React.HTMLProps<HTMLInputElement>["checked"];
 }
 
-export default function SyncedCheckbox(props: SyncedCheckboxProps) {
+export default function SyncedCheckbox(props: SyncedCheckboxProps): JSX.Element {
     const [checked, setChecked] = useDatabridgeSyncPropery<boolean>({
         databridge: props.databridge,
         key: props.dbKey,
         defaultValue: false,
         mapValue: value => {
             return value === "true" || value === true;
-        }
+        },
     });
 
     return <input

@@ -9,13 +9,13 @@ export interface NotificationProps {
     message: string;
 }
 
-function Notification(props: NotificationProps) {
+function Notification(props: NotificationProps): JSX.Element {
     return <div className={`notification ${props.type}`}>
         {props.message}
     </div>;
 }
 
-export default function Notifications() {
+export default function Notifications(): JSX.Element {
     const notifications = React.useMemo(() => NotificationManager.notifications, [NotificationManager.notifications]);
 
     return <div className="notifications">

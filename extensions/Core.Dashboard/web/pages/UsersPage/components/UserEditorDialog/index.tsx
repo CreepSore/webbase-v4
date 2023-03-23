@@ -12,7 +12,7 @@ interface UserEditorDialogProps {
     afterImpersonate: () => void;
 }
 
-export default function UserEditorDialog(props: UserEditorDialogProps) {
+export default function UserEditorDialog(props: UserEditorDialogProps): JSX.Element {
     const [username, setUsername] = React.useState(props.user.username);
     const [email, setEmail] = React.useState(props.user.email || "");
     const [isActive, setIsActive] = React.useState(props.user.isActive);
@@ -27,49 +27,49 @@ export default function UserEditorDialog(props: UserEditorDialogProps) {
         setPermissionGroup(permissionGroups.find(pg => pg.id === props.user.permissionGroup.id));
     }, [permissionGroups, props.user.permissionGroup.id]);
 
-    const pgQuery = useQuery<{permissionGroups: IPermissionGroup[]}>(`{ permissionGroups { id, name } }`, {
-        onSuccess: (data) => setPermissionGroups(data.permissionGroups)
+    useQuery<{permissionGroups: IPermissionGroup[]}>("{ permissionGroups { id, name } }", {
+        onSuccess: (data) => setPermissionGroups(data.permissionGroups),
     });
 
     const saveUserMutation = useMutation(`mutation UpdUser($id: ID!, $username: String, $email: String, $password: String, $isActive: Boolean, $permissionGroupId: Int) {
         updateUser(id: $id, username: $username, email: $email, password: $password, isActive: $isActive, permissionGroupId: $permissionGroupId)
     }`, {
         onSuccess: () => props.afterSave(),
-        onError: () => props.afterSave()
-    })
+        onError: () => props.afterSave(),
+    });
 
     const deleteUserMutation = useMutation(`mutation DelUser($id: ID!){
         deleteUser(id: $id)
     }`, {
         onSuccess: () => props.afterDelete(),
-        onError: () => props.afterDelete()
+        onError: () => props.afterDelete(),
     });
 
     const impersonateUserMutation = useMutation(`mutation ImpersonateUser($id: ID!){
         impersonateUser(id: $id)
     }`, {
         onSuccess: () => props.afterImpersonate(),
-        onError: () => props.afterImpersonate()
+        onError: () => props.afterImpersonate(),
     });
 
-    const saveUser = () => {
+    const saveUser = (): void => {
         saveUserMutation.execute({
             id: props.user.id,
-            username: username,
-            email: email,
-            isActive: isActive,
+            username,
+            email,
+            isActive,
             password: (updatePassword && password) ? password : null,
-            permissionGroupId: permissionGroup ? permissionGroup.id : props.user.permissionGroup.id
+            permissionGroupId: permissionGroup ? permissionGroup.id : props.user.permissionGroup.id,
         });
     };
 
-    const deleteUser = () => {
+    const deleteUser = (): void => {
         deleteUserMutation.execute({id: props.user.id});
     };
 
-    const impersonateUser = () => {
+    const impersonateUser = (): void => {
         impersonateUserMutation.execute({id: props.user.id});
-    }
+    };
 
     return <div className="dialog-container">
         <div className="dialog user-edit-dialog">

@@ -7,14 +7,13 @@ import { useQuery } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
 import UserEditorDialog from "./components/UserEditorDialog";
 import UserAddDialog from "./components/UserAddDialog";
-import INavigator from "../../interfaces/INavigator";
 
 interface UsersTableRowProps {
     user: IUser;
     onStartEditUser: (user: IUser) => void;
 }
 
-function UsersTableRow(props: UsersTableRowProps) {
+function UsersTableRow(props: UsersTableRowProps): JSX.Element {
     return <tr>
         <td>{props.user.id}</td>
         <td>{props.user.username}</td>
@@ -32,7 +31,7 @@ interface UsersTableProps {
     onStartAddUser: () => void;
 }
 
-function UsersTable(props: UsersTableProps) {
+function UsersTable(props: UsersTableProps): JSX.Element {
     return <div className="users-table-container">
         <table className="users-table">
             <thead>
@@ -60,17 +59,17 @@ interface UsersPageProps {
     afterImpersonate: () => void;
 }
 
-export default function UsersPage(props: UsersPageProps) {
+export default function UsersPage(props: UsersPageProps): JSX.Element {
     const myPermissions = React.useMemo(() => (props.myUser?.permissionGroup?.permissions || []).map(p => p.name), [props.myUser]);
     const [users, setUsers] = React.useState([]);
     const [editingUser, setEditingUser] = React.useState<IUser>(null);
     const [addUserDialogVisible, setAddUserDialogVisible] = React.useState(false);
-    const usersQuery = useQuery<{users: IUser[]}>(`{ users { id, username, email, isActive, permissionGroup { id, name } } }`, {
+    const usersQuery = useQuery<{users: IUser[]}>("{ users { id, username, email, isActive, permissionGroup { id, name } } }", {
         onSuccess: (data, errors) => {
             if(!errors?.length) {
                 setUsers(data.users);
             }
-        }
+        },
     });
 
     return <div className="users-page">

@@ -16,9 +16,9 @@ export function useDatabridgeSyncPropery<T>(options: UseDatabridgeSyncProperyOpt
     React.useEffect(() => {
         if(!options.databridge) return;
 
-        const packetCallback = (packet: IDatabridgePacket<any>) => {
+        const packetCallback = (packet: IDatabridgePacket<any>): void => {
             if(packet.type === "SYNC.STATE.UPDATE") {
-                let stateUpdatePacket = packet as IDatabridgePacket<{key: string, value: T}>;
+                const stateUpdatePacket = packet as IDatabridgePacket<{key: string, value: T}>;
                 if(stateUpdatePacket.data.key === options.key) {
                     let newValue = stateUpdatePacket.data.value;
                     if(options.mapValue) {

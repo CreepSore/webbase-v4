@@ -8,7 +8,7 @@ interface PermissionsListProps {
     disabled?: boolean;
 }
 
-function PermissionsList(props: PermissionsListProps) {
+function PermissionsList(props: PermissionsListProps): JSX.Element {
     return <div className={`flex flex-col w-full select-none ${props.className ? props.className : ""}`}>
         {props.permissions.map(p => <div
             key={p.id}
@@ -31,11 +31,12 @@ interface PermissionsEditorProps {
 }
 
 
-export default function PermissionsEditor(props: PermissionsEditorProps) {
+export default function PermissionsEditor(props: PermissionsEditorProps): JSX.Element {
     const [selectedGroup, setSelectedGroup] = React.useState<number>(1);
     const resolvedGroup = React.useMemo(() => props.permissionGroups.find(pg => pg.id === selectedGroup), [selectedGroup, props.permissionGroups]);
     const assignedPermissions = React.useMemo(() => resolvedGroup ? [...resolvedGroup.permissions] : [], [resolvedGroup]);
-    const unassignedPermissions = React.useMemo(() => props.permissions.filter(p => !assignedPermissions.map(p => p.id).includes(p.id)), [assignedPermissions, props.permissions]);
+    const unassignedPermissions = React.useMemo(() => props.permissions
+        .filter(p => !assignedPermissions.map(assignedPermission => assignedPermission.id).includes(p.id)), [assignedPermissions, props.permissions]);
 
     return <div className="permissions-editor">
         <div className="group-selector">

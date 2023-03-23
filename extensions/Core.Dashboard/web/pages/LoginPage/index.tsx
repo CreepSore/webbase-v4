@@ -1,7 +1,6 @@
-import e from "express";
+import { useMutation } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 import React from "react";
 
-import {useMutation, useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 import "./style.css";
 
@@ -13,9 +12,9 @@ interface LoginPageProps {
 const errorMapping: {[key: string]: string} = {
     INVALID_CREDENTIALS: "Invalid username or password",
     USER_INACTIVE: "User is inactive. Please contact the administrator",
-}
+};
 
-export default function LoginPage(props: LoginPageProps) {
+export default function LoginPage(props: LoginPageProps): JSX.Element {
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
     const [loginError, setLoginError] = React.useState("");

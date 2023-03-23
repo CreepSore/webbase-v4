@@ -8,7 +8,12 @@ interface UseQueryOptions<T> {
     onError?: (error: GraphQLFormattedError[]) => any | Promise<any>;
 }
 
-export function useQuery<T>(query: string, options: UseQueryOptions<T> = {}) {
+export function useQuery<T>(query: string, options: UseQueryOptions<T> = {}): {
+    data: T,
+    errors: GraphQLFormattedError[],
+    loading: boolean,
+    forceUpdate: () => void
+} {
     const [data, setData] = React.useState<T>(options.defaultValue);
     const [errors, setErrors] = React.useState<GraphQLFormattedError[]>([]);
     const [loading, setLoading] = React.useState<boolean>(true);
@@ -19,12 +24,12 @@ export function useQuery<T>(query: string, options: UseQueryOptions<T> = {}) {
         fetch("/api/core.graphql", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                query: query,
-                variables: options.variables
-            })
+                query,
+                variables: options.variables,
+            }),
         }).then(res => res.json()).then(fetchedData => {
             options.onSuccess?.(fetchedData.data, fetchedData.errors);
             setData(fetchedData.data);
@@ -42,7 +47,7 @@ export function useQuery<T>(query: string, options: UseQueryOptions<T> = {}) {
         data,
         errors,
         loading,
-        forceUpdate
+        forceUpdate,
     };
 }
 
@@ -53,7 +58,13 @@ interface UseMutationOptions<T> {
     onError?: (error: GraphQLFormattedError[]) => any | Promise<any>;
 }
 
-export function useMutation<T>(mutation: string, options: UseMutationOptions<T> = {}) {
+export function useMutation<T>(mutation: string, options: UseMutationOptions<T> = {}): {
+    execute: (variables?: { [key: string]: any }) => void,
+    data: T,
+    errors: GraphQLFormattedError[],
+    loading: boolean,
+    setVariables: (variables: { [key: string]: any }) => void,
+} {
     const [data, setData] = React.useState<T>(options.defaultValue || null);
     const [variables, setVariables] = React.useState(options.variables || {});
     const [errors, setErrors] = React.useState<GraphQLFormattedError[]>([]);
@@ -67,12 +78,12 @@ export function useMutation<T>(mutation: string, options: UseMutationOptions<T> 
         fetch("/api/core.graphql", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             },
             body: JSON.stringify({
                 query: mutation,
-                variables
-            })
+                variables,
+            }),
         }).then(res => res.json()).then(async fetchedData => {
             await options.onSuccess?.(fetchedData.data, fetchedData.errors);
             setData(fetchedData.data);
@@ -87,9 +98,9 @@ export function useMutation<T>(mutation: string, options: UseMutationOptions<T> 
         setLoading(true);
     }, [loading, mutation, variables]);
 
-    return {execute: (variables: any = null) => {
-        if(variables) {
-            setVariables(variables);
+    return {execute: (bindVars: any = null) => {
+        if(bindVars) {
+            setVariables(bindVars);
         }
 
         setLoading(true);

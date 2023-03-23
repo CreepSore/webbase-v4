@@ -1,5 +1,5 @@
 import React from "react";
-import IUser, { IPermissionGroup } from "@extensions/Core.Usermgmt/Interfaces/ModelTypes";
+import { IPermissionGroup } from "@extensions/Core.Usermgmt/Interfaces/ModelTypes";
 import { useMutation, useQuery } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 import "./style.css";
@@ -9,7 +9,7 @@ interface UserEditorDialogProps {
     afterSave: () => void;
 }
 
-export default function UserAddDialog(props: UserEditorDialogProps) {
+export default function UserAddDialog(props: UserEditorDialogProps): JSX.Element {
     const [username, setUsername] = React.useState("");
     const [email, setEmail] = React.useState("");
     const [isActive, setIsActive] = React.useState(false);
@@ -22,24 +22,24 @@ export default function UserAddDialog(props: UserEditorDialogProps) {
         setPermissionGroup(permissionGroups.find(pg => pg.id === 1));
     }, [permissionGroups]);
 
-    const pgQuery = useQuery<{permissionGroups: IPermissionGroup[]}>(`{ permissionGroups { id, name } }`, {
-        onSuccess: (data) => setPermissionGroups(data.permissionGroups)
+    useQuery<{permissionGroups: IPermissionGroup[]}>("{ permissionGroups { id, name } }", {
+        onSuccess: (data) => setPermissionGroups(data.permissionGroups),
     });
 
     const addUserMutation = useMutation(`mutation CreateUser($username: String!, $email: String, $password: String!, $isActive: Boolean, $permissionGroupId: Int) {
         createUser(username: $username, email: $email, password: $password, isActive: $isActive, permissionGroupId: $permissionGroupId)
     }`, {
         onSuccess: () => props.afterSave(),
-        onError: () => props.afterSave()
-    })
+        onError: () => props.afterSave(),
+    });
 
-    const addUser = () => {
+    const addUser = (): void => {
         addUserMutation.execute({
             username,
             email,
             isActive,
             password,
-            permissionGroupId: permissionGroup ? permissionGroup.id : 1
+            permissionGroupId: permissionGroup ? permissionGroup.id : 1,
         });
     };
 

@@ -21,35 +21,35 @@ import LogsPage from "./pages/LogsPage";
 import Notifications from "@extensions/Core.ReactComponents/Notifications";
 import NotificationManager from "@extensions/Core.ReactComponents/Notifications/NotificationManager";
 
-function Main() {
-    let startPage = location.hash.substring(1);
-    let [currentDashboardPage, setCurrentDashboardPage] = React.useState(startPage || "home");
-    let [myUser, setMyUser] = React.useState<IUser>();
+function Main(): JSX.Element {
+    const startPage = location.hash.substring(1);
+    const [currentDashboardPage, setCurrentDashboardPage] = React.useState(startPage || "home");
+    const [myUser, setMyUser] = React.useState<IUser>();
 
-    let myUserQuery = useQuery<{me: IUser}>(
-        `{ me { pseudo, id, username, email, permissionGroup { name, permissions { name } } } }`,
+    const myUserQuery = useQuery<{me: IUser}>(
+        "{ me { pseudo, id, username, email, permissionGroup { name, permissions { name } } } }",
         {onSuccess: (data) => {
             if(data.me.pseudo) {
                 setCurrentDashboardPage("login");
             }
             setMyUser(data.me);
-        }}
+        }},
     );
 
     React.useEffect(() => {
         NotificationManager.addNotification({
             type: "info",
             message: "text",
-            title: "test"
+            title: "test",
         });
     }, []);
 
-    let onNavigationRequest = (target: string) => {
+    const onNavigationRequest = (target: string): void => {
         if(target === currentDashboardPage) return;
         window.history.pushState(null, "", target !== "home" ? `#${target}` : "#");
 
         setCurrentDashboardPage(target);
-    }
+    };
 
     if(myUserQuery.loading) {
         return <></>;

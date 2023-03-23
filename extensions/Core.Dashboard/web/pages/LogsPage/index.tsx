@@ -1,7 +1,6 @@
-import e from "express";
 import React from "react";
 
-import {useMutation, useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
+import {useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 import "./style.css";
 
@@ -13,10 +12,6 @@ interface LogEntry {
     message: string;
 }
 
-interface PageLogsProperties {
-    setCurrentPage: (key: string) => void;
-}
-
 interface LogViewerProperties {
     lines: LogEntry[];
 }
@@ -25,17 +20,17 @@ interface LogViewerLineProperties {
     line: LogEntry;
 }
 
-function LogViewerLine(props: LogViewerLineProperties) {
-    let color = "text-gray-200";
+function LogViewerLine(props: LogViewerLineProperties): JSX.Element {
+    let color: string;
     switch(props.line.level) {
         case "DEBUG": color = "text-gray-400"; break;
         case "WARN": color = "text-orange-300"; break;
         case "ERROR": color = "text-red-400"; break;
         case "CRITICAL": color = "text-red-600"; break;
+        default: color = "text-gray-200"; break;
     }
-    let [lastClick, setLastClick] = React.useState(0);
 
-    let onClick = (e: React.MouseEvent) => {
+    const onClick = (e: React.MouseEvent): void => {
         window.getSelection().selectAllChildren(e.target as Node);
     };
 
@@ -48,11 +43,11 @@ function LogViewerLine(props: LogViewerLineProperties) {
     </tr>;
 }
 
-function LogViewer(props: LogViewerProperties) {
-    const filterText = (text: string, searchText: string) => {
+function LogViewer(props: LogViewerProperties): JSX.Element {
+    const filterText = (text: string, searchText: string): boolean => {
         if(!searchText) return true;
 
-        let searchMode = searchText[0]
+        const searchMode = searchText[0];
         if(["?", "!"].includes(searchText[0])) {
             try {
                 const match = new RegExp(searchText.substring(1), "gi");
@@ -128,7 +123,7 @@ function LogViewer(props: LogViewerProperties) {
                 {filteredLog.map(line => <LogViewerLine key={line.id} line={line} />)}
             </tbody>
         </table>
-    </div>
+    </div>;
 }
 
 interface LogsPageProps {
@@ -136,9 +131,9 @@ interface LogsPageProps {
     onLoginFailure?: () => void;
 }
 
-export default function LogsPage(props: LogsPageProps) {
-    let containerRef = React.useRef<HTMLDivElement>();
-    let [scroll, setScroll] = React.useState(containerRef.current?.scrollTop || 0);
+export default function LogsPage(props: LogsPageProps): JSX.Element {
+    const containerRef = React.useRef<HTMLDivElement>();
+    const [scroll, setScroll] = React.useState(containerRef.current?.scrollTop || 0);
     const [logs, setLogs] = React.useState<{
         id: string,
         date: number,
@@ -146,18 +141,18 @@ export default function LogsPage(props: LogsPageProps) {
         infos: string[],
         message: string
     }[]>([]);
-    useQuery(`{ logs { id, date, level, infos, message } }`, {
+    useQuery("{ logs { id, date, level, infos, message } }", {
         onSuccess: (data: any, errors) => {
             if(!errors?.length) {
                 setLogs(data.logs);
             }
-        }
+        },
     });
 
     React.useEffect(() => {
         if(!containerRef.current) return;
 
-        let cb = () => {
+        const cb = (): void => {
             setScroll(containerRef.current.scrollTop);
         };
 
@@ -174,6 +169,5 @@ export default function LogsPage(props: LogsPageProps) {
                 onClick={() => containerRef.current?.scrollTo?.({top: scroll === 0 ? 999999 : 0})}
             >{scroll === 0 ? "D" : "U"}</button>
         </div>
-
     </div>;
 }

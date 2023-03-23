@@ -1,6 +1,5 @@
 import React from "react";
-import { IPermissionGroup } from "@extensions/Core.Usermgmt/Interfaces/ModelTypes";
-import { useMutation, useQuery } from "@extensions/Core.GraphQL/web/GraphQLHooks";
+import { useMutation } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 import "./style.css";
 
@@ -9,7 +8,7 @@ interface PermGroupCreateDialogProps {
     afterSave: () => void;
 }
 
-export default function PermGroupCreateDialog(props: PermGroupCreateDialogProps) {
+export default function PermGroupCreateDialog(props: PermGroupCreateDialogProps): JSX.Element {
     const [name, setName] = React.useState("");
     const [description, setDescription] = React.useState("");
 
@@ -17,13 +16,13 @@ export default function PermGroupCreateDialog(props: PermGroupCreateDialogProps)
         createPermissionGroup(name: $name, description: $description)
     }`, {
         onSuccess: () => props.afterSave(),
-        onError: () => props.afterSave()
-    })
+        onError: () => props.afterSave(),
+    });
 
-    const createPermissionGroup = () => {
+    const createPermissionGroup = (): void => {
         createGroupMutation.execute({
             name,
-            description
+            description,
         });
     };
 

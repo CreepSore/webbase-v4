@@ -1,5 +1,4 @@
 import { IPermission, IPermissionGroup } from "@extensions/Core.Usermgmt/Interfaces/ModelTypes";
-import e from "express";
 import React from "react";
 
 import {useMutation, useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
@@ -13,7 +12,7 @@ interface PermissionsPageProps {
 
 }
 
-export default function PermissionsPage(props: PermissionsPageProps) {
+export default function PermissionsPage(props: PermissionsPageProps): JSX.Element {
     const [createGroupDialogOpen, setCreateGroupDialogOpen] = React.useState(false);
     const [permissionGroups, setPermissionGroups] = React.useState<IPermissionGroup[]>([]);
     const [permissions, setPermissions] = React.useState<IPermission[]>([]);
@@ -43,7 +42,7 @@ export default function PermissionsPage(props: PermissionsPageProps) {
     }`, {
         onSuccess: () => {
             permQuery.forceUpdate();
-        }
+        },
     });
 
     const mutationRemovePerm = useMutation(`mutation addPerm($gid: Int!, $pid: Int!) {
@@ -51,7 +50,7 @@ export default function PermissionsPage(props: PermissionsPageProps) {
     }`, {
         onSuccess: () => {
             permQuery.forceUpdate();
-        }
+        },
     });
 
     return <div className="permissions-page">
@@ -72,13 +71,13 @@ export default function PermissionsPage(props: PermissionsPageProps) {
             onPermissionAdded={(perm, group) => {
                 mutationAddPerm.execute({
                     gid: group.id,
-                    pid: perm.id
+                    pid: perm.id,
                 });
             }}
             onPermissionRemoved={(perm, group) => {
                 mutationRemovePerm.execute({
                     gid: group.id,
-                    pid: perm.id
+                    pid: perm.id,
                 });
             }}
             onCreateButtonClicked={() => {

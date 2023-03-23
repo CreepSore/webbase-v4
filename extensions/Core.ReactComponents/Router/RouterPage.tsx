@@ -4,8 +4,8 @@ interface RouterPageProps {
     children: any
 }
 
-export default function RouterPage(props: RouterPageProps) {
+export default function RouterPage(props: RouterPageProps): JSX.Element {
     return (
         <>{props.children}</>
     );
-};
+}

@@ -9,11 +9,11 @@ interface SyncedInputFieldProps {
     defaultValue?: React.HTMLProps<HTMLInputElement>["value"];
 }
 
-export default function SyncedInputField(props: SyncedInputFieldProps) {
+export default function SyncedInputField(props: SyncedInputFieldProps): JSX.Element {
     const [value, setValue] = useDatabridgeSyncPropery({
         databridge: props.databridge,
         key: props.dbKey,
-        defaultValue: props.defaultValue || ""
+        defaultValue: props.defaultValue || "",
     });
 
     return <input

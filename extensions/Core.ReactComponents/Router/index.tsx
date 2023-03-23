@@ -1,4 +1,4 @@
-import React from "react";
+import "react";
 
 const recursiveFind = (children: any, toFind: string): any => {
     if(!children) return null;
@@ -18,8 +18,8 @@ interface RouterProps {
     currentPage: string;
 }
 
-export default function Router(props: RouterProps) {
+export default function Router(props: RouterProps): JSX.Element {
     // children?.find?.(x => x?.find?.(y => y.key === currentPage) || x.key === currentPage) || children.key === currentPage && children
     const result = recursiveFind(props.children, props.currentPage);
     return result;
-};
+}
