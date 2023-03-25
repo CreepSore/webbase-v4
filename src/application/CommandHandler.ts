@@ -1,8 +1,14 @@
 import minimist from "minimist";
 
-type ICommandCallbackResult = void | "INVALID_USAGE" | "INVALID_COMMAND" | "ERROR_HANDLED_BY_COMMAND";
 
-interface ICommand {
+export type ICommandCallbackResult = void | "INVALID_USAGE" | "INVALID_COMMAND" | "ERROR_HANDLED_BY_COMMAND";
+
+export interface ICommandExecutionResult {
+    result: ICommandCallbackResult;
+    log: string[];
+}
+
+export interface ICommand {
     triggers: string[];
     description?: string;
     examples?: string[];
@@ -11,25 +17,35 @@ interface ICommand {
         aliases?: string[];
         description?: string;
     }[];
-    callback: (args: minimist.ParsedArgs) => Promise<ICommandCallbackResult> | ICommandCallbackResult;
+    callback: (args: minimist.ParsedArgs, log: (msg: string) => void) => Promise<ICommandCallbackResult> | ICommandCallbackResult;
 }
 
 export default class CommandHandler {
     commands: Set<ICommand> = new Set();
+    isInteractive: boolean = false;
 
-    async triggerString(cmd: string): Promise<ICommandCallbackResult> {
+    async triggerString(cmd: string): Promise<ICommandExecutionResult> {
         const parsed = minimist(cmd.split(" "));
         parsed.c = parsed.command = parsed._[0];
         return await this.triggerArgs(parsed);
     }
 
-    async triggerArgs(args: minimist.ParsedArgs): Promise<ICommandCallbackResult> {
+    async triggerArgs(args: minimist.ParsedArgs): Promise<ICommandExecutionResult> {
         const command = this.getCommand(args.c);
+        const log: string[] = [];
         if(!command) {
-            return "INVALID_COMMAND";
+            return {
+                result: "INVALID_COMMAND",
+                log,
+            };
         }
 
-        return await command.callback(args);
+        return {
+            result: await command.callback(args, (message) => {
+                log.push(message);
+            }),
+            log,
+        };
     }
 
     getHelpString(command: ICommand): string {

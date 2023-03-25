@@ -37,11 +37,12 @@ export default class Core implements IExtension {
         }
 
         LoggerService
-            .addLogger(new ConsoleLogger())
+            .addLogger(new ConsoleLogger(), "console")
             .hookConsoleLog();
 
+        this.setupCli(executionContext);
+
         if(executionContext.contextType === "cli") {
-            this.setupCli(executionContext);
             return;
         }
 
@@ -66,7 +67,7 @@ export default class Core implements IExtension {
 
     }
 
-    private setupCli(executionContext: ICliExecutionContext): void {
+    private setupCli(executionContext: IExecutionContext): void {
         executionContext.application.cmdHandler.registerCommand({
             triggers: ["help", "h", "?"],
             description: "Shows the help page",
@@ -75,21 +76,21 @@ export default class Core implements IExtension {
                 description: "Name of the command you want to see the help of",
             }],
             examples: ["help", "help --cmd=<command>"],
-            callback: (args) => {
+            callback: (args, log) => {
                 const cmd = args.lp;
                 cmd || args.command;
                 if(!cmd) {
-                    console.log(executionContext.application.cmdHandler.getHelpPage());
+                    log(executionContext.application.cmdHandler.getHelpPage());
                     return;
                 }
 
                 const command = executionContext.application.cmdHandler.getCommand(cmd);
                 if(!command) {
-                    console.log("Command does not exist");
+                    log("Command does not exist");
                     return "ERROR_HANDLED_BY_COMMAND";
                 }
 
-                console.log(executionContext.application.cmdHandler.getHelpString(command));
+                log(executionContext.application.cmdHandler.getHelpString(command));
             },
         });
     }

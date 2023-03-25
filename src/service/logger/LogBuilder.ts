@@ -65,6 +65,11 @@ export default class LogBuilder {
         return this.appendCallStack();
     }
 
+    debugDone(): LogBuilder {
+        if(process.env.DEBUG !== "true") return this;
+        return this.done();
+    }
+
     done(): LogBuilder {
         LogBuilder.onDone(this.logEntry);
         return this;
