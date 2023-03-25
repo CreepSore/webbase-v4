@@ -122,7 +122,7 @@ export default class CoreUsermgmtWeb implements IExtension {
             next();
         }, async(req, res, next) => {
             const {apiKey} = req.query;
-            if(!apiKey) {
+            if(!apiKey || typeof apiKey !== "string") {
                 next();
                 return;
             }
