@@ -14,6 +14,10 @@ interface ActionEntry<ReturnType = void, ArgsType = void> {
 export default class ActionMonitor {
     private _actions: ActionEntry<any, any>[] = [];
 
+    get actions(): Action<any, any>[] {
+        return [...this._actions.map(actionEntry => actionEntry.action)];
+    }
+
     add(
         action: Action<any, any>,
         onSuccess?: ActionEntry["onSuccess"],
@@ -47,11 +51,15 @@ export default class ActionMonitor {
         return this._actions.find(a => a.action.jobId === jobId);
     }
 
-    tryRunAction(jobId: string): void {
+    tryRunAction(jobId: string, args: any = undefined): boolean {
         const action = this.getActionFromId(jobId);
         if (action) {
+            action.setArguments(args ?? action.args);
             this.executeAction(action);
+            return true;
         }
+
+        return false;
     }
 
     private async executeAction<T, T2>(action: Action<T, T2>, args: T2 = undefined): Promise<T> {

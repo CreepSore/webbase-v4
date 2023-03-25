@@ -49,6 +49,10 @@ export default class Action<ReturnType, ArgsType = void> {
         return this._args as ArgsType;
     }
 
+    get state(): ActionState {
+        return this._state;
+    }
+
     constructor(options: ActionOptions<ReturnType, ArgsType>) {
         this._jobId = options.jobId || uuid.v4();
         this._metadata = options.metadata || {};
