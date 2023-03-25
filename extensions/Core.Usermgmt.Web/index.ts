@@ -267,7 +267,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                     .start()
                     .level("WARN")
                     .info("Core.Usermgmt.Web")
-                    .line("Impersonation occured")
+                    .line("Login failed")
                     .object("info", {
                         ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
                     }).debugObject("credentials", req.body).done();
@@ -278,7 +278,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                 .start()
                 .level("INFO")
                 .info("Core.Usermgmt.Web")
-                .line("Impersonation occured")
+                .line("Login occurred")
                 .object("info", {
                     ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
                 }).debugObject("credentials", req.body).done();
