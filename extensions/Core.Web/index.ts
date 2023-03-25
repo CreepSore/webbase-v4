@@ -66,6 +66,7 @@ export default class CoreWeb implements IExtension {
 
         this.app = express();
         expressWs(this.app);
+
         this.app.use(helmet({
             contentSecurityPolicy: false,
         })).use(express.json({limit: "250mb"}))
@@ -99,6 +100,14 @@ export default class CoreWeb implements IExtension {
 
         this.events.emit("express-loaded", this.app);
         this.server = this.app.listen(this.config.port, this.config.hostname);
+
+        LogBuilder
+            .start()
+            .level("INFO")
+            .info("Core.Web")
+            .line("Started Web-Server")
+            .object("config", this.config)
+            .done();
     }
 
     async stop(): Promise<void> {

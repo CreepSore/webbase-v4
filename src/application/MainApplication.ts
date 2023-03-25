@@ -32,10 +32,11 @@ export default class MainAppliation implements IApplication {
     }
 
     loadConfig(): ConfigModel {
+        const templateModel = new ConfigModel();
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
-        const config = this.configLoader.createTemplateAndImport(new ConfigModel());
+        const config = this.configLoader.createTemplateAndImport(templateModel);
 
-        if(!config) {
+        if(!config && Object.keys(templateModel).length > 0) {
             throw new Error(`Config does not exist at [${this.configLoader.configPath}]`);
         }
         return config;
