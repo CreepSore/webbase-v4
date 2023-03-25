@@ -47,11 +47,21 @@ export default class CoreUsermgmt implements IExtension {
     }
 
     async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<{user?: Partial<User>, error?: string}> {
-        if(credentials.email && credentials.username) return null;
+        if(credentials.email && credentials.username) {
+            return { error: "MULTI_CREDENTIALS" };
+        }
 
-        if(credentials.email && typeof credentials.email !== "string") return null;
-        if(credentials.username && typeof credentials.username !== "string") return null;
-        if(credentials.password && typeof credentials.password !== "string") return null;
+        if(credentials.email && typeof credentials.email !== "string") {
+            return { error: "INVALID_TYPE" };
+        }
+
+        if(credentials.username && typeof credentials.username !== "string") {
+            return { error: "INVALID_TYPE" };
+        }
+
+        if(credentials.password && typeof credentials.password !== "string") {
+            return { error: "INVALID_TYPE" };
+        }
 
         const where: Partial<User> = {password: User.hashPassword(credentials.password)};
         if(credentials.email) {
@@ -61,21 +71,15 @@ export default class CoreUsermgmt implements IExtension {
             where.username = credentials.username;
         }
         else {
-            return {
-                error: "INVALID_CREDENTIALS",
-            };
+            return { error: "INVALID_CREDENTIALS" };
         }
 
         const user = await User.use().where(where).first();
         if(!user) {
-            return {
-                error: "INVALID_CREDENTIALS",
-            };
+            return { error: "INVALID_CREDENTIALS" };
         }
         else if(!user.isActive) {
-            return {
-                error: "USER_INACTIVE",
-            };
+            return { error: "USER_INACTIVE" };
         }
 
         return {
@@ -84,22 +88,20 @@ export default class CoreUsermgmt implements IExtension {
     }
 
     async loginByApiKey(apiKey: string): Promise<{user?: Partial<User>, error?: string}> {
-        if(typeof apiKey !== "string") return null;
+        if(typeof apiKey !== "string") {
+            return { error: "INVALID_TYPE" };
+        }
 
         const foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
-        if(!foundApiKey) return null;
+        if(!foundApiKey) return { error: "INVALID_API_KEY" };
 
         const user = await User.use().where({id: foundApiKey.id}).first() as Partial<User>;
         if(!user) {
-            return {
-                error: "INVALID_API_KEY",
-            };
+            return { error: "INVALID_API_KEY" };
         }
 
         if(!user.isActive) {
-            return {
-                error: "USER_INACTIVE",
-            };
+            return { error: "USER_INACTIVE" };
         }
 
         return {
