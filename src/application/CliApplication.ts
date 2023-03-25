@@ -24,6 +24,11 @@ export default class CliApplication implements IApplication {
     async start(): Promise<void> {
         this.events = new EventEmitter();
         const config = this.loadConfig();
+
+        const isInteractive
+            = this.cmdHandler.isInteractive
+            = this.args.c !== null && !this.args.c;
+
         this.events.emit("config-loaded", config);
 
         this.extensionService.setContextInfo({
@@ -50,7 +55,7 @@ export default class CliApplication implements IApplication {
 
         this.events.emit("after-startup", this.extensionService.executionContext);
 
-        if(this.args.c !== null && !this.args.c) {
+        if(isInteractive) {
             await this.startInteractive();
         }
         else {
@@ -80,10 +85,10 @@ export default class CliApplication implements IApplication {
         }).addListener("line", async(line) => {
             if(!line) return;
             const result = await this.cmdHandler.triggerString(line);
-            if(result === "INVALID_COMMAND") {
+            if(result.result === "INVALID_COMMAND") {
                 console.log("This command does not exist.");
             }
-            else if(result === "INVALID_USAGE") {
+            else if(result.result === "INVALID_USAGE") {
                 console.log("Invalid usage of command");
             }
         });

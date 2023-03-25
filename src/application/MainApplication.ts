@@ -4,11 +4,13 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import ConfigModel from "@logic/config/ConfigModel";
 import ExtensionService from "@service/extensions/ExtensionService";
 import IExecutionContext from "@service/extensions/IExecutionContext";
+import CommandHandler from "./CommandHandler";
 
 export default class MainAppliation implements IApplication {
     configLoader: ConfigLoader<ConfigModel>;
     events: EventEmitter = new EventEmitter();
     extensionService: ExtensionService = new ExtensionService();
+    cmdHandler: CommandHandler = new CommandHandler();
 
     async start(): Promise<void> {
         this.events = new EventEmitter();
