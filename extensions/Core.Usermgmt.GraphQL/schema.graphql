@@ -19,6 +19,13 @@ type User {
     isActive: Boolean!
     permissionGroup: PermissionGroup
     pseudo: Boolean!
+    apiKeys: [ApiKey]!
+}
+
+type ApiKey {
+    id: ID!
+    validUntil: String!
+    userId: String!
 }
 
 type Query {
@@ -31,6 +38,7 @@ type Query {
     permissions: [Permission]
     permissionById(id: ID!): Permission
     permissionByName(name: String!): Permission
+    apiKeys: [ApiKey]
 }
 
 type Mutation {
@@ -44,4 +52,6 @@ type Mutation {
     addPermissionToGroup(permissionGroupId: Int!, permissionId: Int!): Boolean!
     removePermissionFromGroup(permissionGroupId: Int!, permissionId: Int!): Boolean!
     createPermissionGroup(name: String!, description: String): Boolean!
+    addApiKeyToUser(userId: ID!): String!
+    deleteApiKey(apiKeyId: ID!): Boolean!
 }
