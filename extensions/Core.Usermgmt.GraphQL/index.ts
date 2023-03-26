@@ -24,6 +24,7 @@ import CoreDb from "@extensions/Core.Db";
 
 import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
+import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
 
 class CoreUsermgmtGraphQLConfig {}
 
@@ -56,6 +57,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         },
         permissionGroup: PermissionGroup,
         permissions: Permission[],
+        apiKeys: ApiKey[],
     }> {
         // @ts-ignore
         const {session} = req.raw;
@@ -88,6 +90,10 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
             },
             permissionGroup: permGroup,
             permissions: perms,
+            // @ts-ignore
+            apiKeys: (await ApiKey.use().where("userId", user.id)).map(apiKey => {
+                return {id: apiKey.id, validUntil: new Date(apiKey.validUntil).toISOString(), userId: apiKey.userId};
+            }),
         };
     }
 
@@ -105,6 +111,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                     permissions: (parent, args, context, info) => this.handlePermissionsQuery(parent, args, context, info),
                     permissionById: (parent, args, context, info) => this.handlePermissionByIdQuery(parent, args, context, info),
                     permissionByName: (parent, args, context, info) => this.handlePermissionByNameQuery(parent, args, context, info),
+                    apiKeys: (parent, args, context, info) => this.handleApiKeysQuery(parent, args, context, info),
                 },
                 Mutation: {
                     loginByCredentials: (parent, args, context, info) => this.handleLoginByCredentialsMutation(parent, args, context, info),
@@ -117,9 +124,10 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
                     addPermissionToGroup: (parent, args, context, info) => this.handleAddPermissionToGroupMutation(parent, args, context, info),
                     removePermissionFromGroup: (parent, args, context, info) =>this.handleRemovePermissionFromGroupMutation(parent, args, context, info),
                     createPermissionGroup: (parent, args, context, info) => this.handleCreatePermissionGroupMutation(parent, args, context, info),
+                    addApiKeyToUser: (parent, args, context, info) => this.handleAddApiKeyToUserMutation(parent, args, context, info),
+                    deleteApiKey: (parent, args, context, info) => this.handleDeleteApiKeyFromUserMutation(parent, args, context, info),
                 },
             },
-
         });
     }
 
@@ -200,6 +208,20 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         return await this.permissionsToGraphQlObject(await Permission.use().where("name", args.id).first());
     }
 
+    async handleApiKeysQuery(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.ViewUser.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        return await Promise.all((await ApiKey.use().select()).map(async(apiKey: Partial<ApiKey>) => {
+            return {
+                id: apiKey.id,
+                validUntil: apiKey.validUntil.getTime(),
+                userId: apiKey.userId,
+            };
+        }));
+    }
+
     async userToGraphQlObject(context: any, user: Partial<User>, loadPermGroup: boolean, loadPerms: boolean) {
         if(!this.hasPermissions(context, UsermgmtPermissions.ViewUser.name)) {
             throw new Error("Invalid Permissions");
@@ -217,15 +239,22 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
             }
         }
 
-        return {
+        const apiKeys = (await ApiKey.use().where("userId", user.id)).map(apiKey => {
+            return {id: apiKey.id, validUntil: new Date(apiKey.validUntil).toISOString(), userId: apiKey.userId};
+        });
+
+        const result = {
             id: user.id,
             username: user.username,
             email: user.email,
             password: user.password,
             isActive: user.isActive,
-            permissionGroup: permGroupError || await this.permissionGroupToGraphQlObject(context, permissionGroup, loadPerms),
+            permissionGroup: permGroupError || (loadPermGroup && await this.permissionGroupToGraphQlObject(context, permissionGroup, loadPerms)),
             pseudo: false,
+            apiKeys,
         };
+
+        return result;
     }
 
     async permissionGroupToGraphQlObject(context: any, group: Partial<PermissionGroup>, loadPerms: boolean) {
@@ -349,6 +378,38 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         const {name, description} = args;
         await PermissionGroup.create({name, description});
         return true;
+    }
+
+    async handleAddApiKeyToUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.EditUser.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const {userId} = args;
+        const user = await User.use().where({id: userId}).first();
+        if(!user) throw new Error("INVALID_USER");
+
+        const apiKeyId = uuid.v4();
+        const validUntil = new Date();
+        validUntil.setDate(validUntil.getDate() + 365);
+
+        await ApiKey.use().insert({
+            id: apiKeyId,
+            userId,
+            created: new Date(),
+            validUntil,
+        });
+
+        return apiKeyId;
+    }
+
+    async handleDeleteApiKeyFromUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!this.hasPermissions(context, UsermgmtPermissions.EditUser.name)) {
+            throw new Error("Invalid Permissions");
+        }
+
+        const count = await ApiKey.use().delete().where({id: args.apiKeyId});
+        return count > 0;
     }
     // #endregion
     // #endregion
