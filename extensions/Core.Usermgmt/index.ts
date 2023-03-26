@@ -11,6 +11,8 @@ import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
 import PermissionGroup from "@extensions/Core.Usermgmt/Models/PermissionGroup";
 import Permission from "@extensions/Core.Usermgmt/Models/Permission";
 
+class LoginError extends Error { }
+
 class TemplateConfig {
 
 }
@@ -46,7 +48,7 @@ export default class CoreUsermgmt implements IExtension {
 
     }
 
-    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<{user?: Partial<User>, error?: string}> {
+    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<User> {
         if(credentials.email && credentials.username) return null;
         const where: Partial<User> = {password: User.hashPassword(credentials.password)};
         if(credentials.email) {
@@ -56,49 +58,34 @@ export default class CoreUsermgmt implements IExtension {
             where.username = credentials.username;
         }
         else {
-            return {
-                error: "INVALID_CREDENTIALS",
-            };
+            throw new LoginError("INVALID_CREDENTIALS");
         }
 
         const user = await User.use().where(where).first();
         if(!user) {
-            return {
-                error: "INVALID_CREDENTIALS",
-            };
+            throw new LoginError("INVALID_CREDENTIALS");
         }
         else if(!user.isActive) {
-            return {
-                error: "USER_INACTIVE",
-            };
+            throw new LoginError("USER_INACTIVE");
         }
 
-        return {
-            user,
-        };
+        return user;
     }
 
-    async loginByApiKey(apiKey: string): Promise<{user?: Partial<User>, error?: string}> {
+    async loginByApiKey(apiKey: string): Promise<User> {
         const foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
         if(!foundApiKey) return null;
 
         const user = await User.use().where({id: foundApiKey.id}).first() as Partial<User>;
         if(!user) {
-            return {
-                error: "INVALID_API_KEY",
-            };
+            throw new LoginError("INVALID_API_KEY");
         }
 
         if(!user.isActive) {
-            return {
-                error: "USER_INACTIVE",
-            };
+            throw new LoginError("USER_INACTIVE");
         }
 
-        return {
-            user,
-            error: null,
-        };
+        return user as User;
     }
 
     async createPermissions(...permissions: Partial<Permission>[]): Promise<Partial<Permission>[]> {
