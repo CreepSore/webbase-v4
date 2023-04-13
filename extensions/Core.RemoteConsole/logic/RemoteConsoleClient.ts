@@ -1,7 +1,6 @@
 import { ICommandExecutionResult } from "@app/CommandHandler";
 import DatabridgePacket from "@extensions/Core.Databridge/DatabridgePacket";
 import DatabridgeTcpClientProtocol from "@extensions/Core.Databridge/protocols/client/DatabridgeTcpClientProtocol";
-import ConsoleLogger from "@service/logger/ConsoleLogger";
 import LogBuilder from "@service/logger/LogBuilder";
 import LoggerService from "@service/logger/LoggerService";
 import * as readline from "readline";
