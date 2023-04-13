@@ -43,6 +43,7 @@ const buildAppConfig = (env, argv) => {
                             exclude: /(node_modules)/,
                             loader: "babel-loader",
                             options: {
+                                babelrc: true,
                                 plugins: [
                                     ["babel-plugin-tsconfig-paths", {
                                         rootDir: ".",
@@ -51,44 +52,21 @@ const buildAppConfig = (env, argv) => {
                                 ],
                                 presets: ["@babel/typescript", ["@babel/preset-env", {
                                     targets: {
-                                        node: "17",
+                                        node: "18",
                                     },
                                 }]],
                             },
                         },
-                        {
-                            test: /\.(tsx|jsx)$/i,
-                            exclude: /(node_modules)/,
-                            use: [
-                                {
-                                    loader: "babel-loader",
-                                    options: {
-                                        presets: ["@babel/typescript", "@babel/preset-react", ["@babel/preset-env", {
-                                            targets: {
-                                                node: "17",
-                                            },
-                                        }]],
-                                    },
-                                },
-                            ],
-                            type: "asset/resource",
-                        },
-                        {
-                            test: /\.(json)$/i,
-                            exclude: /(node_modules)/,
-                        },
-                        {
-                            test: /\.png$/i,
-                            type: "asset/inline",
-                        },
-                        { test: /\.(css)$/i, use: ["style-loader", "css-loader", "postcss-loader", "sass-loader"] },
                     ],
                 },
             ],
         },
         optimization: {
             minimize: argv.mode === "productive",
+            moduleIds: "natural",
             mangleExports: false,
+            concatenateModules: false,
+            removeEmptyChunks: true,
         },
         plugins: [ ],
         target: "node",
