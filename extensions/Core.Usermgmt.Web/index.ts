@@ -127,68 +127,32 @@ export default class CoreUsermgmtWeb implements IExtension {
                 return;
             }
 
-            const apiKeyObject: ApiKey = await ApiKey.use().where({
-                id: apiKey,
-            }).first();
+            try {
+                const user = await coreUsermgmt.loginByApiKey(apiKey as string);
 
-            if(!apiKeyObject) {
                 LogBuilder
                     .start()
                     .level("WARN")
                     .info("Core.Usermgmt.Web")
-                    .line("Failed API Key logon: Invalid API Key")
+                    .line("API Key logon occured")
                     .object("info", {
                         ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
                         apiKey,
+                        uid: user.id,
                     }).done();
-
-                next();
-                return;
             }
-
-            if(!ApiKey.isValid(apiKeyObject)) {
+            catch(err) {
                 LogBuilder
                     .start()
                     .level("WARN")
                     .info("Core.Usermgmt.Web")
-                    .line("Failed API Key logon: API Key expired")
+                    .line("API Key logon failed")
                     .object("info", {
                         ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
                         apiKey,
+                        error: err,
                     }).done();
-
-                next();
-                return;
             }
-
-            const user: User = await User.use().where({id: apiKeyObject.userId}).first();
-            if(!user) {
-                LogBuilder
-                    .start()
-                    .level("WARN")
-                    .info("Core.Usermgmt.Web")
-                    .line("Failed API Key logon: Invalid User on API Key")
-                    .object("info", {
-                        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
-                        apiKey,
-                    }).done();
-
-                next();
-                return;
-            }
-
-            await this.handleUidLogon(req, res, user.id);
-
-            LogBuilder
-                .start()
-                .level("WARN")
-                .info("Core.Usermgmt.Web")
-                .line("API Key Logon occured")
-                .object("info", {
-                    ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
-                    apiKey,
-                    uid: user.id,
-                }).done();
 
             next();
         });
@@ -261,30 +225,33 @@ export default class CoreUsermgmtWeb implements IExtension {
         });
 
         apiRouter.post("/login", async(req, res) => {
-            const logon = await coreUsermgmt.loginByCredentials(req.body);
-            if(logon.error) {
+            try {
+                const logon = await coreUsermgmt.loginByCredentials(req.body);
+
                 LogBuilder
                     .start()
-                    .level("WARN")
+                    .level("INFO")
                     .info("Core.Usermgmt.Web")
                     .line("Login failed")
                     .object("info", {
                         ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
                     }).debugObject("credentials", req.body).done();
-                return res.json({success: false, error: logon.error});
+
+                req.session.uid = logon.id;
+                return res.json({success: true});
             }
+            catch(err) {
+                LogBuilder
+                    .start()
+                    .level("WARN")
+                    .info("Core.Usermgmt.Web")
+                    .line("Impersonation occured")
+                    .object("info", {
+                        ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+                    }).debugObject("credentials", req.body).done();
 
-            LogBuilder
-                .start()
-                .level("INFO")
-                .info("Core.Usermgmt.Web")
-                .line("Login occurred")
-                .object("info", {
-                    ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
-                }).debugObject("credentials", req.body).done();
-
-            req.session.uid = logon.user.id;
-            return res.json({success: true});
+                return res.json({success: false, error: err});
+            }
         });
 
         apiRouter.post("/logout", async(req, res) => {

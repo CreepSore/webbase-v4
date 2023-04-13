@@ -418,10 +418,6 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     async handleLoginByCredentialsMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         const {username, password} = args;
         const result = await this.coreUsermgmt.loginByCredentials({username, password});
-        if(result.error) {
-            throw new Error(result.error);
-        }
-
         context.req.session.uid = result.user.id;
         return result.user.id;
     }
