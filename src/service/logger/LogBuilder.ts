@@ -51,6 +51,25 @@ export default class LogBuilder {
         return this;
     }
 
+    appendCallStack(): LogBuilder {
+        const {stack} = new Error();
+        const lines = stack.split("\n");
+        lines[0] = "Call-Stack:";
+        lines.splice(1, 1);
+        this.line(...lines);
+        return this;
+    }
+
+    appendDebugCallStack(): LogBuilder {
+        if(process.env.DEBUG !== "true") return this;
+        return this.appendCallStack();
+    }
+
+    debugDone(): LogBuilder {
+        if(process.env.DEBUG !== "true") return this;
+        return this.done();
+    }
+
     done(): LogBuilder {
         LogBuilder.onDone(this.logEntry);
         return this;

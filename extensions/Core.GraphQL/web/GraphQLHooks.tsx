@@ -20,6 +20,8 @@ export function useQuery<T>(query: string, options: UseQueryOptions<T> = {}): {
     const [forceUpdateValue, forceUpdate] = React.useReducer(x => x + 1, 0);
 
     React.useEffect(() => {
+        console.log([query, options.variables, forceUpdateValue]);
+
         setLoading(true);
         fetch("/api/core.graphql", {
             method: "POST",
@@ -31,17 +33,17 @@ export function useQuery<T>(query: string, options: UseQueryOptions<T> = {}): {
                 variables: options.variables,
             }),
         }).then(res => res.json()).then(fetchedData => {
-            options.onSuccess?.(fetchedData.data, fetchedData.errors);
             setData(fetchedData.data);
             setErrors(fetchedData.errors);
             setLoading(false);
+            options.onSuccess?.(fetchedData.data, fetchedData.errors);
         }).catch(err => {
-            options.onError?.(err);
             setErrors([err.message]);
-            setData(null);
+            setData(options.defaultValue);
             setLoading(false);
+            options.onError?.(err);
         });
-    }, [query, options.variables, forceUpdateValue]);
+    }, [forceUpdateValue]);
 
     return {
         data,

@@ -74,7 +74,7 @@ export default class CoreUsermgmt implements IExtension {
 
     async loginByApiKey(apiKey: string): Promise<User> {
         const foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
-        if(!foundApiKey) return null;
+        if(!foundApiKey) return { error: "INVALID_API_KEY" };
 
         const user = await User.use().where({id: foundApiKey.id}).first() as Partial<User>;
         if(!user) {

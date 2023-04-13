@@ -53,6 +53,16 @@
                 @apply px-2;
             }
 
+            button.add-api-key-button {
+                @apply bg-green-600 py-1 px-4 text-white font-bold hover:brightness-110;
+                @apply w-full;
+            }
+
+            button.del-api-key-button {
+                @apply bg-red-600 py-1 px-4 text-white font-bold hover:brightness-110;
+                @apply w-full;
+            }
+
             button.impersonate-button {
                 @apply bg-violet-600 py-2 px-4 text-white font-bold hover:brightness-110;
             }

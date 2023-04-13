@@ -116,6 +116,7 @@ export default class User {
     }
 
     static hashPassword(password: string) {
+        if(!password) return null;
         return crypto.createHash("sha256").update(password).digest("hex");
     }
 }

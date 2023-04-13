@@ -4,11 +4,13 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import ConfigModel from "@logic/config/ConfigModel";
 import ExtensionService from "@service/extensions/ExtensionService";
 import IExecutionContext from "@service/extensions/IExecutionContext";
+import CommandHandler from "./CommandHandler";
 
 export default class MainAppliation implements IApplication {
     configLoader: ConfigLoader<ConfigModel>;
     events: EventEmitter = new EventEmitter();
     extensionService: ExtensionService = new ExtensionService();
+    cmdHandler: CommandHandler = new CommandHandler();
 
     async start(): Promise<void> {
         this.events = new EventEmitter();
@@ -32,10 +34,11 @@ export default class MainAppliation implements IApplication {
     }
 
     loadConfig(): ConfigModel {
+        const templateModel = new ConfigModel();
         this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
-        const config = this.configLoader.createTemplateAndImport(new ConfigModel());
+        const config = this.configLoader.createTemplateAndImport(templateModel);
 
-        if(!config) {
+        if(!config && Object.keys(templateModel).length > 0) {
             throw new Error(`Config does not exist at [${this.configLoader.configPath}]`);
         }
         return config;

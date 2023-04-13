@@ -22,6 +22,24 @@ export default function UserEditorDialog(props: UserEditorDialogProps): JSX.Elem
     const [deleteCount, setDeleteCount] = React.useState(4);
     const [permissionGroups, setPermissionGroups] = React.useState<IPermissionGroup[]>([]);
     const [permissionGroup, setPermissionGroup] = React.useState<IPermissionGroup>(null);
+    const [apiKeys, setApiKeys] = React.useState<{id: string, validUntil: string, userId: string}[]>([]);
+
+    const {forceUpdate: forceUpdateApiKeys} = useQuery<{
+        userById: {
+            apiKeys: {id: string, validUntil: string, userId: string}[]
+        }
+    }>(`query getApiKeys($id: ID!) {
+        userById(id: $id) {
+            apiKeys {
+                id,
+                validUntil,
+                userId
+            }
+        }
+    }`, {
+        variables: {id: props.user.id},
+        onSuccess: (data, errors) => (errors?.length || 0) === 0 && setApiKeys(data.userById.apiKeys),
+    });
 
     React.useEffect(() => {
         setPermissionGroup(permissionGroups.find(pg => pg.id === props.user.permissionGroup.id));
@@ -50,6 +68,20 @@ export default function UserEditorDialog(props: UserEditorDialogProps): JSX.Elem
     }`, {
         onSuccess: () => props.afterImpersonate(),
         onError: () => props.afterImpersonate(),
+    });
+
+    const addApiKeyMutation = useMutation(`mutation AddApiKey($id: ID!){
+        addApiKeyToUser(userId: $id)
+    }`, {
+        onSuccess: () => forceUpdateApiKeys(),
+        onError: () => forceUpdateApiKeys(),
+    });
+
+    const delApiKeyMutation = useMutation(`mutation DelApiKey($id: ID!){
+        deleteApiKey(apiKeyId: $id)
+    }`, {
+        onSuccess: () => forceUpdateApiKeys(),
+        onError: () => forceUpdateApiKeys(),
     });
 
     const saveUser = (): void => {
@@ -114,6 +146,29 @@ export default function UserEditorDialog(props: UserEditorDialogProps): JSX.Elem
                 <select value={String(permissionGroup?.id) ?? "0"} onChange={e => setPermissionGroup(permissionGroups.find(pg => String(pg.id) === e.target.value))}>
                     {permissionGroups.map(pg => <option key={pg.id} value={pg.id}>{pg.name}</option>)}
                 </select>
+
+                <div className="grid grid-cols-3 col-span-2 overflow-y-auto md:max-h-[200px]">
+                    <div className="col-span-3">
+                        <button
+                            className="add-api-key-button"
+                            onClick={() => {
+                                addApiKeyMutation.execute({id: props.user.id});
+                            }}
+                        >Create ApiKey</button>
+                    </div>
+                    {apiKeys.map(apiKey => <React.Fragment key={apiKey.id}>
+                        <div>{apiKey.id}</div>
+                        <div>{new Date(apiKey.validUntil).toISOString()}</div>
+                        <div>
+                            <button
+                                className="del-api-key-button"
+                                onClick={() => {
+                                    delApiKeyMutation.execute({id: apiKey.id});
+                                }}
+                            >Delete</button>
+                        </div>
+                    </React.Fragment>)}
+                </div>
 
                 <div className="flex flex-col gap-1 col-span-1 md:col-span-2 mt-2">
                     <button
