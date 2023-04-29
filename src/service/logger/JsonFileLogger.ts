@@ -33,13 +33,21 @@ export default class JsonFileLogger implements ILogger {
             logObj.id = log.id;
         }
 
-        let cache: any[] = [];
-        fs.appendFileSync(this.logfilePath, `${JSON.stringify(logObj, (key, value) => {
-            if (typeof value === "object" && value !== null && !cache.includes(value)) {
-                cache.push(value);
-            }
-            return value;
-        })}\n`);
-        cache = null;
+        // ! For some reason whatsoever, this still sometimes fails when having circular references
+        try {
+            let cache: any[] = [];
+            const toLog = JSON.stringify(logObj, (key, value) => {
+                if (typeof value === "object" && value !== null && !cache.includes(value)) {
+                    cache.push(value);
+                }
+                return value;
+            });
+            cache = null;
+
+            fs.appendFileSync(this.logfilePath, `${toLog}\n`);
+        }
+        catch {
+            // ignore
+        }
     }
 }
