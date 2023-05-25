@@ -46,15 +46,15 @@ describe("Logger Tests", () => {
         const result1 = test.test1();
         const logEntry = log[0];
         expect(logEntry).toBeInstanceOf(Object);
-        expect(Object.keys(logEntry.objects).length).toBe(3);
+        expect(Object.keys(logEntry.objects).length).toBe(1);
         expect(logEntry.lines).toContain("Got called");
         expect(logEntry.lines).toContain("Call-Stack:");
         expect(result1).toBe("test");
 
         const result2 = test.test2();
-        const logEntry2 = log[1]; // ?
+        const logEntry2 = log[1];
         expect(logEntry2).toBeInstanceOf(Object);
-        expect(Object.keys(logEntry2.objects).length).toBe(3);
+        expect(Object.keys(logEntry2.objects).length).toBe(1);
         expect(logEntry2.lines).not.toContain("Call-Stack:");
         expect(result2).toBe("test2");
     });
