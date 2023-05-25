@@ -1,3 +1,5 @@
+import * as perfHooks from "perf_hooks";
+
 import * as uuid from "uuid";
 import ILogEntry from "./ILogEntry";
 
@@ -18,8 +20,6 @@ export default class LogBuilder {
             const original = desc.value;
 
             desc.value = function(...args: any[]) {
-                const startDate = new Date();
-
                 const infoObj: {
                     args?: any,
                     return?: any,
@@ -27,8 +27,6 @@ export default class LogBuilder {
                     endTime?: string,
                 } = {
                     args,
-                    startTime: startDate.toISOString(),
-                    endTime: null,
                 };
 
                 const builder = LogBuilder
@@ -36,16 +34,13 @@ export default class LogBuilder {
                     .level("INFO")
                     .info("LogRuntime");
 
+                const startTime = perfHooks.performance.now();
                 const ret = original?.apply?.(this, args);
-                const endDate = new Date();
-
+                const endTime = perfHooks.performance.now();
                 infoObj.return = ret;
-                infoObj.endTime = endDate.toISOString();
-
-                const execTime = endDate.getTime() - startDate.getTime();
 
                 builder
-                    .line(`Called ${obj.constructor.name}.${symbol}: ${execTime}ms`);
+                    .line(`Called ${obj.constructor.name}.${symbol}: ${endTime - startTime}ms`);
 
                 if(appendCallstack === "debug") {
                     builder.appendDebugCallStack();
