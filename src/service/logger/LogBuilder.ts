@@ -20,6 +20,8 @@ export default class LogBuilder {
             desc.value = function(...args: any[]) {
                 const builder = LogBuilder
                     .start()
+                    .level("INFO")
+                    .info("LogRuntime")
                     .line("Got called")
                     .object("args", args)
                     .object("startTime", Date.now());
