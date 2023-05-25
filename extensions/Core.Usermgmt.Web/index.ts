@@ -135,6 +135,9 @@ export default class CoreUsermgmtWeb implements IExtension {
             try {
                 const user = await coreUsermgmt.loginByApiKey(apiKey as string);
 
+                req.session.uid = user.id;
+                await this.handleUidLogon(req, res, req.session.uid);
+
                 LogBuilder
                     .start()
                     .level("WARN")
