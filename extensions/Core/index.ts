@@ -1,4 +1,6 @@
 import * as fs from "fs";
+import * as process from "process";
+
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import LoggerService from "@service/logger/LoggerService";
@@ -7,6 +9,7 @@ import FileLogger from "@service/logger/FileLogger";
 import CacheLogger from "@service/logger/CacheLogger";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import JsonFileLogger from "@service/logger/JsonFileLogger";
+import LogBuilder from "@service/logger/LogBuilder";
 
 class CoreConfig {
     logger = {
@@ -65,6 +68,34 @@ export default class Core implements IExtension {
                     this.config.logger.jsonLogger.removeId,
                 ));
         }
+
+        process.on("uncaughtException", (error, origin) => {
+            LogBuilder
+                .start()
+                .level("CRITICAL")
+                .info("Core")
+                .line("CRITICAL ERROR OCCURED - PROGRAM WILL CRASH")
+                .object("error", error)
+                .object("origin", origin)
+                .appendCallStack()
+                .done();
+
+            process.exit(1);
+        });
+
+        process.on("unhandledRejection", (reason, promise) => {
+            LogBuilder
+                .start()
+                .level("CRITICAL")
+                .info("Core")
+                .line("UNHANDLED REJECTION OCCURED - PROGRAM WILL CRASH")
+                .object("reason", reason)
+                .object("promise", promise)
+                .appendCallStack()
+                .done();
+
+            process.exit(1);
+        });
     }
 
     async stop(): Promise<void> {
