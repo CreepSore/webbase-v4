@@ -86,7 +86,7 @@ export default class LogBuilder {
                 let ret = original?.apply?.(this, args);
                 const callback = (pRet: any): any => {
                     const endTime = perfHooks.performance.now();
-                    infoObj.return = ret;
+                    infoObj.return = pRet;
 
                     builder
                         .line(`Resolved Promise ${obj.constructor.name}.${symbol}: ${endTime - startTime}ms`);
