@@ -1,5 +1,5 @@
 import * as fs from "fs";
-import IExecutionContext, { ICliExecutionContext } from "@service/extensions/IExecutionContext";
+import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import LoggerService from "@service/logger/LoggerService";
 import ConsoleLogger from "@service/logger/ConsoleLogger";
