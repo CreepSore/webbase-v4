@@ -108,6 +108,12 @@ export default class CoreCache implements IExtension {
         return this.cache.get(key) as CacheEntry<T>;
     }
 
+    getCachedInstance<T>(key: string, config: CacheEntryConfig<T>): CacheEntry<T> {
+        if(this.cache.has(key)) return this.getCacheEntry(key);
+
+        return this.createCacheEntry(config);
+    }
+
     getCachedValue<T>(key: string, defaultValue: T): T {
         return (this.getCacheEntry(key)?.currentValue || defaultValue) as T;
     }
