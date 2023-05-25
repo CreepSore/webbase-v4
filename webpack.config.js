@@ -26,12 +26,13 @@ const buildAppConfig = (env, argv) => {
         },
         devtool: argv.mode === "development" ? "inline-source-map" : false,
         resolve: {
-            extensions: [".ts", ".js", ".json"],
+            extensions: [".ts", ".js"],
             alias: {
                 wpextensions: path.resolve(__dirname, "extensions"),
                 "@extensions": path.resolve(__dirname, "extensions"),
             },
             modules: ["node_modules"],
+            symlinks: false,
         },
         externals: {},
         module: {
@@ -41,6 +42,7 @@ const buildAppConfig = (env, argv) => {
                         {
                             test: /\.(ts|js)$/i,
                             exclude: /(node_modules)/,
+                            include: /(src)|(extensions)/,
                             loader: "babel-loader",
                             options: {
                                 babelrc: true,
@@ -66,7 +68,9 @@ const buildAppConfig = (env, argv) => {
             moduleIds: "natural",
             mangleExports: false,
             concatenateModules: false,
-            removeEmptyChunks: true,
+            removeEmptyChunks: false,
+            removeAvailableModules: false,
+            splitChunks: false,
         },
         plugins: [ ],
         target: "node",
