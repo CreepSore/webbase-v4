@@ -36,13 +36,6 @@ export default class LogBuilder {
                     .level("INFO")
                     .info("LogRuntime");
 
-                if(appendCallstack === "debug") {
-                    builder.appendDebugCallStack();
-                }
-                else if(appendCallstack === "always") {
-                    builder.appendCallStack();
-                }
-
                 const ret = original?.apply?.(this, args);
                 const endDate = new Date();
 
@@ -52,7 +45,16 @@ export default class LogBuilder {
                 const execTime = endDate.getTime() - startDate.getTime();
 
                 builder
-                    .line(`Called ${obj.constructor.name}.${symbol}: ${execTime}ms`)
+                    .line(`Called ${obj.constructor.name}.${symbol}: ${execTime}ms`);
+
+                if(appendCallstack === "debug") {
+                    builder.appendDebugCallStack();
+                }
+                else if(appendCallstack === "always") {
+                    builder.appendCallStack();
+                }
+
+                builder
                     .object("info", infoObj)
                     .done();
 
