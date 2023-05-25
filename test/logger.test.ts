@@ -47,7 +47,6 @@ describe("Logger Tests", () => {
         const logEntry = log[0];
         expect(logEntry).toBeInstanceOf(Object);
         expect(Object.keys(logEntry.objects).length).toBe(1);
-        expect(logEntry.lines).toContain("Got called");
         expect(logEntry.lines).toContain("Call-Stack:");
         expect(result1).toBe("test");
 

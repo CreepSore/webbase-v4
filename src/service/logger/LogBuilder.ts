@@ -18,6 +18,8 @@ export default class LogBuilder {
             const original = desc.value;
 
             desc.value = function(...args: any[]) {
+                const startDate = new Date();
+
                 const infoObj: {
                     args?: any,
                     return?: any,
@@ -25,15 +27,14 @@ export default class LogBuilder {
                     endTime?: string,
                 } = {
                     args,
-                    startTime: new Date().toISOString(),
+                    startTime: startDate.toISOString(),
                     endTime: null,
                 };
 
                 const builder = LogBuilder
                     .start()
                     .level("INFO")
-                    .info("LogRuntime")
-                    .line("Got called");
+                    .info("LogRuntime");
 
                 if(appendCallstack === "debug") {
                     builder.appendDebugCallStack();
@@ -43,9 +44,17 @@ export default class LogBuilder {
                 }
 
                 const ret = original?.apply?.(this, args);
+                const endDate = new Date();
+
                 infoObj.return = ret;
-                infoObj.endTime = new Date().toISOString();
-                builder.object("info", infoObj).done();
+                infoObj.endTime = endDate.toISOString();
+
+                const execTime = endDate.getTime() - startDate.getTime();
+
+                builder
+                    .line(`Called ${obj.constructor.name}.${symbol}: ${execTime}ms`)
+                    .object("info", infoObj)
+                    .done();
 
                 return ret;
             };
