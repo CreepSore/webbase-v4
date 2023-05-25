@@ -58,6 +58,64 @@ export default class LogBuilder {
         };
     }
 
+    /**
+     * This must only be called using decorators
+     * @static
+     * @memberof LogBuilder
+     */
+    static $logRuntimePromise(appendCallstack: "debug"|"always"|"none" = "none"): MethodDecorator {
+        return function(obj: any, symbol: string, desc: PropertyDescriptor) {
+            const original = desc.value;
+
+            desc.value = function(...args: any[]) {
+                const infoObj: {
+                    args?: any,
+                    return?: any,
+                    startTime?: string,
+                    endTime?: string,
+                } = {
+                    args,
+                };
+
+                const builder = LogBuilder
+                    .start()
+                    .level("INFO")
+                    .info("LogRuntime");
+
+                const startTime = perfHooks.performance.now();
+                let ret = original?.apply?.(this, args);
+                const callback = (pRet: any): any => {
+                    const endTime = perfHooks.performance.now();
+                    infoObj.return = ret;
+
+                    builder
+                        .line(`Resolved Promise ${obj.constructor.name}.${symbol}: ${endTime - startTime}ms`);
+
+                    if(appendCallstack === "debug") {
+                        builder.appendDebugCallStack();
+                    }
+                    else if(appendCallstack === "always") {
+                        builder.appendCallStack();
+                    }
+
+                    builder
+                        .object("info", infoObj)
+                        .done();
+                    return pRet;
+                };
+
+                if(ret.then) {
+                    ret = ret.then((pRet: any) => callback(pRet));
+                }
+                else {
+                    callback(ret);
+                }
+
+                return ret;
+            };
+        };
+    }
+
     static start(): LogBuilder {
         return new LogBuilder().start();
     }
