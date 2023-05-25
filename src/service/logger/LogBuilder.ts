@@ -14,10 +14,10 @@ export default class LogBuilder {
      * @memberof LogBuilder
      */
     static $logRuntime(appendCallstack: "debug"|"always"|"none" = "none"): MethodDecorator {
-        return (obj: any, symbol: string, desc: PropertyDescriptor) => {
+        return function(obj: any, symbol: string, desc: PropertyDescriptor) {
             const original = desc.value;
 
-            desc.value = (...args: any[]) => {
+            desc.value = function(...args: any[]) {
                 const builder = LogBuilder
                     .start()
                     .line("Got called")
@@ -31,7 +31,7 @@ export default class LogBuilder {
                     builder.appendCallStack();
                 }
 
-                const ret = original?.apply?.(obj, args);
+                const ret = original?.apply?.(this, args);
 
                 builder
                     .object("endTime", Date.now())
