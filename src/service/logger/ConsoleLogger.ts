@@ -55,7 +55,11 @@ const logLevelUnicodeMapping: {[key: string]: string} = {
  */
 export default class ConsoleLogger implements ILogger {
     // For now we only support linux
-    fancy: boolean = process.platform === "linux";
+    prettyPrint: boolean = process.platform === "linux";
+
+    constructor(prettyPrint: boolean = false) {
+        this.prettyPrint = prettyPrint ? process.platform === "linux" : false;
+    }
 
     async log(log: ILogEntry): Promise<void> {
         const formatted = this.formatLog(log);
@@ -69,7 +73,7 @@ export default class ConsoleLogger implements ILogger {
     }
 
     formatLog(log: ILogEntry): string {
-        if(this.fancy && Object.keys(logLevelMapping).includes(log.level)) {
+        if(this.prettyPrint && Object.keys(logLevelMapping).includes(log.level)) {
             const colors = logLevelMapping[log.level];
             const emoji = logLevelUnicodeMapping[log.level];
             const date = `[${log.date.toISOString()}]`;

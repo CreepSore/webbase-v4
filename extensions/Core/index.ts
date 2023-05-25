@@ -9,9 +9,14 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import JsonFileLogger from "@service/logger/JsonFileLogger";
 
 class CoreConfig {
-    jsonLogger = {
-        enable: true,
-        removeId: false,
+    logger = {
+        consoleLogger: {
+            prettyPrint: true,
+        },
+        jsonLogger: {
+            enable: true,
+            removeId: false,
+        },
     };
 }
 
@@ -36,7 +41,7 @@ export default class Core implements IExtension {
         }
 
         LoggerService
-            .addLogger(new ConsoleLogger(), "console")
+            .addLogger(new ConsoleLogger(this.config.logger.consoleLogger.prettyPrint), "console")
             .hookConsoleLog();
 
         this.setupCli(executionContext);
@@ -49,7 +54,7 @@ export default class Core implements IExtension {
             .addLogger(new FileLogger(`logs/out_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`))
             .addLogger(new CacheLogger(), "cache");
 
-        if(this.config?.jsonLogger?.enable === true) {
+        if(this.config.logger.jsonLogger.enable === true) {
             if(!fs.existsSync("jsonlogs")) {
                 fs.mkdirSync("jsonlogs");
             }
@@ -57,7 +62,7 @@ export default class Core implements IExtension {
             LoggerService
                 .addLogger(new JsonFileLogger(
                     `jsonlogs/out_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`,
-                    this.config?.jsonLogger?.removeId,
+                    this.config.logger.jsonLogger.removeId,
                 ));
         }
     }
