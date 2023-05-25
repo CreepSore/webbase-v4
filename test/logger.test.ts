@@ -14,9 +14,49 @@ describe("Logger Tests", () => {
 
     it("should not destroy the original console.log when unhooking when not hooked", () => {
         const consoleLog = console.log;
+        LoggerService.hookConsoleLog();
         LoggerService.unhookConsoleLog();
 
         expect(consoleLog).toBe(console.log);
+    });
+
+    it("should correctly use the property descriptor", () => {
+        LoggerService.hookConsoleLog();
+        const log: ILogEntry[] = [];
+        LoggerService.addLogger({
+            name: "TestLogger",
+            async log(logEntry: ILogEntry) {
+                log.push(logEntry);
+            },
+        });
+
+        class DecoratorTest {
+            @LogBuilder.$logRuntime("always")
+            test1(): string {
+                return "test";
+            }
+
+            @LogBuilder.$logRuntime()
+            test2(): string {
+                return "test2";
+            }
+        }
+
+        const test = new DecoratorTest();
+        const result1 = test.test1();
+        const logEntry = log[0];
+        expect(logEntry).toBeInstanceOf(Object);
+        expect(Object.keys(logEntry.objects).length).toBe(3);
+        expect(logEntry.lines).toContain("Got called");
+        expect(logEntry.lines).toContain("Call-Stack:");
+        expect(result1).toBe("test");
+
+        const result2 = test.test2();
+        const logEntry2 = log[1]; // ?
+        expect(logEntry2).toBeInstanceOf(Object);
+        expect(Object.keys(logEntry2.objects).length).toBe(3);
+        expect(logEntry2.lines).not.toContain("Call-Stack:");
+        expect(result2).toBe("test2");
     });
 
     it("should correctly add a logger and log data", () => {

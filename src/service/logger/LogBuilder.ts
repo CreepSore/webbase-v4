@@ -8,6 +8,41 @@ export default class LogBuilder {
     constructor() {
     }
 
+    /**
+     * This must only be called using decorators
+     * @static
+     * @memberof LogBuilder
+     */
+    static $logRuntime(appendCallstack: "debug"|"always"|"none" = "none"): MethodDecorator {
+        return (obj: any, symbol: string, desc: PropertyDescriptor) => {
+            const original = desc.value;
+
+            desc.value = (...args: any[]) => {
+                const builder = LogBuilder
+                    .start()
+                    .line("Got called")
+                    .object("args", args)
+                    .object("startTime", Date.now());
+
+                if(appendCallstack === "debug") {
+                    builder.appendDebugCallStack();
+                }
+                else if(appendCallstack === "always") {
+                    builder.appendCallStack();
+                }
+
+                const ret = original?.apply?.(obj, args);
+
+                builder
+                    .object("endTime", Date.now())
+                    .debugObject("return", ret)
+                    .done();
+
+                return ret;
+            };
+        };
+    }
+
     static start(): LogBuilder {
         return new LogBuilder().start();
     }

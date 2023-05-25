@@ -51,6 +51,9 @@ const buildAppConfig = (env, argv) => {
                                         rootDir: ".",
                                         tsconfig: "tsconfig.json",
                                     }],
+                                    ["@babel/plugin-proposal-decorators", {
+                                        legacy: true,
+                                    }],
                                 ],
                                 presets: ["@babel/typescript", ["@babel/preset-env", {
                                     targets: {
