@@ -76,12 +76,11 @@ export default class CoreCache implements IExtension {
     };
 
     config: CacheConfig;
-    configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
     cache: Map<string, CacheEntry<any>> = new Map();
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
@@ -126,25 +125,24 @@ export default class CoreCache implements IExtension {
 
     private checkConfig(): void {
         if(!this.config) {
-            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
+            throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
         }
     }
 
-    private loadConfig(): typeof this.config {
-        const model = new CacheConfig();
-        if(Object.keys(model).length === 0) return model;
-
-        const [cfgname, templatename] = this.generateConfigNames();
-        this.configLoader = new ConfigLoader(cfgname, templatename);
-        const cfg = this.configLoader.createTemplateAndImport(model);
-
-        return cfg;
+    private loadConfig(createDefault: boolean = false): typeof this.config {
+        const [configPath, templatePath] = this.generateConfigNames();
+        return ConfigLoader.initConfigWithModel(
+            configPath,
+            templatePath,
+            new CacheConfig(),
+            createDefault,
+        );
     }
 
     private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
+            ConfigLoader.createTemplateConfigPath(`${this.metadata.name}.json`),
         ];
     }
 }

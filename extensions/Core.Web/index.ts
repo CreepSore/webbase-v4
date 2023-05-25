@@ -32,7 +32,6 @@ export default class CoreWeb implements IExtension {
     config: CoreWebConfig;
     app: express.Express;
     server: Server;
-    configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
     liveReload: {
         enabled: boolean,
@@ -55,14 +54,12 @@ export default class CoreWeb implements IExtension {
     logSkipping: RegExp[] = [];
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
         if(executionContext.contextType === "cli") return;
-        if(!this.config) {
-            throw new Error(`Config not found at [${this.configLoader.configPath}]`);
-        }
+        this.checkConfig();
 
         this.app = express();
         expressWs(this.app);
@@ -113,13 +110,6 @@ export default class CoreWeb implements IExtension {
     async stop(): Promise<void> {
         this.server.removeAllListeners();
         this.server.close();
-    }
-
-    private loadConfig(): typeof this.config {
-        this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("Core.Web.json"), ConfigLoader.createConfigPath("Core.Web.template.json"));
-        const cfg = this.configLoader.createTemplateAndImport(new CoreWebConfig());
-
-        return cfg;
     }
 
     onExpressLoaded(callback: (app: express.Express) => void): void {
@@ -257,5 +247,28 @@ export default class CoreWeb implements IExtension {
     skipLogForUrl(url: RegExp | string): CoreWeb {
         this.logSkipping.push(typeof url === "string" ? new RegExp(url) : url);
         return this;
+    }
+
+    private checkConfig(): void {
+        if(!this.config) {
+            throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
+        }
+    }
+
+    private loadConfig(createDefault: boolean = false): typeof this.config {
+        const [configPath, templatePath] = this.generateConfigNames();
+        return ConfigLoader.initConfigWithModel(
+            configPath,
+            templatePath,
+            new CoreWebConfig(),
+            createDefault,
+        );
+    }
+
+    private generateConfigNames(): string[] {
+        return [
+            ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
+            ConfigLoader.createTemplateConfigPath(`${this.metadata.name}.json`),
+        ];
     }
 }

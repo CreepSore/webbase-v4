@@ -4,15 +4,9 @@ import * as fs from "fs";
 import * as path from "path";
 
 import * as uuid from "uuid";
-
-import IExecutionContext from "@service/extensions/IExecutionContext";
-import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
-import ConfigLoader from "@logic/config/ConfigLoader";
-
 import IGraphQLExtension from "@extensions/Core.GraphQL/IGraphQLExtension";
 import { GraphQLResolveInfo, GraphQLSchema } from "graphql";
 import * as GraphQLTools from "@graphql-tools/schema";
-
 import CoreGraphQL from "@extensions/Core.GraphQL";
 import { Request } from "express";
 import { ParsedQs } from "qs";
@@ -22,6 +16,9 @@ import Permission from "@extensions/Core.Usermgmt/Models/Permission";
 import { Knex } from "knex";
 import CoreDb from "@extensions/Core.Db";
 
+import IExecutionContext from "@service/extensions/IExecutionContext";
+import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
+import ConfigLoader from "@logic/config/ConfigLoader";
 import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
 import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
@@ -38,14 +35,13 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     };
 
     config: CoreUsermgmtGraphQLConfig;
-    configLoader: ConfigLoader<typeof this.config>;
 
     db: Knex;
     coreGraphQL: CoreGraphQL;
     coreUsermgmt: CoreUsermgmt;
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
     }
 
     async buildGraphQLContext(req: Request<Request<any, any, any, any, Record<string, any>>, undefined, any, ParsedQs, Record<string, any>>): Promise<{
@@ -417,20 +413,19 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     // #region Session
     async handleLoginByCredentialsMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         const {username, password} = args;
+        // ! this throws
         const result = await this.coreUsermgmt.loginByCredentials({username, password});
-        context.req.session.uid = result.user.id;
-        return result.user.id;
+        context.req.session.uid = result.id;
+        return result.id;
     }
 
     async handleLoginByApiKeyMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
         const {apiKey} = args;
+        // ! this throws
         const result = await this.coreUsermgmt.loginByApiKey(apiKey);
-        if(result.error) {
-            throw new Error(result.error);
-        }
 
-        context.req.session.uid = result.user.id;
-        return result.user.id;
+        context.req.session.uid = result.id;
+        return result.id;
     }
 
     async handleLogoutMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
@@ -474,25 +469,24 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
 
     private checkConfig(): void {
         if(!this.config) {
-            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
+            throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
         }
     }
 
-    private loadConfig(): typeof this.config {
-        const model = new CoreUsermgmtGraphQLConfig();
-        if(Object.keys(model).length === 0) return model;
-
-        const [cfgname, templatename] = this.generateConfigNames();
-        this.configLoader = new ConfigLoader(cfgname, templatename);
-        const cfg = this.configLoader.createTemplateAndImport(model);
-
-        return cfg;
+    private loadConfig(createDefault: boolean = false): typeof this.config {
+        const [configPath, templatePath] = this.generateConfigNames();
+        return ConfigLoader.initConfigWithModel(
+            configPath,
+            templatePath,
+            new CoreUsermgmtGraphQLConfig(),
+            createDefault,
+        );
     }
 
     private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
+            ConfigLoader.createTemplateConfigPath(`${this.metadata.name}.json`),
         ];
     }
 }

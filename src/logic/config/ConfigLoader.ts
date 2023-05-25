@@ -61,6 +61,14 @@ export default class ConfigLoader<T> {
     }
 
     /**
+     * Exports the specified model as template
+     * @param config
+     */
+    exportConfig(config: Partial<T>): void {
+        ConfigLoader.exportConfig(config, this.configPath);
+    }
+
+    /**
      * Imports a file as a ConfigModel from the specified path
      * @param importPath file to import
      */
@@ -77,11 +85,12 @@ export default class ConfigLoader<T> {
      * @param exportPath the export path
      */
     static exportConfig<T>(config: Partial<T>, exportPath: string): void {
-        if(fs.existsSync(exportPath)) {
-            fs.unlinkSync(exportPath);
-        }
         if(!fs.existsSync(path.dirname(exportPath))) {
             fs.mkdirSync(path.dirname(exportPath), {recursive: true});
+        }
+
+        if(fs.existsSync(exportPath)) {
+            fs.unlinkSync(exportPath);
         }
 
         fs.writeFileSync(exportPath, JSON.stringify(config, null, 4), { encoding: "utf8" });
@@ -89,5 +98,26 @@ export default class ConfigLoader<T> {
 
     static createConfigPath(configName: string): string {
         return path.resolve(".", "cfg", configName);
+    }
+
+    static createTemplateConfigPath(configName: string): string {
+        return path.resolve(".", "cfg", "template", configName);
+    }
+
+    static initConfigWithModel<T>(
+        configPath: string,
+        templatePath: string,
+        defaultModel: T,
+        createDefault: boolean = false,
+    ): T {
+        if(Object.keys(defaultModel).length === 0) return defaultModel;
+
+        const configLoader = new ConfigLoader(configPath, templatePath);
+        if(!configLoader.configExists() && createDefault) {
+            configLoader.exportConfig(defaultModel);
+        }
+
+        const cfg = configLoader.createTemplateAndImport(defaultModel);
+        return cfg as T;
     }
 }

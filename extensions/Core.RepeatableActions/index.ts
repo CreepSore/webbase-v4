@@ -4,8 +4,7 @@ import IExecutionContext, { IAppExecutionContext, ICliExecutionContext } from "@
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import ActionMonitor from "./actions/ActionMonitor";
-import Action, { ActionState } from "./actions/Action";
-import LogBuilder from "@service/logger/LogBuilder";
+import { ActionState } from "./actions/Action";
 
 class CoreRepeatableActionsConfig {
 
@@ -21,12 +20,11 @@ export default class CoreRepeatableActions implements IExtension {
     };
 
     config: CoreRepeatableActionsConfig;
-    configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
     monitor: ActionMonitor = new ActionMonitor();
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
@@ -119,25 +117,24 @@ export default class CoreRepeatableActions implements IExtension {
 
     private checkConfig(): void {
         if(!this.config) {
-            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
+            throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
         }
     }
 
-    private loadConfig(): typeof this.config {
-        const model = new CoreRepeatableActionsConfig();
-        if(Object.keys(model).length === 0) return model;
-
-        const [cfgname, templatename] = this.generateConfigNames();
-        this.configLoader = new ConfigLoader(cfgname, templatename);
-        const cfg = this.configLoader.createTemplateAndImport(model);
-
-        return cfg;
+    private loadConfig(createDefault: boolean = false): typeof this.config {
+        const [configPath, templatePath] = this.generateConfigNames();
+        return ConfigLoader.initConfigWithModel(
+            configPath,
+            templatePath,
+            new CoreRepeatableActionsConfig(),
+            createDefault,
+        );
     }
 
     private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
+            ConfigLoader.createTemplateConfigPath(`${this.metadata.name}.json`),
         ];
     }
 }

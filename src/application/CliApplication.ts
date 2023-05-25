@@ -68,12 +68,14 @@ export default class CliApplication implements IApplication {
     }
 
     private loadConfig(): ConfigModel {
-        this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
-        const config = this.configLoader.createTemplateAndImport(new ConfigModel());
+        const templateModel = new ConfigModel();
+        const config = ConfigLoader.initConfigWithModel(
+            ConfigLoader.createConfigPath("config.json"),
+            ConfigLoader.createTemplateConfigPath("config.json"),
+            templateModel,
+            true,
+        );
 
-        if(!config) {
-            throw new Error(`Config does not exist at [${this.configLoader.configPath}]`);
-        }
         return config;
     }
 

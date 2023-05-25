@@ -7,7 +7,6 @@ import IExecutionContext from "@service/extensions/IExecutionContext";
 import CommandHandler from "./CommandHandler";
 
 export default class MainAppliation implements IApplication {
-    configLoader: ConfigLoader<ConfigModel>;
     events: EventEmitter = new EventEmitter();
     extensionService: ExtensionService = new ExtensionService();
     cmdHandler: CommandHandler = new CommandHandler();
@@ -35,11 +34,15 @@ export default class MainAppliation implements IApplication {
 
     loadConfig(): ConfigModel {
         const templateModel = new ConfigModel();
-        this.configLoader = new ConfigLoader(ConfigLoader.createConfigPath("config.json"), ConfigLoader.createConfigPath("config.template.json"));
-        const config = this.configLoader.createTemplateAndImport(templateModel);
+        const config = ConfigLoader.initConfigWithModel(
+            ConfigLoader.createConfigPath("config.json"),
+            ConfigLoader.createTemplateConfigPath("config.json"),
+            templateModel,
+            true,
+        );
 
         if(!config && Object.keys(templateModel).length > 0) {
-            throw new Error(`Config does not exist at [${this.configLoader.configPath}]`);
+            throw new Error("Main-Application Config does not exist");
         }
         return config;
     }

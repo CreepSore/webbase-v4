@@ -13,7 +13,7 @@ import Permission from "@extensions/Core.Usermgmt/Models/Permission";
 
 class LoginError extends Error { }
 
-class TemplateConfig {
+class CoreUsermgmtConfig {
 
 }
 
@@ -26,12 +26,11 @@ export default class CoreUsermgmt implements IExtension {
         dependencies: ["Core.Db"],
     };
 
-    config: TemplateConfig;
-    configLoader: ConfigLoader<typeof this.config>;
+    config: CoreUsermgmtConfig;
     events: EventEmitter = new EventEmitter();
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
@@ -74,7 +73,7 @@ export default class CoreUsermgmt implements IExtension {
 
     async loginByApiKey(apiKey: string): Promise<User> {
         const foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
-        if(!foundApiKey) return { error: "INVALID_API_KEY" };
+        if(!foundApiKey) throw new LoginError("INVALID_API_KEY");
 
         const user = await User.use().where({id: foundApiKey.id}).first() as Partial<User>;
         if(!user) {
@@ -140,25 +139,24 @@ export default class CoreUsermgmt implements IExtension {
 
     private checkConfig(): void {
         if(!this.config) {
-            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
+            throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
         }
     }
 
-    private loadConfig(): typeof this.config {
-        const model = new TemplateConfig();
-        if(Object.keys(model).length === 0) return model;
-
-        const [cfgname, templatename] = this.generateConfigNames();
-        this.configLoader = new ConfigLoader(cfgname, templatename);
-        const cfg = this.configLoader.createTemplateAndImport(model);
-
-        return cfg;
+    private loadConfig(createDefault: boolean = false): typeof this.config {
+        const [configPath, templatePath] = this.generateConfigNames();
+        return ConfigLoader.initConfigWithModel(
+            configPath,
+            templatePath,
+            new CoreUsermgmtConfig(),
+            createDefault,
+        );
     }
 
     private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
+            ConfigLoader.createTemplateConfigPath(`${this.metadata.name}.json`),
         ];
     }
 }

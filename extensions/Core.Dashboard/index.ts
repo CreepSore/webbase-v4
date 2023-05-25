@@ -39,7 +39,6 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
     };
 
     config: CoreDashboardConfig;
-    configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
     pages: IDashboardPage[];
@@ -47,7 +46,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
         this.pages = [];
     }
 
@@ -113,25 +112,24 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
     private checkConfig(): void {
         if(!this.config) {
-            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
+            throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
         }
     }
 
-    private loadConfig(): typeof this.config {
-        const model = new CoreDashboardConfig();
-        if(Object.keys(model).length === 0) return model;
-
-        const [cfgname, templatename] = this.generateConfigNames();
-        this.configLoader = new ConfigLoader(cfgname, templatename);
-        const cfg = this.configLoader.createTemplateAndImport(model);
-
-        return cfg;
+    private loadConfig(createDefault: boolean = false): typeof this.config {
+        const [configPath, templatePath] = this.generateConfigNames();
+        return ConfigLoader.initConfigWithModel(
+            configPath,
+            templatePath,
+            new CoreDashboardConfig(),
+            createDefault,
+        );
     }
 
     private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
+            ConfigLoader.createTemplateConfigPath(`${this.metadata.name}.json`),
         ];
     }
 }

@@ -9,7 +9,6 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreDb from "@extensions/Core.Db";
 
 import User from "@extensions/Core.Usermgmt/Models/User";
-import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
 import PermissionGroup from "@extensions/Core.Usermgmt/Models/PermissionGroup";
 import Permission from "@extensions/Core.Usermgmt/Models/Permission";
 import CoreWeb from "@extensions/Core.Web";
@@ -39,10 +38,13 @@ declare global {
 }
 
 class CoreUsermgmtWebConfig {
-    autologin = [
-        {ip: "127.0.0.1", userid: "2"},
-        {dns: "localhost", userid: "2"},
-    ];
+    autologin = {
+        enabled: false,
+        entries: [
+            {ip: "127.0.0.1", userid: "2"},
+            {dns: "localhost", userid: "2"},
+        ],
+    };
 }
 
 export default class CoreUsermgmtWeb implements IExtension {
@@ -55,13 +57,13 @@ export default class CoreUsermgmtWeb implements IExtension {
     };
 
     config: CoreUsermgmtWebConfig;
-    configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
+    autologinEntries: {ip: string, userid: string}[] = [];
 
     knex: Knex;
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
@@ -70,20 +72,23 @@ export default class CoreUsermgmtWeb implements IExtension {
             return;
         }
 
-        this.config.autologin = (await Promise.all(this.config.autologin.map(async al => {
-            if(al.dns) {
-                try {
-                    al.ip = (await dns.resolve4(al.dns))[0];
+        if(this.config.autologin.enabled) {
+            this.autologinEntries = (await Promise.all(this.config.autologin.entries.map(async al => {
+                if(al.dns) {
+                    try {
+                        al.ip = (await dns.resolve4(al.dns))[0];
+                    }
+                    catch { return null; }
                 }
-                catch {return null;}
-            }
 
-            if(!al.ip) return null;
-            return {
-                ip: al.ip,
-                userid: al.userid,
-            };
-        }))).filter(Boolean);
+                if(!al.ip) return null;
+
+                return {
+                    ip: al.ip,
+                    userid: al.userid,
+                };
+            }))).filter(Boolean);
+        }
 
         const coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
         const perms = await coreUsermgmt.createPermissions(...Object.values(Permissions));
@@ -103,7 +108,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                 return;
             }
 
-            const autologin = this.config.autologin.find(login => login.ip === req.headers["x-forwarded-for"] || login.ip === req.socket.remoteAddress)?.userid;
+            const autologin = this.autologinEntries.find(login => login.ip === req.headers["x-forwarded-for"] || login.ip === req.socket.remoteAddress)?.userid;
             if(autologin && !req.session.uid) {
                 LogBuilder
                     .start()
@@ -380,25 +385,24 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     private checkConfig(): void {
         if(!this.config) {
-            throw new Error(`Config could not be found at [${this.configLoader.configPath}]`);
+            throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
         }
     }
 
-    private loadConfig(): typeof this.config {
-        const model = new CoreUsermgmtWebConfig();
-        if(Object.keys(model).length === 0) return model;
-
-        const [cfgname, templatename] = this.generateConfigNames();
-        this.configLoader = new ConfigLoader(cfgname, templatename);
-        const cfg = this.configLoader.createTemplateAndImport(model);
-
-        return cfg;
+    private loadConfig(createDefault: boolean = false): typeof this.config {
+        const [configPath, templatePath] = this.generateConfigNames();
+        return ConfigLoader.initConfigWithModel(
+            configPath,
+            templatePath,
+            new CoreUsermgmtWebConfig(),
+            createDefault,
+        );
     }
 
     private generateConfigNames(): string[] {
         return [
             ConfigLoader.createConfigPath(`${this.metadata.name}.json`),
-            ConfigLoader.createConfigPath(`${this.metadata.name}.template.json`),
+            ConfigLoader.createTemplateConfigPath(`${this.metadata.name}.json`),
         ];
     }
 }
