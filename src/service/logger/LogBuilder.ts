@@ -15,7 +15,7 @@ export default class LogBuilder {
      * @static
      * @memberof LogBuilder
      */
-    static $logRuntime(appendCallstack: "debug"|"always"|"none" = "none"): MethodDecorator {
+    static $logRuntime(appendCallstack: "debug"|"always"|"none" = "none", infos: string[] = []): MethodDecorator {
         return function(obj: any, symbol: string, desc: PropertyDescriptor) {
             const original = desc.value;
 
@@ -31,8 +31,14 @@ export default class LogBuilder {
 
                 const builder = LogBuilder
                     .start()
-                    .level("INFO")
-                    .info("LogRuntime");
+                    .level("INFO");
+
+                if(infos.length > 0) {
+                    builder.info(...infos);
+                }
+                else {
+                    builder.info("LogRuntime");
+                }
 
                 const startTime = perfHooks.performance.now();
                 const ret = original?.apply?.(this, args);
@@ -63,7 +69,7 @@ export default class LogBuilder {
      * @static
      * @memberof LogBuilder
      */
-    static $logRuntimePromise(appendCallstack: "debug"|"always"|"none" = "none"): MethodDecorator {
+    static $logRuntimePromise(appendCallstack: "debug"|"always"|"none" = "none", infos: string[] = []): MethodDecorator {
         return function(obj: any, symbol: string, desc: PropertyDescriptor) {
             const original = desc.value;
 
@@ -79,8 +85,14 @@ export default class LogBuilder {
 
                 const builder = LogBuilder
                     .start()
-                    .level("INFO")
-                    .info("LogRuntime");
+                    .level("INFO");
+
+                if(infos.length > 0) {
+                    builder.info(...infos);
+                }
+                else {
+                    builder.info("LogRuntime");
+                }
 
                 const startTime = perfHooks.performance.now();
                 let ret = original?.apply?.(this, args);
