@@ -73,7 +73,6 @@
     "minimist": "^1.2.8",
     "nodemailer": "^6.8.0",
     "sqlite3": "^5.0.11",
-    "ts3-nodejs-library": "^3.4.1",
     "uuid": "^9.0.0"
   }
 }
