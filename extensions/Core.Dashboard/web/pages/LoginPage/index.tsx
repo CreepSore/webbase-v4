@@ -26,6 +26,13 @@ export default function LoginPage(props: LoginPageProps): JSX.Element {
         }
         else {
             setLoginError("");
+
+            const redirect = new URLSearchParams(window.location.search).get("redirect");
+            if(redirect) {
+                location.href = redirect;
+                return;
+            }
+
             props.onLoginSuccess?.(data);
         }
     }});
