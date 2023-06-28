@@ -25,6 +25,7 @@ class CoreWebConfig {
     hostname: string = "127.0.0.1";
     port: number = 1325;
     secret: string = "SECRET";
+    saveSessionOnInit: boolean = false;
 }
 
 export default class CoreWeb implements IExtension {
@@ -78,7 +79,7 @@ export default class CoreWeb implements IExtension {
             .use(express.raw())
             .use(expressSession({
                 secret: this.config.secret,
-                saveUninitialized: false,
+                saveUninitialized: this.config.saveSessionOnInit === true,
                 resave: false,
                 cookie: {
                     maxAge: 1000 * 60 * 60, // 60 Minutes
@@ -86,6 +87,10 @@ export default class CoreWeb implements IExtension {
             }));
 
         this.app.use((req, res, next) => {
+            if(this.config.saveSessionOnInit) {
+                req.session.acceptedCookies = ["mandatory"];
+            }
+
             if(this.logSkipping.some(regex => regex.test(req.url))) {
                 return next();
             }
@@ -100,6 +105,15 @@ export default class CoreWeb implements IExtension {
                 .done();
 
             return next();
+        });
+
+        this.app.post("/api/core.web/acceptCookies", (req, res) => {
+            req.session.acceptedCookies = req.body.cookies;
+            res.json({success: true});
+        });
+
+        this.app.post("/api/core.web/declineCookies", (req, res) => {
+            res.json({success: true});
         });
 
         this.events.emit("express-loaded", this.app);

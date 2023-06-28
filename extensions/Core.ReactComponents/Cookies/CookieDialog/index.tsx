@@ -4,6 +4,7 @@ import ICookieHandler from "../ICookieHandler";
 interface CookieDialogProps extends ICookieHandler {
     children: React.ReactElement[] | React.ReactElement;
     cookieTypes: {key: string, label: string, checked?: boolean, isFixedValue?: boolean}[];
+    skipDefaultHandling?: boolean;
 }
 
 export default function CookieDialog(props: CookieDialogProps): JSX.Element {
@@ -45,11 +46,35 @@ export default function CookieDialog(props: CookieDialogProps): JSX.Element {
                 <div className="grid grid-cols-1 gap-1 mt-5">
                     <button
                         className="py-2 px-2 bg-slate-500 border border-gray-300 hover:bg-slate-400 focus:bg-slate-400"
-                        onClick={() => props.onCookiesAccepted(selectedCookies)}
+                        onClick={() => {
+                            if(props.skipDefaultHandling === true) {
+                                props.onCookiesAccepted(selectedCookies);
+                            }
+                            else {
+                                fetch("/api/core.web/acceptCookies", {
+                                    method: "POST",
+                                    body: JSON.stringify({cookies: selectedCookies}),
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                }).catch(() => {})
+                                    .then(() => props.onCookiesAccepted(selectedCookies));
+                            }
+                        }}
                     >Accept checked Cookies</button>
                     <button
                         className="py-2 px-2 bg-slate-500 border border-gray-300 hover:bg-slate-400 focus:bg-slate-400"
-                        onClick={() => props.onCookiesDeclined()}
+                        onClick={() => {
+                            if(props.skipDefaultHandling === true) {
+                                props.onCookiesDeclined();
+                            }
+                            else {
+                                fetch("/api/core.web/declineCookies", {
+                                    method: "POST",
+                                }).catch(() => {})
+                                    .then(() => props.onCookiesDeclined());
+                            }
+                        }}
                     >Decline all Cookies</button>
                 </div>
             </div>
