@@ -120,10 +120,12 @@ export default class CoreUsermgmtWeb implements IExtension {
                         uid: autologin,
                     }).done();
                 req.session.uid = autologin;
+                await this.handleUidLogon(req, res, req.session.uid, true);
+                next();
+                return;
             }
 
             await this.handleUidLogon(req, res, req.session.uid);
-
             next();
         }, async(req, res, next) => {
             const {apiKey} = req.query;
@@ -136,7 +138,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                 const user = await coreUsermgmt.loginByApiKey(apiKey as string);
 
                 req.session.uid = user.id;
-                await this.handleUidLogon(req, res, req.session.uid);
+                await this.handleUidLogon(req, res, req.session.uid, true);
 
                 LogBuilder
                     .start()
@@ -360,11 +362,11 @@ export default class CoreUsermgmtWeb implements IExtension {
         req: express.Request,
         res: express.Response,
         uid: string = null,
+        skipCookieCheck: boolean = false,
     ): Promise<void> {
-        req.session.uid = uid;
-
         let useAnonGroup = true;
-        if(req.session.uid) {
+        if(uid && (skipCookieCheck || (req.session.acceptedCookies || []).includes("mandatory"))) {
+            req.session.uid = uid;
             const user = await User.use().where({id: req.session.uid}).first();
             if(!user) {
                 delete req.session.uid;

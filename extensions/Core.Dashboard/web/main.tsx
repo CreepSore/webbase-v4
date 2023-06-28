@@ -20,11 +20,13 @@ import LogsPage from "./pages/LogsPage";
 
 import Notifications from "@extensions/Core.ReactComponents/Notifications";
 import NotificationManager from "@extensions/Core.ReactComponents/Notifications/NotificationManager";
+import CookieDialog from "@extensions/Core.ReactComponents/Cookies/CookieDialog";
 
 function Main(): JSX.Element {
     const startPage = location.hash.substring(1);
     const [currentDashboardPage, setCurrentDashboardPage] = React.useState(startPage || "home");
     const [myUser, setMyUser] = React.useState<IUser>();
+    const [cookieDialogVisible, setCookieDialogVisible] = React.useState<boolean>(true);
 
     const myUserQuery = useQuery<{me: IUser}>(
         "{ me { pseudo, id, username, email, permissionGroup { name, permissions { name } } } }",
@@ -73,6 +75,31 @@ function Main(): JSX.Element {
                 }}
 
                 myPermissions={(myUser?.permissionGroup?.permissions || []).map(p => p.name)}/>
+
+            {cookieDialogVisible && <CookieDialog
+                cookieTypes={[
+                    {key: "mandatory", label: "Mandatory", checked: true, isFixedValue: true},
+                ]}
+
+                onCookiesAccepted={(accepted: string[]) => {
+                    console.log(accepted);
+                    setCookieDialogVisible(false);
+                }}
+
+                onCookiesDeclined={() => {
+                    console.log("DECLINED");
+                    setCookieDialogVisible(false);
+                }}
+            >
+                <p>To provide our services we use cookies to save mandatory data.</p>
+                <p className="mt-4">We save:</p>
+                <ul className="ml-4 mb-4">
+                    <li>Login Sessions</li>
+                    <li>Your IP Address for Firewall purposes</li>
+                </ul>
+                <p>We will never provide your data to any third-party-services.</p>
+                <p>We don't save any data for marketing purposes, since we don't show any ads.</p>
+            </CookieDialog>}
 
             <Router currentPage={currentDashboardPage}>
                 <RouterPage key="login">

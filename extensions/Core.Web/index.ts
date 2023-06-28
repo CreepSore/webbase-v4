@@ -14,6 +14,13 @@ import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import LogBuilder from "@service/logger/LogBuilder";
 
+// ! Disabling these rules since they're fucked up
+declare module "express-session" {
+    export interface SessionData {
+        acceptedCookies?: string[]
+    }
+}
+
 class CoreWebConfig {
     hostname: string = "127.0.0.1";
     port: number = 1325;
@@ -71,7 +78,7 @@ export default class CoreWeb implements IExtension {
             .use(express.raw())
             .use(expressSession({
                 secret: this.config.secret,
-                saveUninitialized: true,
+                saveUninitialized: false,
                 resave: false,
                 cookie: {
                     maxAge: 1000 * 60 * 60, // 60 Minutes

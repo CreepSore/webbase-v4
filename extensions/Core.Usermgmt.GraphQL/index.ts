@@ -336,6 +336,8 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     }
 
     async handleImpersonateUserMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!(context.req.session.acceptedCookies || []).includes("mandatory")) return;
+
         if(!this.hasPermissions(context, UsermgmtPermissions.ImpersonateUser.name)) {
             throw new Error("Invalid Permissions");
         }
@@ -412,6 +414,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
 
     // #region Session
     async handleLoginByCredentialsMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!(context.req.session.acceptedCookies || []).includes("mandatory")) return;
         const {username, password} = args;
         // ! this throws
         const result = await this.coreUsermgmt.loginByCredentials({username, password});
@@ -420,6 +423,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     }
 
     async handleLoginByApiKeyMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!(context.req.session.acceptedCookies || []).includes("mandatory")) return;
         const {apiKey} = args;
         // ! this throws
         const result = await this.coreUsermgmt.loginByApiKey(apiKey);
@@ -429,6 +433,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     }
 
     async handleLogoutMutation(parent: any, args: any, context: any, info: GraphQLResolveInfo) {
+        if(!(context.req.session.acceptedCookies || []).includes("mandatory")) return;
         context.req.session.uid = null;
         return true;
     }
