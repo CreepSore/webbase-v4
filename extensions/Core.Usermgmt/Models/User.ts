@@ -45,6 +45,8 @@ export default class User {
     }
 
     static async hasPermissions(user: Partial<User>, ...permissions: Array<Partial<Permission>>) {
+        if(!user.id) return false;
+
         return (await Promise.all(permissions.map(p => this.hasPermission(user, p)))).every(b => Boolean(b));
     }
 
