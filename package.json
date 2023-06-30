@@ -75,6 +75,7 @@
     "node-cron": "^3.0.2",
     "nodemailer": "^6.8.0",
     "sqlite3": "^5.0.11",
+    "tailwind-merge": "^1.13.2",
     "uuid": "^9.0.0"
   }
 }
