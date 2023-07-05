@@ -1,4 +1,4 @@
-import React from "react";
+import React, { EffectCallback } from "react";
 import IDatabridgePacket from "./IDatabridgePacket";
 import DatabridgeWebsocketClient from "./protocols/client/DatabridgeWebsocketClient";
 
@@ -93,25 +93,36 @@ export function useDatabridgePacket<T = any, T2 = any>(config: UseDatabridgePack
     const [lastPacket, setLastPacket] = React.useState<IDatabridgePacket<T, T2>>(config.defaultPacket ?? null);
     const databridge = config.databridgeName ? databridges.get(config.databridgeName) : config.databridge;
 
-    React.useEffect(() => {
+    const onDataReceived = (packet: IDatabridgePacket<T, T2>): void => {
+        if(config.filter(packet)) {
+            setLastPacket(packet);
+        }
+    };
+
+    const requestData = (): any => {
         if(config.preSend && Array.isArray(config.preSend)) {
             config.preSend.forEach(packet => {
                 databridge?.sendPacket(packet);
             });
         }
 
-        const receiveCb = (packet: IDatabridgePacket<T, T2>): void => {
-            if(config.filter(packet)) {
-                setLastPacket(packet);
-            }
-        };
-
-        databridge?.onPacketReceived(receiveCb);
+        databridge?.onPacketReceived(onDataReceived);
 
         return () => {
-            databridge?.removePacketReceived(receiveCb);
+            databridge?.removePacketReceived(onDataReceived);
         };
-    }, []);
+    };
+
+    React.useEffect(() => {
+        if(!databridge) return;
+        if(databridge.isConnected) {
+            return requestData();
+        }
+
+        databridge.onConnected(() => {
+            requestData();
+        });
+    }, [databridge]);
 
     return lastPacket;
 }
@@ -131,28 +142,9 @@ interface UseDatabridgePacketDataConfig<T = any, T2 = any> {
 }
 
 export function useDatabridgePacketData<T = any, T2 = any>(config: UseDatabridgePacketDataConfig<T, T2>): T {
-    const [data, setData] = React.useState<T>(config.defaultData ?? null);
-    const databridge = config.databridgeName ? databridges.get(config.databridgeName) : config.databridge;
+    const packet = useDatabridgePacket<T, T2>({
+        ...config,
+    });
 
-    React.useEffect(() => {
-        if(config.preSend && Array.isArray(config.preSend)) {
-            config.preSend.forEach(packet => {
-                databridge?.sendPacket(packet);
-            });
-        }
-
-        const receiveCb = (packet: IDatabridgePacket<T, T2>): void => {
-            if(config.filter(packet)) {
-                setData(packet.data);
-            }
-        };
-
-        databridge?.onPacketReceived(receiveCb);
-
-        return () => {
-            databridge?.removePacketReceived(receiveCb);
-        };
-    }, []);
-
-    return data;
+    return packet?.data ?? config.defaultData ?? null;
 }
