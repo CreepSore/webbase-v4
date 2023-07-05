@@ -74,6 +74,9 @@ export function useDatabridge(config: UseDatabridgeConfig): [DatabridgeWebsocket
     return [databridgeRef.current, isConnected];
 }
 
+export function useExistingDatabridge(config: {databridgeName: string}): DatabridgeWebsocketClient {
+    return databridges.get(config.databridgeName);
+}
 interface UseDatabridgePacketConfig<T = any, T2 = any> {
     /**
      * @description Either use this or databridge
