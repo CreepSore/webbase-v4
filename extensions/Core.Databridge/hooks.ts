@@ -1,4 +1,4 @@
-import React, { EffectCallback } from "react";
+import React from "react";
 import IDatabridgePacket from "./IDatabridgePacket";
 import DatabridgeWebsocketClient from "./protocols/client/DatabridgeWebsocketClient";
 
@@ -31,7 +31,6 @@ export function useDatabridge(config: UseDatabridgeConfig): [DatabridgeWebsocket
     const reconnectRef = React.useRef(null);
 
     React.useEffect(() => {
-        if(!databridgeRef.current) return;
         databridges.set(config.name, databridgeRef.current);
 
         databridgeRef.current.onConnected(() => {
@@ -48,7 +47,7 @@ export function useDatabridge(config: UseDatabridgeConfig): [DatabridgeWebsocket
             setIsConnected(false);
             config.onDisconnected?.(databridgeRef.current);
 
-            if(config.reconnect ?? true) {
+            if((config.reconnect ?? true) && !reconnectRef.current) {
                 reconnectRef.current = setInterval(() => {
                     databridgeRef.current.connect();
                 }, config.reconnectInterval ?? 5000);
