@@ -89,7 +89,7 @@ interface UsePacketConfig<T = any, T2 = any> {
     filter: (packet: IDatabridgePacket<T, T2>) => boolean;
 }
 
-export function usePacket<T = any, T2 = any>(config: UsePacketConfig<T, T2>): IDatabridgePacket<T, T2> {
+export function useDatabridgePacket<T = any, T2 = any>(config: UsePacketConfig<T, T2>): IDatabridgePacket<T, T2> {
     const [lastPacket, setLastPacket] = React.useState<IDatabridgePacket<T, T2>>(config.defaultPacket || null);
     const databridge = config.databridgeName ? databridges.get(config.databridgeName) : config.databridge;
 
@@ -114,4 +114,31 @@ export function usePacket<T = any, T2 = any>(config: UsePacketConfig<T, T2>): ID
     }, []);
 
     return lastPacket;
+}
+
+export function useDatabridgePacketData<T = any, T2 = any>(config: UsePacketConfig<T, T2>): T {
+    const [data, setData] = React.useState<T>(null);
+    const databridge = config.databridgeName ? databridges.get(config.databridgeName) : config.databridge;
+
+    React.useEffect(() => {
+        if(config.preSend && Array.isArray(config.preSend)) {
+            config.preSend.forEach(packet => {
+                databridge?.sendPacket(packet);
+            });
+        }
+
+        const receiveCb = (packet: IDatabridgePacket<T, T2>): void => {
+            if(config.filter(packet)) {
+                setData(packet.data);
+            }
+        };
+
+        databridge?.onPacketReceived(receiveCb);
+
+        return () => {
+            databridge?.removePacketReceived(receiveCb);
+        };
+    }, []);
+
+    return data;
 }
