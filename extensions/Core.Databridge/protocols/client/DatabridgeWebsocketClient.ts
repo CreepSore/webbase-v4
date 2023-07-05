@@ -5,6 +5,7 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
     websocketUrl: string;
     ws: WebSocket;
     callbacks: {callback: Function, type: string}[] = [];
+    isConnected: boolean = false;
 
     constructor(websocketUrl: string) {
         this.websocketUrl = websocketUrl;
@@ -26,11 +27,13 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
             this.ws = new WebSocket(this.websocketUrl);
             this.ws.onopen = () => {
                 this.callbacks.filter(c => c.type === "onConnected").forEach(cb => cb.callback());
+                this.isConnected = true;
                 res();
             };
 
             this.ws.onclose = () => {
                 this.callbacks.filter(c => c.type === "onDisconnected").forEach(cb => cb.callback());
+                this.isConnected = false;
             };
 
             this.ws.onerror = () => {
@@ -75,7 +78,7 @@ export default class DatabridgeWebsocketClient implements IDatabridgeClientProto
         return this;
     }
 
-    removePacketReceived(callback: () => void): this {
+    removePacketReceived(callback: Function): this {
         this.callbacks = this.callbacks.filter(c => c.callback !== callback);
         return this;
     }
