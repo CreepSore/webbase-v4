@@ -75,7 +75,7 @@ export function useDatabridge(config: UseDatabridgeConfig): [DatabridgeWebsocket
     return [databridgeRef.current, isConnected];
 }
 
-interface UsePacketConfig<T = any, T2 = any> {
+interface UseDatabridgePacketConfig<T = any, T2 = any> {
     /**
      * @description Either use this or databridge
      */
@@ -89,8 +89,8 @@ interface UsePacketConfig<T = any, T2 = any> {
     filter: (packet: IDatabridgePacket<T, T2>) => boolean;
 }
 
-export function useDatabridgePacket<T = any, T2 = any>(config: UsePacketConfig<T, T2>): IDatabridgePacket<T, T2> {
-    const [lastPacket, setLastPacket] = React.useState<IDatabridgePacket<T, T2>>(config.defaultPacket || null);
+export function useDatabridgePacket<T = any, T2 = any>(config: UseDatabridgePacketConfig<T, T2>): IDatabridgePacket<T, T2> {
+    const [lastPacket, setLastPacket] = React.useState<IDatabridgePacket<T, T2>>(config.defaultPacket ?? null);
     const databridge = config.databridgeName ? databridges.get(config.databridgeName) : config.databridge;
 
     React.useEffect(() => {
@@ -116,8 +116,22 @@ export function useDatabridgePacket<T = any, T2 = any>(config: UsePacketConfig<T
     return lastPacket;
 }
 
-export function useDatabridgePacketData<T = any, T2 = any>(config: UsePacketConfig<T, T2>): T {
-    const [data, setData] = React.useState<T>(null);
+interface UseDatabridgePacketDataConfig<T = any, T2 = any> {
+    /**
+     * @description Either use this or databridge
+     */
+    databridgeName?: string;
+    /**
+     * @description Either use this or databridgeName
+     */
+    databridge?: DatabridgeWebsocketClient;
+    defaultData?: T;
+    preSend?: IDatabridgePacket<any, any>[];
+    filter: (packet: IDatabridgePacket<T, T2>) => boolean;
+}
+
+export function useDatabridgePacketData<T = any, T2 = any>(config: UseDatabridgePacketDataConfig<T, T2>): T {
+    const [data, setData] = React.useState<T>(config.defaultData ?? null);
     const databridge = config.databridgeName ? databridges.get(config.databridgeName) : config.databridge;
 
     React.useEffect(() => {
