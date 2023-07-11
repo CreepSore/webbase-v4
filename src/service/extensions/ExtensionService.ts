@@ -62,10 +62,36 @@ export default class ExtensionService {
 
     async startExtensions(): Promise<void> {
         if(this.extensionsStarted) return;
-        const baseNodes = this.extensions.filter(ext => ext.metadata.dependencies.length === 0);
+        const loaded: Set<IExtension> = new Set();
+        let currentNodes = this.extensions.filter(ext => ext.metadata.dependencies.length === 0);
 
-        for(const baseNode of baseNodes) {
-            await this.startExtensionRecursive(baseNode);
+        while(currentNodes.length > 0) {
+            for(const node of currentNodes) {
+                loaded.add(node);
+                try {
+                    await node.start({...this.executionContext});
+                    node.metadata.isLoaded = true;
+                    this.fireOnExtensionStarted(node.metadata.name, {...this.executionContext});
+                    if(!this.doSkipLogs) {
+                        LogBuilder
+                            .start()
+                            .level("INFO")
+                            .info("ExtensionService.ts")
+                            .line(`Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`)
+                            .done();
+                    }
+                }
+                catch(err) {
+                    LogBuilder
+                        .start()
+                        .level("ERROR")
+                        .info("ExtensionService.ts")
+                        .line(`Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed`)
+                        .object("error", err)
+                        .done();
+                }
+            }
+            currentNodes = this.extensions.filter(e => !loaded.has(e) && !e.metadata.resolvedDependencies.some(d => !loaded.has(d)));
         }
 
         this.extensionsStarted = true;
@@ -136,46 +162,6 @@ export default class ExtensionService {
     // #endregion
 
     // #region Private Methods
-    private async startExtensionRecursive(node: IExtension): Promise<void> {
-        let runStart = false;
-        if(!node.metadata.isLoaded) {
-            node.metadata.isLoaded = true;
-            runStart = true;
-        }
-
-        for(const dep of node.metadata.resolvedDependencies) {
-            await this.startExtensionRecursive(dep);
-        }
-
-        if(runStart) {
-            try {
-                await node.start({...this.executionContext});
-                this.fireOnExtensionStarted(node.metadata.name, {...this.executionContext});
-                if(!this.doSkipLogs) {
-                    LogBuilder
-                        .start()
-                        .level("INFO")
-                        .info("ExtensionService.ts")
-                        .line(`Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`)
-                        .done();
-                }
-            }
-            catch(err) {
-                LogBuilder
-                    .start()
-                    .level("ERROR")
-                    .info("ExtensionService.ts")
-                    .line(`Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed`)
-                    .object("error", err)
-                    .done();
-            }
-
-            for(const child of this.extensions.filter(ext => ext.metadata.resolvedDependencies.includes(node))) {
-                await this.startExtensionRecursive(child);
-            }
-        }
-    }
-
     private getDisabledExtensions(): string[] {
         const disabledPath = path.join(this.extensionPath, "disabled.json");
         let disabledResult: string[] = [];
