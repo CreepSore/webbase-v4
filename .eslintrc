@@ -33,7 +33,8 @@
         "node_modules/",
         "webpack.config.js",
         "tailwind.config.js",
-        "postcss.config.js"
+        "postcss.config.js",
+        "*.js"
     ],
     "root": true,
     "rules": {
