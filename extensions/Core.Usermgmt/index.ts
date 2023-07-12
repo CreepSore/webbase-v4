@@ -23,7 +23,7 @@ export default class CoreUsermgmt implements IExtension {
         version: "1.0.0",
         description: "Usermanagement Module",
         author: "ehdes",
-        dependencies: ["Core.Db"],
+        dependencies: [CoreDb.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreUsermgmt.metadata;

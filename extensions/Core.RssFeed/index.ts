@@ -9,6 +9,7 @@ import CoreUsermgmtWeb from "@extensions/Core.Usermgmt.Web";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
 
 import Permissions from "./permissions";
+import Core from "@extensions/Core";
 
 class CoreRssFeedConfig {
 
@@ -20,7 +21,7 @@ export default class CoreRssFeed implements IExtension {
         version: "1.0.0",
         description: "RSS Feed Module",
         author: "ehdes",
-        dependencies: ["Core", "Core.Usermgmt.Web"],
+        dependencies: [Core.metadata.name, CoreWeb.metadata.name, CoreUsermgmtWeb.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreRssFeed.metadata;

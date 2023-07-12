@@ -5,6 +5,7 @@ import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import * as knex from "knex";
 import LogBuilder from "@service/logger/LogBuilder";
+import Core from "@extensions/Core";
 
 class CoreDbConfig {
     client: string = "sqlite3";
@@ -19,7 +20,7 @@ export default class CoreDb implements IExtension {
         version: "1.0.0",
         description: "Core Database Module",
         author: "ehdes",
-        dependencies: ["Core"],
+        dependencies: [Core.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreDb.metadata;

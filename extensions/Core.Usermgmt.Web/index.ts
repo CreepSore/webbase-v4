@@ -53,7 +53,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         version: "1.0.0",
         description: "Usermanagement Web Module",
         author: "ehdes",
-        dependencies: ["Core.Usermgmt", "Core.Web"],
+        dependencies: [CoreUsermgmt.metadata.name, CoreWeb.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreUsermgmtWeb.metadata;

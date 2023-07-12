@@ -6,6 +6,7 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import INotificationProvider from "./logic/interfaces/INotificationProvider";
 import LogBuilder from "@service/logger/LogBuilder";
 import INotification from "./logic/interfaces/INotification";
+import Core from "@extensions/Core";
 
 class TemplateConfig {
 
@@ -17,7 +18,7 @@ export default class CoreNotifications implements IExtension {
         version: "1.0.0",
         description: "Notifications Module",
         author: "ehdes",
-        dependencies: ["Core"],
+        dependencies: [Core.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreNotifications.metadata;

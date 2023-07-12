@@ -13,6 +13,7 @@ import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import LogBuilder from "@service/logger/LogBuilder";
+import Core from "@extensions/Core";
 
 // ! Disabling these rules since they're fucked up
 declare module "express-session" {
@@ -34,7 +35,7 @@ export default class CoreWeb implements IExtension {
         version: "1.0.0",
         description: "Core Web Module",
         author: "ehdes",
-        dependencies: ["Core"],
+        dependencies: [Core.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreWeb.metadata;

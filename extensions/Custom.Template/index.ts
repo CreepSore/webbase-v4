@@ -3,6 +3,7 @@ import {EventEmitter} from "events";
 import IExecutionContext, { IAppExecutionContext, ICliExecutionContext } from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
+import Core from "@extensions/Core";
 
 class TemplateConfig {
 
@@ -14,7 +15,7 @@ export default class CustomTemplate implements IExtension {
         version: "1.0.0",
         description: "Template Module",
         author: "ehdes",
-        dependencies: ["Core"],
+        dependencies: [Core.metadata.name],
     };
 
     metadata: ExtensionMetadata = CustomTemplate.metadata;

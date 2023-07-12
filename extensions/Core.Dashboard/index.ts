@@ -17,6 +17,7 @@ import CacheLogger from "@service/logger/CacheLogger";
 import Permissions from "./permissions";
 import CoreGraphQL from "@extensions/Core.GraphQL";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
+import Core from "@extensions/Core";
 
 export interface IDashboardPage {
     id: string;
@@ -35,7 +36,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         version: "2.0.0",
         description: "Dashboard Module",
         author: "ehdes",
-        dependencies: ["Core", "Core.Usermgmt", "Core.Usermgmt.GraphQL", "Core.GraphQL"],
+        dependencies: [Core.metadata.name, CoreUsermgmt.metadata.name, CoreUsermgmtGraphQL.metadata.name, CoreGraphQL.metadata.name, CoreWeb.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreDashboard.metadata;

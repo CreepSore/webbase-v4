@@ -10,6 +10,7 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreWeb from "@extensions/Core.Web";
 import IGraphQLExtension from "./IGraphQLExtension";
 import LogBuilder from "@service/logger/LogBuilder";
+import Core from "@extensions/Core";
 
 class CoreGraphQLConfig {
 
@@ -21,7 +22,7 @@ export default class CoreGraphQL implements IExtension {
         version: "1.0.0",
         description: "Template Module",
         author: "ehdes",
-        dependencies: ["Core", "Core.Web"],
+        dependencies: [Core.metadata.name, CoreWeb.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreGraphQL.metadata;

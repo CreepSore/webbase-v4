@@ -22,6 +22,7 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
 import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
+import CoreUsermgmtWeb from "@extensions/Core.Usermgmt.Web";
 
 class CoreUsermgmtGraphQLConfig {}
 
@@ -31,7 +32,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         version: "1.0.0",
         description: "Usermanagement GraphQL Module",
         author: "ehdes",
-        dependencies: ["Core.Usermgmt.Web", "Core.GraphQL"],
+        dependencies: [CoreUsermgmtWeb.metadata.name, CoreGraphQL.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreUsermgmtGraphQL.metadata;

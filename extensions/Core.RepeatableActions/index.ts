@@ -5,6 +5,7 @@ import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import ActionMonitor from "./actions/ActionMonitor";
 import { ActionState } from "./actions/Action";
+import Core from "@extensions/Core";
 
 class CoreRepeatableActionsConfig {
 
@@ -16,7 +17,7 @@ export default class CoreRepeatableActions implements IExtension {
         version: "1.0.0",
         description: "Provides an interface for managing repeatable actions",
         author: "ehdes",
-        dependencies: ["Core"],
+        dependencies: [Core.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreRepeatableActions.metadata;

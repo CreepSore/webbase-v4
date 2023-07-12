@@ -4,6 +4,7 @@ import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import LogBuilder from "@service/logger/LogBuilder";
+import Core from "@extensions/Core";
 
 class CacheConfig {
 
@@ -72,7 +73,7 @@ export default class CoreCache implements IExtension {
         version: "1.0.0",
         description: "Caching Module",
         author: "ehdes",
-        dependencies: ["Core"],
+        dependencies: [Core.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreCache.metadata;

@@ -6,6 +6,7 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import RemoteConsoleClient from "./logic/RemoteConsoleClient";
 import RemoteConsoleServer from "./logic/RemoteConsoleServer";
 import LogBuilder from "@service/logger/LogBuilder";
+import Core from "@extensions/Core";
 
 class CoreRemoteConsoleConfig {
     enabled: boolean = false;
@@ -20,7 +21,7 @@ export default class CoreRemoteConsole implements IExtension {
         version: "1.0.0",
         description: "Remote CLI Module",
         author: "ehdes",
-        dependencies: ["Core"],
+        dependencies: [Core.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreRemoteConsole.metadata;

@@ -8,6 +8,7 @@ import nodemailer from "nodemailer";
 import Mail from "nodemailer/lib/mailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import LogBuilder from "@service/logger/LogBuilder";
+import Core from "@extensions/Core";
 
 interface MailConfig {
     host: string,
@@ -40,7 +41,7 @@ export default class CoreMail implements IExtension {
         version: "1.0.0",
         description: "Core Mail Module",
         author: "ehdes",
-        dependencies: ["Core"],
+        dependencies: [Core.metadata.name],
     };
 
     metadata: ExtensionMetadata = CoreMail.metadata;
