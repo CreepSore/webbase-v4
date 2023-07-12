@@ -48,13 +48,15 @@ class CoreUsermgmtWebConfig {
 }
 
 export default class CoreUsermgmtWeb implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Usermgmt.Web",
         version: "1.0.0",
         description: "Usermanagement Web Module",
         author: "ehdes",
         dependencies: ["Core.Usermgmt", "Core.Web"],
     };
+
+    metadata: ExtensionMetadata = CoreUsermgmtWeb.metadata;
 
     config: CoreUsermgmtWebConfig;
     events: EventEmitter = new EventEmitter();

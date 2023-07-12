@@ -16,13 +16,15 @@ class CoreGraphQLConfig {
 }
 
 export default class CoreGraphQL implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.GraphQL",
         version: "1.0.0",
         description: "Template Module",
         author: "ehdes",
         dependencies: ["Core", "Core.Web"],
     };
+
+    metadata: ExtensionMetadata = CoreGraphQL.metadata;
 
     config: CoreGraphQLConfig;
     events: EventEmitter = new EventEmitter();

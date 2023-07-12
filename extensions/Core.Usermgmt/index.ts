@@ -18,13 +18,15 @@ class CoreUsermgmtConfig {
 }
 
 export default class CoreUsermgmt implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Usermgmt",
         version: "1.0.0",
         description: "Usermanagement Module",
         author: "ehdes",
         dependencies: ["Core.Db"],
     };
+
+    metadata: ExtensionMetadata = CoreUsermgmt.metadata;
 
     config: CoreUsermgmtConfig;
     events: EventEmitter = new EventEmitter();

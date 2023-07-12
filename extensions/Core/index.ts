@@ -24,13 +24,15 @@ class CoreConfig {
 }
 
 export default class Core implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core",
         version: "1.0.0",
         description: "Core Module",
         author: "ehdes",
         dependencies: [],
     };
+
+    metadata: ExtensionMetadata = Core.metadata;
 
     config: CoreConfig;
 

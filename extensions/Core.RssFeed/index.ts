@@ -15,13 +15,15 @@ class CoreRssFeedConfig {
 }
 
 export default class CoreRssFeed implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.RssFeed",
         version: "1.0.0",
         description: "RSS Feed Module",
         author: "ehdes",
         dependencies: ["Core", "Core.Usermgmt.Web"],
     };
+
+    metadata: ExtensionMetadata = CoreRssFeed.metadata;
 
     config: CoreRssFeedConfig;
     events: EventEmitter = new EventEmitter();

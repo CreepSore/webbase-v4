@@ -15,13 +15,15 @@ class CoreRemoteConsoleConfig {
 }
 
 export default class CoreRemoteConsole implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.RemoteConsole",
         version: "1.0.0",
         description: "Remote CLI Module",
         author: "ehdes",
         dependencies: ["Core"],
     };
+
+    metadata: ExtensionMetadata = CoreRemoteConsole.metadata;
 
     config: CoreRemoteConsoleConfig;
     events: EventEmitter = new EventEmitter();

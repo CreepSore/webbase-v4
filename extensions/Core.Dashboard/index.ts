@@ -30,13 +30,15 @@ class CoreDashboardConfig {
 }
 
 export default class CoreDashboard implements IExtension, IGraphQLExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Dashboard",
         version: "2.0.0",
         description: "Dashboard Module",
         author: "ehdes",
         dependencies: ["Core", "Core.Usermgmt", "Core.Usermgmt.GraphQL", "Core.GraphQL"],
     };
+
+    metadata: ExtensionMetadata = CoreDashboard.metadata;
 
     config: CoreDashboardConfig;
     events: EventEmitter = new EventEmitter();

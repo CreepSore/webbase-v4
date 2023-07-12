@@ -14,13 +14,15 @@ class CoreDbConfig {
 }
 
 export default class CoreDb implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Db",
         version: "1.0.0",
         description: "Core Database Module",
         author: "ehdes",
         dependencies: ["Core"],
     };
+
+    metadata: ExtensionMetadata = CoreDb.metadata;
 
     config: CoreDbConfig;
     db: knex.Knex;

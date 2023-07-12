@@ -29,13 +29,15 @@ class CoreWebConfig {
 }
 
 export default class CoreWeb implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Web",
         version: "1.0.0",
         description: "Core Web Module",
         author: "ehdes",
         dependencies: ["Core"],
     };
+
+    metadata: ExtensionMetadata = CoreWeb.metadata;
 
     config: CoreWebConfig;
     app: express.Express;

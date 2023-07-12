@@ -35,13 +35,15 @@ class CoreMailTemplate {
 }
 
 export default class CoreMail implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Mail",
         version: "1.0.0",
         description: "Core Mail Module",
         author: "ehdes",
         dependencies: ["Core"],
     };
+
+    metadata: ExtensionMetadata = CoreMail.metadata;
 
     config: CoreMailTemplate;
     events: EventEmitter = new EventEmitter();

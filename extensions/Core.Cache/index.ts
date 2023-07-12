@@ -67,13 +67,15 @@ class CacheEntry<T> {
 }
 
 export default class CoreCache implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Cache",
         version: "1.0.0",
         description: "Caching Module",
         author: "ehdes",
         dependencies: ["Core"],
     };
+
+    metadata: ExtensionMetadata = CoreCache.metadata;
 
     config: CacheConfig;
     events: EventEmitter = new EventEmitter();

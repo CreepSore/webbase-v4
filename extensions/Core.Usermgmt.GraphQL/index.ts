@@ -26,13 +26,15 @@ import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
 class CoreUsermgmtGraphQLConfig {}
 
 export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Usermgmt.GraphQL",
         version: "1.0.0",
         description: "Usermanagement GraphQL Module",
         author: "ehdes",
         dependencies: ["Core.Usermgmt.Web", "Core.GraphQL"],
     };
+
+    metadata: ExtensionMetadata = CoreUsermgmtGraphQL.metadata;
 
     config: CoreUsermgmtGraphQLConfig;
 

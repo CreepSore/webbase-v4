@@ -11,13 +11,15 @@ class CoreRepeatableActionsConfig {
 }
 
 export default class CoreRepeatableActions implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.RepeatableActions",
         version: "1.0.0",
         description: "Provides an interface for managing repeatable actions",
         author: "ehdes",
         dependencies: ["Core"],
     };
+
+    metadata: ExtensionMetadata = CoreRepeatableActions.metadata;
 
     config: CoreRepeatableActionsConfig;
     events: EventEmitter = new EventEmitter();

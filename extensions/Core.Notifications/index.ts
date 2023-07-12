@@ -12,13 +12,15 @@ class TemplateConfig {
 }
 
 export default class CoreNotifications implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Core.Notifications",
         version: "1.0.0",
         description: "Notifications Module",
         author: "ehdes",
         dependencies: ["Core"],
     };
+
+    metadata: ExtensionMetadata = CoreNotifications.metadata;
 
     config: TemplateConfig = new TemplateConfig();
     events: EventEmitter = new EventEmitter();
