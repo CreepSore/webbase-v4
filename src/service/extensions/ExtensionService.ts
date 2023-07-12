@@ -91,7 +91,11 @@ export default class ExtensionService {
                         .done();
                 }
             }
-            currentNodes = this.extensions.filter(e => !loaded.has(e) && !e.metadata.resolvedDependencies.some(d => !loaded.has(d)));
+            currentNodes = this.extensions.filter(e =>
+                !loaded.has(e) &&
+                e.metadata.resolvedDependencies.length === e.metadata.dependencies.length &&
+                !e.metadata.resolvedDependencies.some(d => !loaded.has(d)),
+            );
         }
 
         this.extensionsStarted = true;
