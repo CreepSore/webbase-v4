@@ -9,13 +9,15 @@ class TemplateConfig {
 }
 
 export default class CustomTemplate implements IExtension {
-    metadata: ExtensionMetadata = {
+    static metadata: ExtensionMetadata = {
         name: "Custom.Template",
         version: "1.0.0",
         description: "Template Module",
         author: "ehdes",
         dependencies: ["Core"],
     };
+
+    metadata: ExtensionMetadata = CustomTemplate.metadata;
 
     config: TemplateConfig = new TemplateConfig();
     events: EventEmitter = new EventEmitter();
