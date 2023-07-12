@@ -10,7 +10,18 @@ let extensionConfigs = fs.readdirSync(extPath)
         const filePath = path.join(extPath, file);
         const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
         return data || {};
-    });
+    }).filter(Boolean);
+
+extensionConfigs = [...extensionConfigs, ...fs.readdirSync(extPath)
+    .filter(file => fs.statSync(path.join(extPath, file)).isDirectory() && !file.startsWith("Custom.Template"))
+    .map(file => {
+        const filePath = path.join(extPath, file, "webpack.json");
+        if(!fs.existsSync(filePath)){
+            return null;
+        }
+        const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        return data || {};
+    }).filter(Boolean)];
 
 const buildAppConfig = (env, argv) => {
     extensionConfigs = extensionConfigs.map(cfg => cfg.appBuildConfig).filter(Boolean);
