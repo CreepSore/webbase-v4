@@ -60,6 +60,7 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     config: CoreUsermgmtWebConfig;
     events: EventEmitter = new EventEmitter();
+    $: <T extends IExtension>(name: string) => T;
     autologinEntries: {ip: string, userid: string}[] = [];
 
     knex: Knex;
@@ -70,6 +71,7 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
+        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }
@@ -92,14 +94,14 @@ export default class CoreUsermgmtWeb implements IExtension {
             }))).filter(Boolean);
         }
 
-        const coreUsermgmt = executionContext.extensionService.getExtension("Core.Usermgmt") as CoreUsermgmt;
+        const coreUsermgmt = this.$<CoreUsermgmt>(CoreUsermgmt.metadata.name);
+        const coreDb = this.$<CoreDb>(CoreDb.metadata.name);
+        const coreWeb = this.$<CoreWeb>(CoreWeb.metadata.name);
         const perms = await coreUsermgmt.createPermissions(...Object.values(Permissions));
         await Promise.all(perms.map(p => PermissionGroup.addPermission({name: "Administrator"}, p)));
 
-        const coreDb = executionContext.extensionService.getExtension("Core.Db") as CoreDb;
         this.knex = coreDb.db;
 
-        const coreWeb = executionContext.extensionService.getExtension("Core.Web") as CoreWeb;
         // ! We literally can't do shit about that
         // eslint-disable-next-line new-cap
         const apiRouter = express.Router();

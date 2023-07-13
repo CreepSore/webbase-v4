@@ -43,6 +43,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
     config: CoreDashboardConfig;
     events: EventEmitter = new EventEmitter();
+    $: <T extends IExtension>(name: string) => T;
 
     pages: IDashboardPage[];
     umgmtGql: CoreUsermgmtGraphQL;
@@ -85,17 +86,16 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
+        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }
 
-        const [coreWeb, umgmtGraphQl, coreGraphQl, coreUsermgmt]
-            = executionContext.extensionService.getExtensions(
-                "Core.Web",
-                "Core.Usermgmt.GraphQL",
-                "Core.GraphQL",
-                "Core.Usermgmt",
-            ) as [CoreWeb, CoreUsermgmtGraphQL, CoreGraphQL, CoreUsermgmt];
+        const coreWeb = this.$<CoreWeb>(CoreWeb.metadata.name);
+        const umgmtGraphQl = this.$<CoreUsermgmtGraphQL>(CoreUsermgmtGraphQL.metadata.name);
+        const coreGraphQl = this.$<CoreGraphQL>(CoreGraphQL.metadata.name);
+        const coreUsermgmt = this.$<CoreUsermgmt>(CoreUsermgmt.metadata.name);
+
         await coreUsermgmt.createPermissions(...Object.values(Permissions));
         this.umgmtGql = umgmtGraphQl;
         const mainUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
