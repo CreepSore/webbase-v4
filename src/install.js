@@ -42,6 +42,7 @@ const main = async() => {
     else {
         console.log("Commands:");
         console.log("node install.js --npm=[install|remove] [--run]");
+        console.log("node install.js --extinit=[Extension.Name]")
     }
 };
 
