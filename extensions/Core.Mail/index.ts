@@ -41,7 +41,7 @@ export default class CoreMail implements IExtension {
         version: "1.0.0",
         description: "Core Mail Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name],
+        dependencies: [Core],
     };
 
     metadata: ExtensionMetadata = CoreMail.metadata;

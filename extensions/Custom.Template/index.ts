@@ -15,14 +15,14 @@ export default class CustomTemplate implements IExtension {
         version: "1.0.0",
         description: "Template Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name],
+        dependencies: [Core],
     };
 
     metadata: ExtensionMetadata = CustomTemplate.metadata;
 
     config: TemplateConfig = new TemplateConfig();
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string) => T;
+    $: <T extends IExtension>(name: string|{prototype: T}) => T;
 
     constructor() {
         this.config = this.loadConfig();
@@ -30,7 +30,7 @@ export default class CustomTemplate implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             await this.startCli(executionContext);
             return;

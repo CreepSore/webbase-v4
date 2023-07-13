@@ -53,14 +53,14 @@ export default class CoreUsermgmtWeb implements IExtension {
         version: "1.0.0",
         description: "Usermanagement Web Module",
         author: "ehdes",
-        dependencies: [CoreUsermgmt.metadata.name, CoreWeb.metadata.name],
+        dependencies: [CoreUsermgmt, CoreWeb],
     };
 
     metadata: ExtensionMetadata = CoreUsermgmtWeb.metadata;
 
     config: CoreUsermgmtWebConfig;
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string) => T;
+    $: <T extends IExtension>(name: string|{prototype: T}) => T;
     autologinEntries: {ip: string, userid: string}[] = [];
 
     knex: Knex;
@@ -71,7 +71,7 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }
@@ -94,9 +94,9 @@ export default class CoreUsermgmtWeb implements IExtension {
             }))).filter(Boolean);
         }
 
-        const coreUsermgmt = this.$<CoreUsermgmt>(CoreUsermgmt.metadata.name);
-        const coreDb = this.$<CoreDb>(CoreDb.metadata.name);
-        const coreWeb = this.$<CoreWeb>(CoreWeb.metadata.name);
+        const coreUsermgmt = this.$(CoreUsermgmt);
+        const coreDb = this.$(CoreDb);
+        const coreWeb = this.$(CoreWeb);
         const perms = await coreUsermgmt.createPermissions(...Object.values(Permissions));
         await Promise.all(perms.map(p => PermissionGroup.addPermission({name: "Administrator"}, p)));
 

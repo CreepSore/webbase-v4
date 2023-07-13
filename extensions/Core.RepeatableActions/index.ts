@@ -17,7 +17,7 @@ export default class CoreRepeatableActions implements IExtension {
         version: "1.0.0",
         description: "Provides an interface for managing repeatable actions",
         author: "ehdes",
-        dependencies: [Core.metadata.name],
+        dependencies: [Core],
     };
 
     metadata: ExtensionMetadata = CoreRepeatableActions.metadata;

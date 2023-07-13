@@ -18,7 +18,7 @@ export default class CoreNotifications implements IExtension {
         version: "1.0.0",
         description: "Notifications Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name],
+        dependencies: [Core],
     };
 
     metadata: ExtensionMetadata = CoreNotifications.metadata;
@@ -26,7 +26,7 @@ export default class CoreNotifications implements IExtension {
     config: TemplateConfig = new TemplateConfig();
     events: EventEmitter = new EventEmitter();
     notificationProviders: Set<INotificationProvider> = new Set<INotificationProvider>();
-    $: <T extends IExtension>(name: string) => T;
+    $: <T extends IExtension>(name: string|{prototype: T}) => T;
 
     constructor() {
         this.config = this.loadConfig();
@@ -55,7 +55,7 @@ export default class CoreNotifications implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             await this.startCli(executionContext);
             return;

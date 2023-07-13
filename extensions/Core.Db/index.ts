@@ -20,7 +20,7 @@ export default class CoreDb implements IExtension {
         version: "1.0.0",
         description: "Core Database Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name],
+        dependencies: [Core],
     };
 
     metadata: ExtensionMetadata = CoreDb.metadata;
@@ -36,8 +36,6 @@ export default class CoreDb implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         if(executionContext.contextType === "cli") return;
-        // Don't load the DB if we aren't required by any extension
-        if(!executionContext.extensionService.extensions.find(ext => ext.metadata.dependencies.includes(this.metadata.name))) return;
         this.checkConfig();
 
         const config = {...this.config};

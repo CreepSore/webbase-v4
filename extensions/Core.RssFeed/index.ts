@@ -21,14 +21,14 @@ export default class CoreRssFeed implements IExtension {
         version: "1.0.0",
         description: "RSS Feed Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name, CoreWeb.metadata.name, CoreUsermgmtWeb.metadata.name],
+        dependencies: [Core, CoreWeb, CoreUsermgmtWeb],
     };
 
     metadata: ExtensionMetadata = CoreRssFeed.metadata;
 
     config: CoreRssFeedConfig;
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string) => T;
+    $: <T extends IExtension>(name: string|{prototype: T}) => T;
 
     rssFeed = new RssFeed();
 
@@ -38,7 +38,7 @@ export default class CoreRssFeed implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             await this.startCli(executionContext);
             return;
@@ -58,9 +58,9 @@ export default class CoreRssFeed implements IExtension {
     }
 
     private async startMain(executionContext: IAppExecutionContext): Promise<void> {
-        const coreWeb = this.$<CoreWeb>(CoreWeb.metadata.name);
-        const coreUsermgmt = this.$<CoreUsermgmt>(CoreUsermgmt.metadata.name);
-        const coreUsermgmtWeb = this.$<CoreUsermgmtWeb>(CoreUsermgmtWeb.metadata.name);
+        const coreWeb = this.$(CoreWeb);
+        const coreUsermgmt = this.$(CoreUsermgmt);
+        const coreUsermgmtWeb = this.$(CoreUsermgmtWeb);
 
         await coreUsermgmt.createPermissions(...Object.values(Permissions));
 

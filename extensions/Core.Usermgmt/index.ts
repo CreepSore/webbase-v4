@@ -23,14 +23,14 @@ export default class CoreUsermgmt implements IExtension {
         version: "1.0.0",
         description: "Usermanagement Module",
         author: "ehdes",
-        dependencies: [CoreDb.metadata.name],
+        dependencies: [CoreDb],
     };
 
     metadata: ExtensionMetadata = CoreUsermgmt.metadata;
 
     config: CoreUsermgmtConfig;
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string) => T;
+    $: <T extends IExtension>(name: string|{prototype: T}) => T;
 
     constructor() {
         this.config = this.loadConfig(true);
@@ -38,12 +38,12 @@ export default class CoreUsermgmt implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }
 
-        const coreDb = this.$<CoreDb>(CoreDb.metadata.name);
+        const coreDb = this.$(CoreDb);
         await this.setupSchema(coreDb.db);
     }
 

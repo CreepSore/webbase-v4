@@ -35,7 +35,7 @@ export default class CoreWeb implements IExtension {
         version: "1.0.0",
         description: "Core Web Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name],
+        dependencies: [Core],
     };
 
     metadata: ExtensionMetadata = CoreWeb.metadata;

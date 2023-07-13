@@ -73,7 +73,7 @@ export default class CoreCache implements IExtension {
         version: "1.0.0",
         description: "Caching Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name],
+        dependencies: [Core],
     };
 
     metadata: ExtensionMetadata = CoreCache.metadata;

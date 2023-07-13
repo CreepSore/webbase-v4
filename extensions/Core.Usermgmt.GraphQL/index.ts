@@ -32,13 +32,13 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
         version: "1.0.0",
         description: "Usermanagement GraphQL Module",
         author: "ehdes",
-        dependencies: [CoreUsermgmtWeb.metadata.name, CoreGraphQL.metadata.name],
+        dependencies: [CoreUsermgmtWeb, CoreGraphQL],
     };
 
     metadata: ExtensionMetadata = CoreUsermgmtGraphQL.metadata;
 
     config: CoreUsermgmtGraphQLConfig;
-    $: <T extends IExtension>(name: string) => T;
+    $: <T extends IExtension>(name: string|{prototype: T}) => T;
 
     db: Knex;
     coreGraphQL: CoreGraphQL;
@@ -454,14 +454,14 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }
 
-        const coreDb = this.$<CoreDb>(CoreDb.metadata.name);
-        this.coreGraphQL = this.$<CoreGraphQL>(CoreGraphQL.metadata.name);
-        this.coreUsermgmt = this.$<CoreUsermgmt>(CoreUsermgmt.metadata.name);
+        const coreDb = this.$(CoreDb);
+        this.coreGraphQL = this.$(CoreGraphQL);
+        this.coreUsermgmt = this.$(CoreUsermgmt);
         this.db = coreDb.db;
 
         this.coreGraphQL.registerExtension(this);

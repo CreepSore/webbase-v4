@@ -49,7 +49,13 @@ export default class ExtensionService {
         )).filter(x => Boolean(x));
 
         this.extensions.forEach(extension => {
-            extension.metadata.resolvedDependencies = this.extensions.filter(ext => extension.metadata.dependencies.includes(ext.metadata.name));
+            extension.metadata.resolvedDependencies = this.extensions.filter(ext =>
+                // ! I can not figure the types of this out under any circumstances
+                // ! This works however, flawlessly
+                // @ts-ignore
+                extension.metadata.dependencies.includes(ext.metadata?.name) ||
+                // @ts-ignore
+                extension.metadata.dependencies.includes(ext.constructor));
         });
 
         return true;
@@ -116,8 +122,16 @@ export default class ExtensionService {
      * Gets an extension by its name
      * @param name the name of the extension
      */
-    getExtension(name: string): IExtension {
-        const result = this.extensions.find(ext => ext.metadata.name === name);
+    getExtension(name: string|any): IExtension {
+        let result: IExtension;
+
+        if(typeof name === "string") {
+            result = this.extensions.find(ext => ext.metadata.name === name);
+        }
+        else if(name.prototype) {
+            result = this.extensions.find(ext => ext instanceof name);
+        }
+
         if(!result) {
             LogBuilder
                 .start()
@@ -126,7 +140,8 @@ export default class ExtensionService {
                 .line(`Failed to get extension [${name}]`)
                 .done();
         }
-        return result;
+
+        return result || null;
     }
 
     /**

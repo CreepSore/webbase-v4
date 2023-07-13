@@ -21,7 +21,7 @@ export default class CoreRemoteConsole implements IExtension {
         version: "1.0.0",
         description: "Remote CLI Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name],
+        dependencies: [Core],
     };
 
     metadata: ExtensionMetadata = CoreRemoteConsole.metadata;

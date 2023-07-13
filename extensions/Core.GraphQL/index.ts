@@ -22,14 +22,14 @@ export default class CoreGraphQL implements IExtension {
         version: "1.0.0",
         description: "Template Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name, CoreWeb.metadata.name],
+        dependencies: [Core, CoreWeb],
     };
 
     metadata: ExtensionMetadata = CoreGraphQL.metadata;
 
     config: CoreGraphQLConfig;
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string) => T;
+    $: <T extends IExtension>(name: string|{prototype: T}) => T;
 
     schemes: GraphQL.GraphQLSchema[];
     rootSchema: GraphQL.GraphQLSchema;
@@ -41,7 +41,7 @@ export default class CoreGraphQL implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }
@@ -70,7 +70,7 @@ export default class CoreGraphQL implements IExtension {
             return;
         }
 
-        const coreWeb = this.$<CoreWeb>(CoreWeb.metadata.name);
+        const coreWeb = this.$(CoreWeb);
         this.schemes = [];
         let hasError = false;
 

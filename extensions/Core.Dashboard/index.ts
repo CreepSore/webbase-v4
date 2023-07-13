@@ -36,14 +36,14 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         version: "2.0.0",
         description: "Dashboard Module",
         author: "ehdes",
-        dependencies: [Core.metadata.name, CoreUsermgmt.metadata.name, CoreUsermgmtGraphQL.metadata.name, CoreGraphQL.metadata.name, CoreWeb.metadata.name],
+        dependencies: [Core, CoreUsermgmt, CoreUsermgmtGraphQL, CoreGraphQL, CoreWeb],
     };
 
     metadata: ExtensionMetadata = CoreDashboard.metadata;
 
     config: CoreDashboardConfig;
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string) => T;
+    $: <T extends IExtension>(name: string|{prototype: T}) => T;
 
     pages: IDashboardPage[];
     umgmtGql: CoreUsermgmtGraphQL;
@@ -86,15 +86,15 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }
 
-        const coreWeb = this.$<CoreWeb>(CoreWeb.metadata.name);
-        const umgmtGraphQl = this.$<CoreUsermgmtGraphQL>(CoreUsermgmtGraphQL.metadata.name);
-        const coreGraphQl = this.$<CoreGraphQL>(CoreGraphQL.metadata.name);
-        const coreUsermgmt = this.$<CoreUsermgmt>(CoreUsermgmt.metadata.name);
+        const coreWeb = this.$(CoreWeb);
+        const umgmtGraphQl = this.$(CoreUsermgmtGraphQL);
+        const coreGraphQl = this.$(CoreGraphQL);
+        const coreUsermgmt = this.$(CoreUsermgmt);
 
         await coreUsermgmt.createPermissions(...Object.values(Permissions));
         this.umgmtGql = umgmtGraphQl;
