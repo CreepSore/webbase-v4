@@ -43,7 +43,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
     config: CoreDashboardConfig;
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string|{prototype: T}) => T;
+    $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     pages: IDashboardPage[];
     umgmtGql: CoreUsermgmtGraphQL;
@@ -86,7 +86,7 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }

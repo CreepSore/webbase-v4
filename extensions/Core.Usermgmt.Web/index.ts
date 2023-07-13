@@ -60,7 +60,7 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     config: CoreUsermgmtWebConfig;
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string|{prototype: T}) => T;
+    $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
     autologinEntries: {ip: string, userid: string}[] = [];
 
     knex: Knex;
@@ -71,7 +71,7 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }

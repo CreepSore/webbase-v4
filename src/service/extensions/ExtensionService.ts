@@ -122,7 +122,7 @@ export default class ExtensionService {
      * Gets an extension by its name
      * @param name the name of the extension
      */
-    getExtension(name: string|any): IExtension {
+    getExtension(name: string|Function & { prototype: IExtension }): IExtension {
         let result: IExtension;
 
         if(typeof name === "string") {

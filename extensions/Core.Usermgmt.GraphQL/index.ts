@@ -38,7 +38,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
     metadata: ExtensionMetadata = CoreUsermgmtGraphQL.metadata;
 
     config: CoreUsermgmtGraphQLConfig;
-    $: <T extends IExtension>(name: string|{prototype: T}) => T;
+    $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     db: Knex;
     coreGraphQL: CoreGraphQL;
@@ -454,7 +454,7 @@ export default class CoreUsermgmtGraphQL implements IExtension, IGraphQLExtensio
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        this.$ = <T extends IExtension>(name: string|{prototype: T}) => executionContext.extensionService.getExtension(name) as T;
+        this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             return;
         }
