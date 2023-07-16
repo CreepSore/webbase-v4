@@ -4,7 +4,7 @@ const child_process = require("child_process");
 const minimist = require("minimist");
 
 const argv = minimist(process.argv.slice(2), {
-    string: ["npm"],
+    string: ["npm", "extinit"],
     boolean: ["run"],
 });
 
@@ -36,11 +36,39 @@ const main = async() => {
     if(argv.npm) {
         generateNpmCommand(extensions);
     }
+    else if(argv.extinit) {
+        initializeExtension(argv.extinit);
+    }
     else {
         console.log("Commands:");
         console.log("node install.js --npm=[install|remove] [--run]");
+        console.log("node install.js --extinit=[Extension.Name]")
     }
 };
+
+const initializeExtension = (name) => {
+    const normalizedName = name.replace(/\./g, "");
+    const extPath = path.join(__dirname, "../extensions");
+    const extensionDir = path.join(extPath, name);
+    if(fs.existsSync(extensionDir)) {
+        console.log("Extension already exists");
+        return;
+    }
+
+    const templateDir = path.join(extPath, "Custom.Template");
+    if(!fs.existsSync(templateDir)) {
+        console.log("Template extension not found");
+        return;
+    }
+
+    fs.mkdirSync(extensionDir);
+    let indexData = fs.readFileSync(path.join(templateDir, "index.ts"), "utf8");
+    indexData = indexData.replace(/Custom\.Template/g, name);
+    indexData = indexData.replace(/CustomTemplate/g, normalizedName);
+    fs.writeFileSync(path.join(extensionDir, "index.ts"), indexData);
+
+    console.log("Extension created");
+}
 
 /**
  * @param {{[key: string]: import("./IInstallerType").default}} extensions

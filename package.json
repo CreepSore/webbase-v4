@@ -13,8 +13,7 @@
     "pwatchWeb": "webpack build --env buildtype=web --mode=production -w",
     "generateDocs": "typedoc --out docs --basePath ./src --entryPointStrategy expand ./src",
     "lint": "eslint . --ext ts",
-    "log": "cat $(ls -t logs/* | head -1) | vim - -c 'set filetype=messages'",
-    "jsonlog": "cat $(ls -t jsonlogs/* | head -1) | vim - -c 'set filetype=messages'"
+    "extinit": "node ./src/install.js --extinit"
   },
   "author": "ehdes",
   "license": "MIT",
