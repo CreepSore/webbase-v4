@@ -5,7 +5,7 @@ import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
 
-class TemplateConfig {
+class CustomTemplateConfig {
 
 }
 
@@ -20,7 +20,7 @@ export default class CustomTemplate implements IExtension {
 
     metadata: ExtensionMetadata = CustomTemplate.metadata;
 
-    config: TemplateConfig = new TemplateConfig();
+    config: CustomTemplateConfig = new CustomTemplateConfig();
     events: EventEmitter = new EventEmitter();
     $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
@@ -64,7 +64,7 @@ export default class CustomTemplate implements IExtension {
         return ConfigLoader.initConfigWithModel(
             configPath,
             templatePath,
-            new TemplateConfig(),
+            new CustomTemplateConfig(),
             createDefault,
         );
     }
