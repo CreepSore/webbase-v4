@@ -27,6 +27,11 @@ class CoreWebConfig {
     port: number = 1325;
     secret: string = "SECRET";
     saveSessionOnInit: boolean = false;
+    // ! These are more or less pseudovalues
+    // ! Since we should always proxy through nginx, these
+    // ! should be set according to it's settings.
+    httpHost: string = "localhost";
+    httpProtocol: string = "https";
 }
 
 export default class CoreWeb implements IExtension {
@@ -42,6 +47,9 @@ export default class CoreWeb implements IExtension {
 
     config: CoreWebConfig;
     app: express.Express;
+    // ! I still can't do shit about this
+    // eslint-disable-next-line new-cap
+    coreRouter: express.Router = express.Router();
     server: Server;
     events: EventEmitter = new EventEmitter();
     liveReload: {
@@ -109,6 +117,8 @@ export default class CoreWeb implements IExtension {
 
             return next();
         });
+
+        this.app.use(this.coreRouter);
 
         this.app.post("/api/core.web/acceptCookies", (req, res) => {
             req.session.acceptedCookies = req.body.cookies;
