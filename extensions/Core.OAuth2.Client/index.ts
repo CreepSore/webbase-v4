@@ -73,7 +73,16 @@ export default class CoreOAuth2Client implements IExtension {
 
     private async startMain(executionContext: IAppExecutionContext): Promise<void> {
         const coreWeb = this.$(CoreWeb);
+        coreWeb.app.options("/oauth2/callback", async(req, res) => {
+            res.setHeader("Access-Control-Allow-Origin", `https://${this.config.oauthHost}`);
+            res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+            res.end();
+        });
+
         coreWeb.app.get("/oauth2/callback", async(req, res) => {
+            res.setHeader("Access-Control-Allow-Origin", `https://${this.config.oauthHost}`);
+            res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
             const {code, state} = req.query;
             if(!code) {
                 res.status(400).send(OAuthErrorFactory.invalidCode().message);
