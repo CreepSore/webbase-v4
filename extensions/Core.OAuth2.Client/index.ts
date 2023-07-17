@@ -78,6 +78,7 @@ export default class CoreOAuth2Client implements IExtension {
             if(req.url === "/" || validRedirectUris.includes(req.url)) {
                 res.setHeader("Access-Control-Allow-Origin", `https://${this.config.oauthHost}`);
                 res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+                res.setHeader("Access-Control-Allow-Credentials", "true");
                 if(req.method === "OPTIONS") {
                     res.end();
                     return;
@@ -89,12 +90,14 @@ export default class CoreOAuth2Client implements IExtension {
         coreWeb.coreRouter.options("/oauth2/callback", async(req, res) => {
             res.setHeader("Access-Control-Allow-Origin", `https://${this.config.oauthHost}`);
             res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+            res.setHeader("Access-Control-Allow-Credentials", "true");
             res.end();
         });
 
         coreWeb.coreRouter.get("/oauth2/callback", async(req, res) => {
             res.setHeader("Access-Control-Allow-Origin", `https://${this.config.oauthHost}`);
             res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+            res.setHeader("Access-Control-Allow-Credentials", "true");
 
             const {code, state} = req.query;
             if(!code) {
@@ -145,6 +148,7 @@ export default class CoreOAuth2Client implements IExtension {
                 }
 
                 req.session.uid = userinfo.id;
+                req.session.save();
 
                 const redirectTo = this.stateRedirects.get(state as string);
                 if(redirectTo) {

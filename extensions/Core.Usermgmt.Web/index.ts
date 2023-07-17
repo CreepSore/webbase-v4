@@ -363,7 +363,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         };
     }
 
-    private async handleUidLogon(
+    async handleUidLogon(
         req: express.Request,
         res: express.Response,
         uid: string = null,
