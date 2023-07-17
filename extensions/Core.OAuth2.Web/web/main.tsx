@@ -12,26 +12,32 @@ function Main(): JSX.Element {
 
     const doLogin = (): void => {
         (async() => {
-            const fetchResponse = await fetch(location.href, {
-                method: "POST",
-                body: JSON.stringify({
-                    authData: {
-                        type: AuthenticationParameter.Password,
-                        name: username,
-                        password,
+            try {
+                const fetchResponse = await fetch(location.href, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        authData: {
+                            type: AuthenticationParameter.Password,
+                            name: username,
+                            password,
+                        },
+                    } as {authData: PasswordAuthenticationData}),
+                    headers: {
+                        "Content-Type": "application/json",
                     },
-                } as {authData: PasswordAuthenticationData}),
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            const jsonData = await fetchResponse.json();
+                });
 
-            if(fetchResponse.status === 400) {
-                setLoginError(jsonData.error);
+                if(fetchResponse.status === 400) {
+                    setLoginError(await fetchResponse.text());
+                }
+                else {
+                    // ! Fuck it just go else, we still want to redirect to 404 pages
+                    // ! Not my problem if i'm too dumb to specify existing pages
+                    window.location.href = fetchResponse.url;
+                }
             }
-            else if(fetchResponse.status === 302) {
-                window.location.href = fetchResponse.headers.get("Location") as string;
+            catch(err) {
+                console.log(err);
             }
         })();
     };
