@@ -22,6 +22,7 @@ export interface ExtensionMetadata {
     /**
      * The dependencies of the extension.
      * @example ["Core", "Core.Web"]
+     * [Core, CoreWeb]
      */
     dependencies: Array<string>|Array<Function & { prototype: IExtension }>;
     /**

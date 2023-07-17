@@ -1,0 +1,13 @@
+{
+    "appBuildConfig": {
+        "externals": {
+            "express": "commonjs express",
+            "express-ws": "commonjs express-ws"
+        }
+    },
+    "webBuildConfig": {
+        "entry": {
+            "Core.OAuth2.Web.Main.js": "./extensions/Core.OAuth2.Web/web/main.tsx"
+        }
+    }
+}

@@ -83,6 +83,7 @@ export default class User {
     static async create(user: User) {
         user.id = user.id || uuid.v4();
         user.created = user.created || new Date();
+        user.modified = user.modified || null;
         user.permissionGroupId = user.permissionGroupId || (await PermissionGroup.use().where({name: "Anonymous"}))[0].id;
         user.email = user.email || null;
 
@@ -103,7 +104,7 @@ export default class User {
                 table.string("email", 255)
                     .nullable();
 
-                table.string("password", 44); // SHA256
+                table.string("password", 44).nullable(); // SHA256
 
                 table.boolean("isActive");
 
