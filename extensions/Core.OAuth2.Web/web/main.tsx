@@ -15,10 +15,12 @@ function Main(): JSX.Element {
             const fetchResponse = await fetch(location.href, {
                 method: "POST",
                 body: JSON.stringify({
-                    type: AuthenticationParameter.Password,
-                    name: username,
-                    password,
-                } as PasswordAuthenticationData),
+                    authData: {
+                        type: AuthenticationParameter.Password,
+                        name: username,
+                        password,
+                    },
+                } as {authData: PasswordAuthenticationData}),
                 headers: {
                     "Content-Type": "application/json",
                 },
