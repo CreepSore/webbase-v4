@@ -18,6 +18,7 @@ import Permissions from "./permissions";
 import { Knex } from "knex";
 import expressWs from "express-ws";
 import LogBuilder from "@service/logger/LogBuilder";
+import CoreOAuth2Web from "@extensions/Core.OAuth2.Web";
 
 declare module "express-session" {
     export interface SessionData {
@@ -53,7 +54,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         version: "1.0.0",
         description: "Usermanagement Web Module",
         author: "ehdes",
-        dependencies: [CoreUsermgmt, CoreWeb],
+        dependencies: [CoreUsermgmt, CoreWeb, CoreOAuth2Web],
     };
 
     metadata: ExtensionMetadata = CoreUsermgmtWeb.metadata;

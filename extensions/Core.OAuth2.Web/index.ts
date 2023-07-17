@@ -74,7 +74,7 @@ export default class CoreOAuth2Web implements IExtension {
             });
         });
 
-        coreWeb.app.get<any, any, any, any, {code: string}>("/oauth2/token", async(req, res, next) => {
+        coreWeb.coreRouter.get<any, any, any, any, {code: string}>("/oauth2/token", async(req, res, next) => {
             const {code} = req.query;
             const codeMapping = this.codeMapping.get(code);
             if(!code || !codeMapping || codeMapping.expiresAt < Date.now()) {
@@ -95,7 +95,7 @@ export default class CoreOAuth2Web implements IExtension {
             });
         });
 
-        coreWeb.app.get<any, any, any, any, {code: string}>("/oauth2/userinfo", async(req, res, next) => {
+        coreWeb.coreRouter.get<any, any, any, any, {code: string}>("/oauth2/userinfo", async(req, res, next) => {
             const {authorization} = req.headers;
             if(!authorization) {
                 res.status(400).json({error: OAuthErrorFactory.invalidToken().message});
@@ -118,7 +118,7 @@ export default class CoreOAuth2Web implements IExtension {
             } as IOAuthUser);
         });
 
-        coreWeb.app.use(/\/oauth2$/, async(req, res, next) => {
+        coreWeb.coreRouter.use(/\/oauth2$/, async(req, res, next) => {
             const authenticationRequest = req.query as unknown as IAuthenticationRequest & {scopes: string};
             const parsedAuthenticationRequest = {
                 ...authenticationRequest,

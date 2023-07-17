@@ -73,13 +73,26 @@ export default class CoreOAuth2Client implements IExtension {
 
     private async startMain(executionContext: IAppExecutionContext): Promise<void> {
         const coreWeb = this.$(CoreWeb);
-        coreWeb.app.options("/oauth2/callback", async(req, res) => {
+        coreWeb.coreRouter.use((req, res, next) => {
+            const validRedirectUris = [...this.stateRedirects.values()].map(uri => new URL(uri).pathname);
+            if(req.url === "/" || validRedirectUris.includes(req.url)) {
+                res.setHeader("Access-Control-Allow-Origin", `https://${this.config.oauthHost}`);
+                res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+                if(req.method === "OPTIONS") {
+                    res.end();
+                    return;
+                }
+            }
+            next();
+        });
+
+        coreWeb.coreRouter.options("/oauth2/callback", async(req, res) => {
             res.setHeader("Access-Control-Allow-Origin", `https://${this.config.oauthHost}`);
             res.setHeader("Access-Control-Allow-Headers", "Content-Type");
             res.end();
         });
 
-        coreWeb.app.get("/oauth2/callback", async(req, res) => {
+        coreWeb.coreRouter.get("/oauth2/callback", async(req, res) => {
             res.setHeader("Access-Control-Allow-Origin", `https://${this.config.oauthHost}`);
             res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
@@ -138,7 +151,7 @@ export default class CoreOAuth2Client implements IExtension {
                     res.redirect(redirectTo);
                 }
                 else {
-                    res.json({sucess: true}).status(200);
+                    res.redirect(`${coreWeb.config.httpProtocol}://${coreWeb.config.httpHost}/`);
                 }
             }
             catch(error) {
