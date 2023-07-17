@@ -5,7 +5,7 @@ import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
 import CoreWeb from "@extensions/Core.Web";
-import OAuthErrorFactory, { OAuthError } from "@extensions/Core.OAuth2/errors";
+import OAuthErrorFactory from "@extensions/Core.OAuth2/errors";
 import IOAuthUser from "@extensions/Core.OAuth2.Db/models/interfaces/IOAuthUser";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
 import User from "@extensions/Core.Usermgmt/Models/User";
@@ -21,6 +21,7 @@ declare module "express-session" {
 }
 
 class CoreOAuth2ClientConfig {
+    enabled: boolean = false;
     oauthHost: string = "localhost";
     clientId: string = "";
     clientSecret: string = "";
@@ -47,7 +48,10 @@ export default class CoreOAuth2Client implements IExtension {
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
-        this.checkConfig();
+        if(!this.checkConfig()) {
+            return;
+        }
+
         this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
             await this.startCli(executionContext);
@@ -148,10 +152,8 @@ export default class CoreOAuth2Client implements IExtension {
         this.stateRedirects.set(state, redirectUrl);
     }
 
-    private checkConfig(): void {
-        if(!this.config) {
-            throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
-        }
+    private checkConfig(): boolean {
+        return Boolean(this.config) && this.config.enabled;
     }
 
     private loadConfig(createDefault: boolean = false): typeof this.config {
