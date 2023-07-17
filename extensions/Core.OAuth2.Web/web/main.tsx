@@ -33,12 +33,11 @@ function Main(): JSX.Element {
                 else {
                     // ! Fuck it just go else, we still want to redirect to 404 pages
                     // ! Not my problem if i'm too dumb to specify existing pages
-                    window.location.href = fetchResponse.headers.get("Location") as string;
+                    window.location.href = fetchResponse.url;
                 }
             }
             catch(err) {
                 console.log(err);
-                debugger;
             }
         })();
     };
