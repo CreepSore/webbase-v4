@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
+
+@layer base {
+
+}
+
+@layer components {
+    #login {
+        @apply bg-slate-900;
+        @apply w-full h-full min-h-screen;
+        @apply flex justify-center items-center;
+
+        .login-form {
+            @apply bg-black/50 backdrop-blur-lg;
+            @apply flex flex-col gap-1;
+            @apply w-full max-w-[500px];
+            @apply p-4 rounded-md;
+            @apply shadow-white/10 shadow-md;
+
+            input.login-input[type="text"],
+            input.login-input[type="password"] {
+                @apply bg-white/10 text-white;
+                @apply px-2 py-1;
+
+                @apply border border-transparent;
+                @apply focus:outline-none;
+
+                &.invalid {
+                    @apply hover:border-red-600/50 focus:border-red-600/50;
+                }
+
+                &.valid {
+                    @apply border-green-400/80;
+                }
+            }
+
+            button.login-input {
+                @apply px-4 py-2;
+                @apply hover:brightness-125;
+
+                &.invalid {
+                    @apply bg-red-600/50 text-white;
+                }
+
+                &.valid {
+                    @apply bg-green-400/80 text-white;
+                }
+            }
+
+            .error-alert {
+                @apply block w-full;
+                @apply py-1 px-2;
+                @apply bg-red-600/50 text-white;
+            }
+        }
+    }
+}
+
+@layer utilities {
+
+}

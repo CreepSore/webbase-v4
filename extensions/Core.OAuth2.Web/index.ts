@@ -64,9 +64,14 @@ export default class CoreOAuth2Web implements IExtension {
 
     private async startMain(executionContext: IAppExecutionContext): Promise<void> {
         const coreWeb = this.$(CoreWeb);
+        const loginScript = coreWeb.addScriptFromFile("Core.OAuth2.Web.Main", "Core.OAuth2.Web.Main.js");
 
         this.codeWatchdog = nodeCron.schedule("* * * * * *", async() => {
-
+            this.codeMapping.forEach((value, key) => {
+                if(value.expiresAt < Date.now()) {
+                    this.codeMapping.delete(key);
+                }
+            });
         });
 
         coreWeb.app.get<any, any, any, any, {code: string}>("/oauth2/token", async(req, res, next) => {
@@ -153,7 +158,13 @@ export default class CoreOAuth2Web implements IExtension {
         }, async(req, res, next) => {
             if(req.method !== "GET") return next();
 
-            res.status(200).json({success: true});
+            res.setHeader("Cache-Control", "public, max-age=86400, must-revalidate");
+
+            res.setHeader("Content-Type", "text/html")
+                .status(200)
+                .write(coreWeb.generateReactPage(loginScript));
+
+            res.end();
         }, async(req, res, next) => {
             if(req.method !== "POST") return next();
 
