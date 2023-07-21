@@ -4,15 +4,16 @@ const child_process = require("child_process");
 const minimist = require("minimist");
 
 const argv = minimist(process.argv.slice(2), {
-    string: ["npm", "extinit"],
+    string: ["npm", "extinit", "extdisable", "extenable"],
     boolean: ["run"],
 });
+
+/** @type {{[key: string]: import("./IInstallerType").default}} */
+const extensions = {};
 
 const main = async() => {
     const extPath = path.join(__dirname, "../extensions");
     const extensionsDir = fs.readdirSync(extPath);
-    /** @type {{[key: string]: import("./IInstallerType").default}} */
-    const extensions = {};
 
     for(const extension of extensionsDir) {
         if(extension.startsWith("Custom.Template")) {
@@ -39,10 +40,18 @@ const main = async() => {
     else if(argv.extinit) {
         initializeExtension(argv.extinit);
     }
+    else if(argv.extdisable) {
+        disableExtension(argv.extdisable);
+    }
+    else if(argv.extenable) {
+        enableExtension(argv.extenable);
+    }
     else {
         console.log("Commands:");
         console.log("node install.js --npm=[install|remove] [--run]");
-        console.log("node install.js --extinit=[Extension.Name]")
+        console.log("node install.js --extinit=[Extension.Name]");
+        console.log("node install.js --extdisable=[Extension.Name]");
+        console.log("node install.js --extenable=[Extension.Name]");
     }
 };
 
@@ -69,6 +78,74 @@ const initializeExtension = (name) => {
 
     console.log("Extension created");
 }
+
+const disableExtension = (name) => {
+    let disabledJson = path.resolve(__dirname, "..", "extensions", "disabled.json");
+    let disabled;
+    if(!fs.existsSync(disabledJson)) {
+        disabled = [];
+    }
+    else {
+        try {
+            disabled = JSON.parse(fs.readFileSync(disabledJson, "utf8"));
+        }
+        catch(err) {
+            console.error(err);
+        }
+    }
+
+    let extDir = path.resolve(__dirname, "..", "extensions", name);
+    if(!fs.existsSync(extDir)) {
+        console.log("Extension not found");
+        return;
+    }
+
+    let disabledFolder = path.resolve(__dirname, "..", "extensions", "disabled");
+    if(!fs.existsSync(disabledFolder)) {
+        fs.mkdirSync(disabledFolder);
+    }
+
+    fs.renameSync(extDir, path.resolve(disabledFolder, name));
+
+    if(!disabled.includes(name)) {
+        disabled.push(name);
+        fs.writeFileSync(disabledJson, JSON.stringify(disabled, null, 4));
+    }
+
+    console.log("Extension disabled");
+}
+
+const enableExtension = (name) => {
+    const disabledJson = path.resolve(__dirname, "..", "extensions", "disabled.json");
+    let disabled;
+    if(!fs.existsSync(disabledJson)) {
+        disabled = [];
+    }
+    else {
+        try {
+            disabled = JSON.parse(fs.readFileSync(disabledJson, "utf8"));
+        }
+        catch(err) {
+            console.error(err);
+        }
+    }
+
+    const extDir = path.resolve(__dirname, "..", "extensions", "disabled", name);
+    if(!fs.existsSync(extDir)) {
+        console.log("Extension not found");
+        return;
+    }
+
+    const enabledFolder = path.resolve(__dirname, "..", "extensions");
+    fs.renameSync(extDir, path.resolve(enabledFolder, name));
+
+    if(disabled.includes(name)) {
+        disabled.splice(disabled.indexOf(name), 1);
+        fs.writeFileSync(disabledJson, JSON.stringify(disabled, null, 4));
+    }
+
+    console.log("Extension enabled");
+};
 
 /**
  * @param {{[key: string]: import("./IInstallerType").default}} extensions
