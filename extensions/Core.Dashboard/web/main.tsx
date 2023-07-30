@@ -18,10 +18,6 @@ import UsersPage from "./pages/UsersPage";
 import PermissionsPage from "./pages/PermissionsPage";
 import LogsPage from "./pages/LogsPage";
 
-import Notifications from "@extensions/Core.ReactComponents/Notifications";
-import NotificationManager from "@extensions/Core.ReactComponents/Notifications/NotificationManager";
-import CookieDialog from "@extensions/Core.ReactComponents/Cookies/CookieDialog";
-
 function Main(): JSX.Element {
     const startPage = location.hash.substring(1);
     const [currentDashboardPage, setCurrentDashboardPage] = React.useState(startPage || "home");
@@ -37,14 +33,6 @@ function Main(): JSX.Element {
         }},
     );
 
-    React.useEffect(() => {
-        NotificationManager.addNotification({
-            type: "info",
-            message: "text",
-            title: "test",
-        });
-    }, []);
-
     const onNavigationRequest = (target: string): void => {
         if(target === currentDashboardPage) return;
         window.history.pushState(null, "", target !== "home" ? `#${target}` : "#");
@@ -59,7 +47,7 @@ function Main(): JSX.Element {
     return <div id="dashboard">
         <div className="background">
             <div className="background-container">
-                <div className="image" style={{backgroundImage: /*`url(${backgroundImageSrc})`*/ ""}}/>
+                <div className="image bg-sky-900" />
                 <div className="blur"></div>
             </div>
         </div>
@@ -89,7 +77,7 @@ function Main(): JSX.Element {
                 </RouterPage>
 
                 <RouterPage key="home">
-                    <Notifications />
+
                 </RouterPage>
 
                 <RouterPage key="users">
