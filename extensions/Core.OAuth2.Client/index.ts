@@ -99,10 +99,10 @@ export default class CoreOAuth2Client implements IExtension {
             res.setHeader("Access-Control-Allow-Headers", "Content-Type");
             res.setHeader("Access-Control-Allow-Credentials", "true");
 
-            const {code, state, error} = req.query;
+            const {code, state, error: loginError} = req.query;
 
-            if(error) {
-                res.status(400).send(error);
+            if(loginError) {
+                res.status(400).send(loginError);
                 return;
             }
 
