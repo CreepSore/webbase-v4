@@ -7,7 +7,7 @@ import RouterPage from "@extensions/Core.ReactComponents/Router/RouterPage";
 import {useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 // @ts-ignore
-import backgroundImageSrc from "./bg.png";
+// import backgroundImageSrc from "./bg.png";
 
 import "./style.css";
 import Sidebar from "./components/Sidebar";
@@ -59,7 +59,7 @@ function Main(): JSX.Element {
     return <div id="dashboard">
         <div className="background">
             <div className="background-container">
-                <div className="image" style={{backgroundImage: `url(${backgroundImageSrc})`}}/>
+                <div className="image" style={{backgroundImage: /*`url(${backgroundImageSrc})`*/ ""}}/>
                 <div className="blur"></div>
             </div>
         </div>

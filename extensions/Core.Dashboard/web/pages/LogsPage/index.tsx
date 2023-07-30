@@ -2,8 +2,6 @@ import React from "react";
 
 import {useQuery} from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
-import "./style.css";
-
 interface LogEntry {
     id: string;
     date: number;

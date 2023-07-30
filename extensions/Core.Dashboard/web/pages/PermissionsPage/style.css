@@ -1,11 +1,4 @@
-@tailwind base;
 @tailwind components;
-@tailwind utilities;
-@tailwind variants;
-
-@layer base {
-
-}
 
 @layer components {
     .permissions-page {
@@ -26,8 +19,4 @@
             }
         }
     }
-}
-
-@layer utilities {
-
 }

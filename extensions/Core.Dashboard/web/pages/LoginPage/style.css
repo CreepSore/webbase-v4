@@ -1,11 +1,4 @@
-@tailwind base;
 @tailwind components;
-@tailwind utilities;
-@tailwind variants;
-
-@layer base {
-
-}
 
 @layer components {
     #login {
@@ -56,8 +49,4 @@
             }
         }
     }
-}
-
-@layer utilities {
-
 }
