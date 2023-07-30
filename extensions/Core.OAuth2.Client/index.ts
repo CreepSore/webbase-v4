@@ -99,7 +99,13 @@ export default class CoreOAuth2Client implements IExtension {
             res.setHeader("Access-Control-Allow-Headers", "Content-Type");
             res.setHeader("Access-Control-Allow-Credentials", "true");
 
-            const {code, state} = req.query;
+            const {code, state, error} = req.query;
+
+            if(error) {
+                res.status(400).send(error);
+                return;
+            }
+
             if(!code) {
                 res.status(400).send(OAuthErrorFactory.invalidCode().message);
                 return;
@@ -159,7 +165,7 @@ export default class CoreOAuth2Client implements IExtension {
                 }
             }
             catch(error) {
-                res.status(400).send(error.error);
+                res.status(400).send(error.message);
                 return;
             }
         });
