@@ -21,7 +21,7 @@ export default class MainAppliation implements IApplication {
             application: this,
             extensionService: this.extensionService,
         });
-        await this.extensionService.loadExtensions();
+        await this.extensionService.loadExtensionsFromExtensionsFolder();
         await this.extensionService.startExtensions();
 
         console.log("INFO", "MainApplication.ts", "Main Application Startup successful.");

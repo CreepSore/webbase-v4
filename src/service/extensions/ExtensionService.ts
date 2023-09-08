@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import {EventEmitter} from "events";
 
-import IExecutionContext, {IAppExecutionContext, ICliExecutionContext} from "./IExecutionContext";
+import IExecutionContext, {IAppExecutionContext, ICliExecutionContext, ITestExecutionContext} from "./IExecutionContext";
 import IExtension, {IExtensionConstructor} from "./IExtension";
 import LogBuilder from "@service/logger/LogBuilder";
 
@@ -21,12 +21,12 @@ export default class ExtensionService {
      * Sets the current {@link IAppExecutionContext}
      * @param info
      */
-    setContextInfo(info: IAppExecutionContext|ICliExecutionContext): void {
+    setContextInfo(info: IAppExecutionContext|ICliExecutionContext|ITestExecutionContext): void {
         this.executionContext = info;
         this.executionContext.extensionService = this;
     }
 
-    async loadExtensions(): Promise<boolean> {
+    async loadExtensionsFromExtensionsFolder(): Promise<boolean> {
         if(this.extensionsStarted) return false;
         if(!fs.existsSync(this.extensionPath)) return false;
         const disabled = this.getDisabledExtensions();
@@ -48,15 +48,7 @@ export default class ExtensionService {
                 }),
         )).filter(x => Boolean(x));
 
-        this.extensions.forEach(extension => {
-            extension.metadata.resolvedDependencies = this.extensions.filter(ext =>
-                // ! I can not figure the types of this out under any circumstances
-                // ! This works however, flawlessly
-                // @ts-ignore
-                extension.metadata.dependencies.includes(ext.metadata?.name) ||
-                // @ts-ignore
-                extension.metadata.dependencies.includes(ext.constructor));
-        });
+        this.loadExtensions();
 
         return true;
     }
@@ -116,6 +108,23 @@ export default class ExtensionService {
         }
 
         this.extensionsStarted = false;
+    }
+
+    registerExtension(extension: IExtension): void {
+        this.extensions.push(extension);
+    }
+
+    loadExtensions(): void {
+        for(const extension of this.extensions) {
+            extension.metadata.resolvedDependencies = this.extensions.filter(ext =>
+                // ! I can not figure the types of this out under any circumstances
+                // ! This works however, flawlessly
+                // @ts-ignore
+                extension.metadata.dependencies.includes(ext.metadata?.name) ||
+                // @ts-ignore
+                extension.metadata.dependencies.includes(ext.constructor)
+            );
+        }
     }
 
     /**

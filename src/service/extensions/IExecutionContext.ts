@@ -1,11 +1,12 @@
 import MainApplication from "@app/MainApplication";
-import ExtensionService from "./ExtensionService";
 import CliApplication from "@app/CliApplication";
+import TestApplication from "@app/TestApplication";
+import ExtensionService from "./ExtensionService";
 
 /**
  * Base ExecutionContext
  */
-type IExecutionContext = (IAppExecutionContext|ICliExecutionContext);
+type IExecutionContext = (IAppExecutionContext|ICliExecutionContext|ITestExecutionContext);
 
 export default IExecutionContext;
 
@@ -21,5 +22,11 @@ export interface IAppExecutionContext {
 export interface ICliExecutionContext {
     contextType: "cli";
     application: CliApplication
+    extensionService: ExtensionService;
+}
+
+export interface ITestExecutionContext {
+    contextType: "test";
+    application: TestApplication;
     extensionService: ExtensionService;
 }
