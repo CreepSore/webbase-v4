@@ -49,8 +49,53 @@ export default class CoreNotifications implements IExtension {
     }
 
     registerNotificationProvider(provider: INotificationProvider): this {
+        if([...this.notificationProviders].some(notificationProvider => notificationProvider.type === provider.type)) {
+            LogBuilder
+                .start()
+                .info(this.metadata.name)
+                .level("WARN")
+                .line(`Provider of type ${provider.type} is already registered.`)
+                .done();
+
+            return this;
+        }
+
         this.notificationProviders.add(provider);
         return this;
+    }
+
+    async sendNotification<T extends INotificationProvider>(
+        notification: INotification,
+        targets: Array<Function & { prototype: T }> = null
+    ): Promise<void> {
+        let notificationProviders = [...this.notificationProviders];
+
+        if(targets) {
+            let filteredProviders = [];
+            for(let provider of notificationProviders) {
+                for(let target of targets) {
+                    if(provider instanceof target) {
+                        filteredProviders.push(provider);
+                    }
+                }
+            }
+
+            notificationProviders = filteredProviders;
+        }
+
+        for(let provider of notificationProviders) {
+            try {
+                await provider.broadcastNotification(notification);
+            }
+            catch {
+                LogBuilder
+                    .start()
+                    .info(this.metadata.name)
+                    .level("ERROR")
+                    .line(`Failed to send notification using provider of type ${provider.type}`)
+                    .done();
+            }
+        }
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
