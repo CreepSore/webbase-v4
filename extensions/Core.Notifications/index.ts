@@ -132,6 +132,7 @@ export default class CoreNotifications implements IExtension {
                         .info(this.metadata.name)
                         .line(`Failed to start notification provider of type ${notificationProvider.type}`)
                         .done();
+
                     this.notificationProviders.delete(notificationProvider);
                 }
             }
