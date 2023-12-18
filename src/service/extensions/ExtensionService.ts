@@ -1,10 +1,10 @@
-import * as path from "path";
+import { EventEmitter } from "events";
 import * as fs from "fs";
-import {EventEmitter} from "events";
+import * as path from "path";
 
-import IExecutionContext, {IAppExecutionContext, ICliExecutionContext, ITestExecutionContext} from "./IExecutionContext";
-import IExtension, {IExtensionConstructor} from "./IExtension";
 import LogBuilder from "@service/logger/LogBuilder";
+import IExecutionContext, { IAppExecutionContext, ICliExecutionContext, ITestExecutionContext } from "./IExecutionContext";
+import IExtension, { IExtensionConstructor } from "./IExtension";
 
 export default class ExtensionService {
     extensions: Array<IExtension> = [];
@@ -60,16 +60,19 @@ export default class ExtensionService {
 
     async startExtensions(): Promise<void> {
         if(this.extensionsStarted) return;
+
         const loaded: Set<IExtension> = new Set();
         let currentNodes = this.extensions.filter(ext => ext.metadata.dependencies.length === 0);
 
         while(currentNodes.length > 0) {
             for(const node of currentNodes) {
                 loaded.add(node);
+
                 try {
                     await node.start({...this.executionContext});
                     node.metadata.isLoaded = true;
                     this.fireOnExtensionStarted(node.metadata.name, {...this.executionContext});
+
                     if(!this.doSkipLogs) {
                         LogBuilder
                             .start()
@@ -89,6 +92,7 @@ export default class ExtensionService {
                         .done();
                 }
             }
+
             currentNodes = this.extensions.filter(e =>
                 !loaded.has(e) &&
                 e.metadata.resolvedDependencies.length === e.metadata.dependencies.length &&
@@ -122,7 +126,7 @@ export default class ExtensionService {
                 // @ts-ignore
                 extension.metadata.dependencies.includes(ext.metadata?.name) ||
                 // @ts-ignore
-                extension.metadata.dependencies.includes(ext.constructor)
+                extension.metadata.dependencies.includes(ext.constructor),
             );
         }
     }

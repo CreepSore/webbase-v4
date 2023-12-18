@@ -9,7 +9,7 @@ import CoreNotifications from "@extensions/Core.Notifications";
 import MailNotificationProvider from "./MailNotificationProvider";
 
 class CoreMailNotificationsConfig {
-    enable: boolean = false;
+    enabled: boolean = false;
 }
 
 export default class CoreMailNotifications implements IExtension {
@@ -53,7 +53,7 @@ export default class CoreMailNotifications implements IExtension {
     }
 
     private async startMain(executionContext: IAppExecutionContext): Promise<void> {
-        if(!this.config.enable) {
+        if(!this.config.enabled) {
             return;
         }
 

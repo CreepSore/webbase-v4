@@ -1,4 +1,4 @@
-import IExtension, { IExtensionConstructor } from "@service/extensions/IExtension";
+import IExtension from "@service/extensions/IExtension";
 import TestApplication from "@app/TestApplication";
 
 export default async function prepareTestApplication(keepDependencies: IExtension["metadata"]["name"][]): Promise<TestApplication> {

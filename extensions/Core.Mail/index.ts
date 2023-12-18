@@ -108,8 +108,10 @@ export default class CoreMail implements IExtension {
                 .info("Core.Mail")
                 .line(`Mailer with name [${mailerName}] does not exist`)
                 .done();
+
             return false;
         }
+
         const mailerOptions = mailer.options as SMTPTransport;
         mail.from = mail.from ?? mailerOptions.auth.user;
 
@@ -121,14 +123,14 @@ export default class CoreMail implements IExtension {
             .done();
 
         try {
+            await mailer.sendMail(mail);
+
             LogBuilder
                 .start()
                 .level("INFO")
                 .info("Core.Mail")
                 .line(`Sent mail to [${mail.to}] from [${mail.from}]`)
                 .done();
-
-            await mailer.sendMail(mail);
         }
         catch(err) {
             LogBuilder

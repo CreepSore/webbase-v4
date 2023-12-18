@@ -4,7 +4,6 @@ import IExecutionContext, { IAppExecutionContext, ICliExecutionContext } from "@
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
-import IOAuthUser from "@extensions/Core.OAuth2.Db/models/interfaces/IOAuthUser";
 
 class CoreOAuth2Config {
 

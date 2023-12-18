@@ -39,7 +39,7 @@ export default class TestApplication implements IApplication {
     }
 
     private async setupExtensionService(): Promise<ExtensionService> {
-        let extensionService: ExtensionService = new ExtensionService();
+        const extensionService: ExtensionService = new ExtensionService();
 
         for(const extDir of fs.readdirSync("extensions")) {
             if(extDir.startsWith("Custom.Template")) continue;
@@ -54,9 +54,9 @@ export default class TestApplication implements IApplication {
 
         extensionService.loadExtensions();
 
-        let toKeep = extensionService.getExtensions(...this.keepDependencies);
+        const toKeep = extensionService.getExtensions(...this.keepDependencies);
 
-        let addDependencies = (extension: IExtension) => {
+        const addDependencies = (extension: IExtension): void => {
             for(const dependency of extension.metadata.resolvedDependencies) {
                 toKeep.push(dependency);
                 addDependencies(dependency);

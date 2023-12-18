@@ -79,7 +79,7 @@ export default class OAuthAuthenticationHandler {
         user: IOAuthUser,
         authData: Password2FAAuthenticationData,
     ): Promise<boolean> {
-        const twoFactorKey = await OAuthUser.getAuthParamValue(user.id, AuthenticationParameter.Password2FA);
+        // const twoFactorKey = await OAuthUser.getAuthParamValue(user.id, AuthenticationParameter.Password2FA);
 
         // TODO: Implement
 

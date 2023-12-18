@@ -11,11 +11,11 @@ export default class MailNotificationProvider implements INotificationProvider {
     }
 
     async start(): Promise<void> {
-        
+
     }
-    
+
     async stop(): Promise<void> {
-        
+
     }
 
     async broadcastNotification(message: INotification): Promise<void> {
@@ -24,5 +24,4 @@ export default class MailNotificationProvider implements INotificationProvider {
             text: message.message,
         });
     }
-
 }

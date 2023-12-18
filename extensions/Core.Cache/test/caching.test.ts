@@ -22,8 +22,8 @@ describe("caching tests", () => {
             updateCallback: () => {
                 return "FDSA";
             },
-            updateEveryMs: -1
-        })
+            updateEveryMs: -1,
+        });
 
         expect(entry.currentValue).toBe("ASDF");
         expect(await entry.getValue()).toBe("ASDF");
@@ -43,8 +43,8 @@ describe("caching tests", () => {
             updateCallback: () => {
                 return "FDSA";
             },
-            updateEveryMs: 200
-        })
+            updateEveryMs: 200,
+        });
 
         expect(entry.currentValue).toBe("ASDF");
         expect(await entry.getValue()).toBe("ASDF");
@@ -53,10 +53,10 @@ describe("caching tests", () => {
 
         setTimeout(() => {
             timeoutCheck();
-            entry.getValue().then(value => expect(value).toBe("FDSA"))
+            entry.getValue().then(value => expect(value).toBe("FDSA"));
         }, 9999);
 
         jest.runAllTimers();
         expect(timeoutCheck).toBeCalled();
     });
- });
+});

@@ -66,14 +66,14 @@ export default class CoreNotifications implements IExtension {
 
     async sendNotification<T extends INotificationProvider>(
         notification: INotification,
-        targets: Array<Function & { prototype: T }> = null
+        targets: Array<Function & { prototype: T }> = null,
     ): Promise<void> {
         let notificationProviders = [...this.notificationProviders];
 
         if(targets) {
-            let filteredProviders = [];
-            for(let provider of notificationProviders) {
-                for(let target of targets) {
+            const filteredProviders = [];
+            for(const provider of notificationProviders) {
+                for(const target of targets) {
                     if(provider instanceof target) {
                         filteredProviders.push(provider);
                     }
@@ -83,7 +83,7 @@ export default class CoreNotifications implements IExtension {
             notificationProviders = filteredProviders;
         }
 
-        for(let provider of notificationProviders) {
+        for(const provider of notificationProviders) {
             try {
                 await provider.broadcastNotification(notification);
             }

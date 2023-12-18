@@ -36,7 +36,9 @@ class CacheEntry<T> {
     }
 
     async getValue(): Promise<T> {
-        if(this.refreshNextUpdate || (this.updateEveryMs > 0 && (Date.now() - Number(this.lastUpdate) > this.updateEveryMs))) {
+        const timeoutReached = (Date.now() - Number(this.lastUpdate) > this.updateEveryMs);
+
+        if(this.refreshNextUpdate || (this.updateEveryMs > 0 && timeoutReached)) {
             this.refreshNextUpdate = false;
             LogBuilder
                 .start()
@@ -44,7 +46,9 @@ class CacheEntry<T> {
                 .info("Core.Cache")
                 .line(`Executing update-function for cache [${this.key}]`)
                 .done();
+
             this.currentValue = await this.updateCallback();
+
             LogBuilder
                 .start()
                 .level("INFO")

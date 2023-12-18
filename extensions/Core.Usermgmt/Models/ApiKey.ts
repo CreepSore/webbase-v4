@@ -38,8 +38,8 @@ export default class ApiKey {
                         .references("id")
                         .inTable("users");
 
-                    table.dateTime("created");
-                    table.dateTime("modified").nullable();
+                    table.dateTime("createdAt");
+                    table.dateTime("modifiedAt").nullable();
                 });
             });
     }

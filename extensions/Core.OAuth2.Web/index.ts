@@ -11,7 +11,7 @@ import CoreWeb from "@extensions/Core.Web";
 import OAuthAuthenticationHandler from "@extensions/Core.OAuth2/logic/OAuthAuthenticationHandler";
 import IAuthenticationRequest from "./interfaces/requests/IAuthenticationRequest";
 import OAuthClient from "@extensions/Core.OAuth2.Db/models/OAuthClient";
-import OAuthErrorFactory, { OAuthError } from "@extensions/Core.OAuth2/errors";
+import OAuthErrorFactory from "@extensions/Core.OAuth2/errors";
 import OAuthTokenCombo from "@extensions/Core.OAuth2.Db/models/OAuthTokenCombo";
 import IOAuthUser from "@extensions/Core.OAuth2.Db/models/interfaces/IOAuthUser";
 import AuthenticationData from "@extensions/Core.OAuth2/interfaces/AuthenticationData";
