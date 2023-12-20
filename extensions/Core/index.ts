@@ -49,9 +49,11 @@ export default class Core implements IExtension {
             .addLogger(new ConsoleLogger(this.config.logger.consoleLogger.prettyPrint), "console")
             .hookConsoleLog();
 
-        this.setupCli(executionContext);
-
         if(executionContext.contextType === "cli") {
+            this.setupCli(executionContext);
+        }
+
+        if(executionContext.contextType !== "app") {
             return;
         }
 

@@ -43,6 +43,7 @@ export default class CoreOAuth2Db implements IExtension {
             await this.startCli(executionContext);
             return;
         }
+
         else if(executionContext.contextType === "app") {
             await this.startMain(executionContext);
             return;
