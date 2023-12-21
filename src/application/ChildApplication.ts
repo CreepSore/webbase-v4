@@ -25,6 +25,7 @@ export default class ChildApplication implements IApplication {
 
     id: string;
     childType: string;
+    static parentProcessId: number = process.ppid;
 
     static childProcesses: {id: string, type: string, process: childProcess.ChildProcess}[] = [];
 
@@ -113,8 +114,6 @@ export default class ChildApplication implements IApplication {
     startParentWatchdog(): void {
         setInterval(async() => {
             const parentProcessExists = await ChildApplication.parentProcessExists();
-
-            console.log("INFO", "Ok", parentProcessExists);
 
             if(!parentProcessExists) {
                 process.exit(0);
@@ -240,15 +239,13 @@ export default class ChildApplication implements IApplication {
         return new Promise((res) => {
             runPlatformDependent<void>({
                 linux: () => {
-                    console.log("INFO", "ok", process.ppid);
-
-                    const psProcess = childProcess.exec(`ps -aux | awk '{print $2}' | grep -e '^${process.ppid}$'`);
+                    const psProcess = childProcess.exec(`ps -aux | awk '{print $2}' | grep -e '^${this.parentProcessId}$'`);
                     psProcess.on("exit", (exitCode) => {
                         res(exitCode === 0);
                     });
                 },
                 win32: () => {
-                    childProcess.exec(`tasklist /FI "PID eq ${process.ppid}" /NH`, (error, stdout, stderr) => {
+                    childProcess.exec(`tasklist /FI "PID eq ${this.parentProcessId}" /NH`, (error, stdout, stderr) => {
                         res(Boolean(String(stdout).trim()));
                     });
                 },
