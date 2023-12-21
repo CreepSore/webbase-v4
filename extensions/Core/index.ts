@@ -45,13 +45,24 @@ export default class Core implements IExtension {
             fs.mkdirSync("logs");
         }
 
+        if(executionContext.contextType === "child-app") {
+            // ChildApp logging is set up inside ChildApplication.ts
+            return;
+        }
+
         LoggerService
             .addLogger(new ConsoleLogger(this.config.logger.consoleLogger.prettyPrint), "console")
             .hookConsoleLog();
 
-        this.setupCli(executionContext);
 
         if(executionContext.contextType === "cli") {
+            this.setupCli(executionContext);
+            return;
+        }
+
+        LoggerService
+
+        if(executionContext.contextType !== "app") {
             return;
         }
 

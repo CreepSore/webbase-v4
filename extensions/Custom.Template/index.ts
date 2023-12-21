@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import IExecutionContext, { IAppExecutionContext, ICliExecutionContext } from "@service/extensions/IExecutionContext";
+import IExecutionContext, { IAppExecutionContext, IChildExecutionContext as IChildAppExecutionContext, ICliExecutionContext } from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
@@ -39,6 +39,10 @@ export default class CustomTemplate implements IExtension {
             await this.startMain(executionContext);
             return;
         }
+        else if(executionContext.contextType === "child-app") {
+            await this.startChildApp(executionContext);
+            return;
+        }
     }
 
     async stop(): Promise<void> {
@@ -50,6 +54,10 @@ export default class CustomTemplate implements IExtension {
     }
 
     private async startMain(executionContext: IAppExecutionContext): Promise<void> {
+
+    }
+
+    private async startChildApp(executionContext: IChildAppExecutionContext): Promise<void> {
 
     }
 

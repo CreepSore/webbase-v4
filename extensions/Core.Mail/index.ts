@@ -56,7 +56,7 @@ export default class CoreMail implements IExtension {
 
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
-        if(executionContext.contextType === "cli") {
+        if(executionContext.contextType !== "app") {
             return;
         }
 

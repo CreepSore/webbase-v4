@@ -73,7 +73,7 @@ export default class CoreUsermgmtWeb implements IExtension {
     async start(executionContext: IExecutionContext): Promise<void> {
         this.checkConfig();
         this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
-        if(executionContext.contextType === "cli") {
+        if(executionContext.contextType !== "app") {
             return;
         }
 
