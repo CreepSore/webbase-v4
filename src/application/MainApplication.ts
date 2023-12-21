@@ -27,8 +27,6 @@ export default class MainAppliation implements IApplication {
 
         console.log("INFO", "MainApplication.ts", "Main Application Startup successful.");
         this.events.emit("after-startup", this.extensionService.executionContext);
-
-        ChildApplication.startChildApplication("test", 10000, "inherit");
     }
 
     async stop(): Promise<void> {
