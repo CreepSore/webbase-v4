@@ -1,5 +1,6 @@
 import * as uuid from "uuid";
 import * as childProcess from "child_process";
+import * as ps from "process";
 
 import {EventEmitter} from "events";
 import IApplication from "./IApplication";
@@ -12,6 +13,8 @@ import LogBuilder from "@service/logger/LogBuilder";
 import LoggerService from "@service/logger/LoggerService";
 import FileLogger from "@service/logger/FileLogger";
 import ChildConsoleLogger from "@service/logger/ChildConsoleLogger";
+import IExtension from "@service/extensions/IExtension";
+import { runPlatformDependent } from "@service/utils/multiplatform";
 
 export default class ChildApplication implements IApplication {
     static currentExecutablePath: string;
@@ -71,6 +74,10 @@ export default class ChildApplication implements IApplication {
         this.events = new EventEmitter();
         const config = this.loadConfig();
         this.events.emit("config-loaded", config);
+
+        this.startParentWatchdog();
+
+        setTimeout(() => {}, 60000);
     }
 
     async stop(): Promise<void> {
@@ -103,6 +110,18 @@ export default class ChildApplication implements IApplication {
         return this;
     }
 
+    startParentWatchdog(): void {
+        setInterval(async() => {
+            const parentProcessExists = await ChildApplication.parentProcessExists();
+
+            console.log("INFO", "Ok", parentProcessExists);
+
+            if(!parentProcessExists) {
+                process.exit(0);
+            }
+        }, 5000);
+    }
+
     // TODO: Think of something better. This is actually fucking disgusting.
     static initializeStaticClass(currentExecutablePath: string): void {
         this.currentExecutablePath = currentExecutablePath;
@@ -126,7 +145,7 @@ export default class ChildApplication implements IApplication {
                 stdio: attachStdio,
             });
 
-            const processId = uuid.v4();
+            const childProcessId = uuid.v4();
 
             const listenForHandshake = (message: any): void => {
                 if(message.type === "CA_HANDSHAKE") {
@@ -134,9 +153,9 @@ export default class ChildApplication implements IApplication {
                         clearTimeout(rejectionTimeout);
                     }
 
-                    res(processId);
+                    res(childProcessId);
 
-                    forkedProcess.send({type: "CA_HANDSHAKE", id: processId});
+                    forkedProcess.send({type: "CA_HANDSHAKE", id: childProcessId});
                     forkedProcess.removeListener("message", listenForHandshake);
                 }
             };
@@ -146,18 +165,18 @@ export default class ChildApplication implements IApplication {
                 LogBuilder
                     .start()
                     .level("INFO")
-                    .info("ChildApplication.ts", childAppType, processId, String(code))
+                    .info("ChildApplication.ts", childAppType, childProcessId, String(code))
                     .line("Child Application exited.")
                     .done();
             });
 
             this.childProcesses.push({
-                id: processId,
+                id: childProcessId,
                 type: childAppType,
                 process: forkedProcess,
             });
 
-            return processId;
+            return childProcessId;
         });
     }
 
@@ -179,5 +198,61 @@ export default class ChildApplication implements IApplication {
 
     static getChildProcessById(id: string): childProcess.ChildProcess {
         return this.childProcesses.find(processEntry => processEntry.id === id)?.process;
+    }
+
+    static send(message: any): void {
+        process.send?.(message);
+    }
+
+    static sendExtensionMessage(extension: IExtension, message: any): void {
+        process.send?.({
+            sender: extension.metadata.name,
+            message,
+        });
+    }
+
+    static sendExtensionMessageToChild(child: string|childProcess.ChildProcess, extension: IExtension, message: any): void {
+        const target = typeof child === "string" ? this.getChildProcessById(child) : child;
+        if(!target) {
+            return;
+        }
+
+        target.send({
+            sender: extension.metadata.name,
+            message,
+        });
+    }
+
+    static waitForExtensionMessage<T>(extension: IExtension): Promise<T> {
+        return new Promise(res => {
+            const receiveCallback = (packet: any): void => {
+                if(packet?.sender === extension.metadata.name) {
+                    res(packet.message);
+                    process.removeListener("message", receiveCallback);
+                }
+            };
+
+            process.on("message", receiveCallback);
+        });
+    }
+
+    static parentProcessExists(): Promise<boolean> {
+        return new Promise((res) => {
+            runPlatformDependent<void>({
+                linux: () => {
+                    console.log("INFO", "ok", process.ppid);
+
+                    const psProcess = childProcess.exec(`ps -aux | awk '{print $2}' | grep -e '^${process.ppid}$'`);
+                    psProcess.on("exit", (exitCode) => {
+                        res(exitCode === 0);
+                    });
+                },
+                win32: () => {
+                    childProcess.exec(`tasklist /FI "PID eq ${process.ppid}" /NH`, (error, stdout, stderr) => {
+                        res(Boolean(String(stdout).trim()));
+                    });
+                },
+            });
+        });
     }
 }

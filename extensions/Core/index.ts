@@ -10,6 +10,7 @@ import CacheLogger from "@service/logger/CacheLogger";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import JsonFileLogger from "@service/logger/JsonFileLogger";
 import LogBuilder from "@service/logger/LogBuilder";
+import { runPlatformDependent } from "@service/utils/multiplatform";
 
 class CoreConfig {
     logger = {
@@ -143,6 +144,12 @@ export default class Core implements IExtension {
         });
     }
 
+    /**
+     * @template T
+     * @return {T}
+     * @memberof Core
+     * @deprecated Use multiplatform.ts instead of this.
+     */
     runPlatformDependent<T>(callbacks: {
         aix?: (platform: string) => T,
         android?: (platform: string) => T,
@@ -156,12 +163,7 @@ export default class Core implements IExtension {
         cygwin?: (platform: string) => T,
         netbsd?: (platform: string) => T
     }): T {
-        const callbackToRun = callbacks[process.platform];
-        if(!callbackToRun) {
-            throw new Error("Unsupported platform");
-        }
-
-        return callbackToRun(process.platform);
+        return runPlatformDependent(callbacks);
     }
 
     private loadConfig(createDefault: boolean = false): typeof this.config {
