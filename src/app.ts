@@ -1,5 +1,3 @@
-import * as url from "url";
-
 import ChildApplication from "@app/ChildApplication";
 import CliApplication from "@app/CliApplication";
 import IApplication from "@app/IApplication";

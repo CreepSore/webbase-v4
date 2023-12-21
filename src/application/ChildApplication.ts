@@ -9,6 +9,9 @@ import ExtensionService from "@service/extensions/ExtensionService";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import CommandHandler from "./CommandHandler";
 import LogBuilder from "@service/logger/LogBuilder";
+import LoggerService from "@service/logger/LoggerService";
+import FileLogger from "@service/logger/FileLogger";
+import ChildConsoleLogger from "@service/logger/ChildConsoleLogger";
 
 export default class ChildApplication implements IApplication {
     static currentExecutablePath: string;
@@ -31,16 +34,36 @@ export default class ChildApplication implements IApplication {
             if(message?.type === "CA_HANDSHAKE") {
                 this.id = message?.id;
 
-                LogBuilder
-                    .start()
-                    .level("INFO")
-                    .info("ChildApplication.ts")
-                    .line(`Got handshake from parent. Our id is [${this.id}]`)
-                    .done();
+                this.extensionService.setContextInfo({
+                    contextType: "child-app",
+                    application: this,
+                    extensionService: this.extensionService,
+                    childType: this.childType,
+                });
+
+                this.extensionService.skipLogs();
+
+                this.extensionService
+                    .loadExtensionsFromExtensionsFolder()
+                    .then(() => {
+                        this.extensionService
+                            .startExtensions()
+                            .then(() => {
+                                console.log("INFO", "ChildApplication.ts", "Child Application Startup successful.");
+                                console.log("INFO", "ChildApplication.ts", `Got handshake from parent. Our id is [${this.id}]`);
+
+                                this.events.emit("after-startup", this.extensionService.executionContext);
+                            });
+                    });
 
                 process.removeListener("message", listenForId);
             }
         };
+
+        LoggerService
+            .addLogger(new ChildConsoleLogger(this, true))
+            .addLogger(new FileLogger(`logs/out_child_${this.childType}_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`))
+            .hookConsoleLog();
 
         process.on?.("message", listenForId);
         process.send({type: "CA_HANDSHAKE"});
@@ -48,18 +71,6 @@ export default class ChildApplication implements IApplication {
         this.events = new EventEmitter();
         const config = this.loadConfig();
         this.events.emit("config-loaded", config);
-
-        this.extensionService.setContextInfo({
-            contextType: "child-app",
-            application: this,
-            extensionService: this.extensionService,
-            childType: this.childType,
-        });
-        await this.extensionService.loadExtensionsFromExtensionsFolder();
-        await this.extensionService.startExtensions();
-
-        console.log("INFO", "ChildApplication.ts", "Child Application Startup successful.");
-        this.events.emit("after-startup", this.extensionService.executionContext);
     }
 
     async stop(): Promise<void> {
@@ -97,36 +108,57 @@ export default class ChildApplication implements IApplication {
         this.currentExecutablePath = currentExecutablePath;
     }
 
-    static async startChildApplication(childAppType: string): Promise<string> {
-        const forkedProcess = childProcess.fork(this.currentExecutablePath, [`--childApp=${childAppType}`], {
-            detached: true,
-            stdio: "ignore",
-        });
-
-        const processId = uuid.v4();
-
-        LogBuilder
-            .start()
-            .level("INFO")
-            .info("ChildApplication.ts")
-            .line(`Child-Application of type ${childAppType} spawned with id ${processId} [${this.currentExecutablePath}].`)
-            .done();
-
-        const listenForHandshake = (message: any): void => {
-            if(message.type === "CA_HANDSHAKE") {
-                forkedProcess.send({type: "CA_HANDSHAKE", id: processId});
-                forkedProcess.removeListener("message", listenForHandshake);
+    static startChildApplication(
+        childAppType: string,
+        rejectAfterMs: number = 10000,
+        attachStdio: childProcess.StdioOptions = "ignore",
+    ): Promise<string> {
+        return new Promise((res, rej) => {
+            let rejectionTimeout: NodeJS.Timeout = null;
+            if(rejectAfterMs > 0) {
+                rejectionTimeout = setTimeout(() => {
+                    rej("TIMEOUT");
+                }, rejectAfterMs);
             }
-        };
-        forkedProcess.on("message", listenForHandshake);
 
-        this.childProcesses.push({
-            id: processId,
-            type: childAppType,
-            process: forkedProcess,
+            const forkedProcess = childProcess.fork(this.currentExecutablePath, [`--childApp=${childAppType}`], {
+                detached: true,
+                stdio: attachStdio,
+            });
+
+            const processId = uuid.v4();
+
+            const listenForHandshake = (message: any): void => {
+                if(message.type === "CA_HANDSHAKE") {
+                    if(rejectionTimeout) {
+                        clearTimeout(rejectionTimeout);
+                    }
+
+                    res(processId);
+
+                    forkedProcess.send({type: "CA_HANDSHAKE", id: processId});
+                    forkedProcess.removeListener("message", listenForHandshake);
+                }
+            };
+            forkedProcess.on("message", listenForHandshake);
+
+            forkedProcess.once("exit", code => {
+                LogBuilder
+                    .start()
+                    .level("INFO")
+                    .info("ChildApplication.ts", childAppType, processId, String(code))
+                    .line("Child Application exited.")
+                    .done();
+            });
+
+            this.childProcesses.push({
+                id: processId,
+                type: childAppType,
+                process: forkedProcess,
+            });
+
+            return processId;
         });
-
-        return processId;
     }
 
     static getChildProcessesByType(childAppType: string): childProcess.ChildProcess[] {

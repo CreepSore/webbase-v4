@@ -5,6 +5,7 @@ import ConfigModel from "@logic/config/ConfigModel";
 import ExtensionService from "@service/extensions/ExtensionService";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import CommandHandler from "./CommandHandler";
+import ChildApplication from "./ChildApplication";
 
 export default class MainAppliation implements IApplication {
     events: EventEmitter = new EventEmitter();
@@ -26,6 +27,8 @@ export default class MainAppliation implements IApplication {
 
         console.log("INFO", "MainApplication.ts", "Main Application Startup successful.");
         this.events.emit("after-startup", this.extensionService.executionContext);
+
+        ChildApplication.startChildApplication("gamma-test", 10000, "inherit");
     }
 
     async stop(): Promise<void> {
