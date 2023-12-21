@@ -51,6 +51,13 @@ export default class Core implements IExtension {
 
         if(executionContext.contextType === "cli") {
             this.setupCli(executionContext);
+            return;
+        }
+
+        if(executionContext.contextType === "child-app") {
+            LoggerService
+                .addLogger(new FileLogger(`logs/out_child_${executionContext.childType}_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`))
+            return;
         }
 
         if(executionContext.contextType !== "app") {

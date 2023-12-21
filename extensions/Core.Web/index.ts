@@ -77,7 +77,7 @@ export default class CoreWeb implements IExtension {
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
-        if(executionContext.contextType === "cli") return;
+        if(executionContext.contextType !== "app") return;
         this.checkConfig();
 
         this.app = express();
