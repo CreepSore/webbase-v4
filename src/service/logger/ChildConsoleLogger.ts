@@ -10,7 +10,7 @@ export default class ChildConsoleLogger extends ConsoleLogger {
         this.app = childApp;
     }
 
-    log(log: ILogEntry): Promise<void> {
+    logSync(log: ILogEntry): void {
         const clonedEntry: ILogEntry = {
             ...log,
             lines: [...log.lines],
@@ -19,6 +19,6 @@ export default class ChildConsoleLogger extends ConsoleLogger {
         };
 
         clonedEntry.infos.push(this.app.childType, this.app.id);
-        return super.log(clonedEntry);
+        return super.logSync(clonedEntry);
     }
 }

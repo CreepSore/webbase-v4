@@ -37,6 +37,7 @@ export default class ChildApplication implements IApplication {
         const listenForId = (message: any): void => {
             if(message?.type === "CA_HANDSHAKE") {
                 this.id = message?.id;
+                console.log("INFO", "ChildApplication.ts", `Got handshake from parent. Our id is [${this.id}]`);
 
                 this.extensionService.setContextInfo({
                     contextType: "child-app",
@@ -53,9 +54,6 @@ export default class ChildApplication implements IApplication {
                         this.extensionService
                             .startExtensions()
                             .then(() => {
-                                console.log("INFO", "ChildApplication.ts", "Child Application Startup successful.");
-                                console.log("INFO", "ChildApplication.ts", `Got handshake from parent. Our id is [${this.id}]`);
-
                                 this.events.emit("after-startup", this.extensionService.executionContext);
                             });
                     });
@@ -77,8 +75,6 @@ export default class ChildApplication implements IApplication {
         this.events.emit("config-loaded", config);
 
         this.startParentWatchdog();
-
-        setTimeout(() => {}, 60000);
     }
 
     async stop(): Promise<void> {
@@ -203,21 +199,25 @@ export default class ChildApplication implements IApplication {
         process.send?.(message);
     }
 
-    static sendExtensionMessage(extension: IExtension, message: any): void {
+    static sendExtensionMessage(extension: IExtension|string, message: any): void {
+        const extensionName = typeof extension === "string" ? extension : extension.metadata.name;
+
         process.send?.({
-            sender: extension.metadata.name,
+            sender: extensionName,
             message,
         });
     }
 
-    static sendExtensionMessageToChild(child: string|childProcess.ChildProcess, extension: IExtension, message: any): void {
+    static sendExtensionMessageToChild(child: string|childProcess.ChildProcess, extension: IExtension|string, message: any): void {
         const target = typeof child === "string" ? this.getChildProcessById(child) : child;
         if(!target) {
             return;
         }
 
+        const extensionName = typeof extension === "string" ? extension : extension.metadata.name;
+
         target.send({
-            sender: extension.metadata.name,
+            sender: extensionName,
             message,
         });
     }
@@ -232,6 +232,27 @@ export default class ChildApplication implements IApplication {
             };
 
             process.on("message", receiveCallback);
+        });
+    }
+
+    static waitForExtensionMessageFromChild<T>(child: string|childProcess.ChildProcess, extension: IExtension|string): Promise<T> {
+        const target: childProcess.ChildProcess = typeof child === "string" ? this.getChildProcessById(child) : child;
+
+        if(!target) {
+            return;
+        }
+
+        const extensionName = typeof extension === "string" ? extension : extension.metadata.name;
+
+        return new Promise((res) => {
+            const receiveCallback = (packet: any): void => {
+                if(packet?.sender === extensionName) {
+                    res(packet.message);
+                    process.removeListener("message", receiveCallback);
+                }                target.removeListener("message", receiveCallback);
+            };
+
+            target.on("message", receiveCallback);
         });
     }
 
@@ -251,5 +272,19 @@ export default class ChildApplication implements IApplication {
                 },
             });
         });
+    }
+
+    static castToExtensionMessage<T>(message: any): {
+        sender: string,
+        message: T
+    } {
+        if(
+            !message?.sender
+            || !message?.message
+        ) {
+            return null;
+        }
+
+        return message;
     }
 }

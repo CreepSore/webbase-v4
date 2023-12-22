@@ -61,7 +61,7 @@ export default class ConsoleLogger implements ILogger {
         this.prettyPrint = prettyPrint ? process.platform === "linux" : false;
     }
 
-    async log(log: ILogEntry): Promise<void> {
+    logSync(log: ILogEntry): void {
         const formatted = this.formatLog(log);
 
         if(Boolean(LoggerService.oldLog)) {
