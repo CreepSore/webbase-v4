@@ -152,6 +152,13 @@ export default class ChildApplication implements IApplication {
 
                     forkedProcess.send({type: "CA_HANDSHAKE", id: childProcessId});
                     forkedProcess.removeListener("message", listenForHandshake);
+
+                    LogBuilder
+                        .start()
+                        .level("INFO")
+                        .info("ChildApplication.ts", childAppType, childProcessId)
+                        .line("Got handshake from ChildApplication.")
+                        .done();
                 }
             };
             forkedProcess.on("message", listenForHandshake);
