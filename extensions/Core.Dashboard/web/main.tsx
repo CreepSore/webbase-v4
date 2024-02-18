@@ -17,11 +17,18 @@ import LoginPage from "./pages/LoginPage";
 import UsersPage from "./pages/UsersPage";
 import PermissionsPage from "./pages/PermissionsPage";
 import LogsPage from "./pages/LogsPage";
+import { Paper, ThemeProvider, createTheme } from "@mui/material";
+import { ThemeContext } from "@emotion/react";
 
 function Main(): JSX.Element {
     const startPage = location.hash.substring(1);
     const [currentDashboardPage, setCurrentDashboardPage] = React.useState(startPage || "home");
     const [myUser, setMyUser] = React.useState<IUser>();
+    const theme = createTheme({
+        palette: {
+            mode: "dark",
+        },
+    });
 
     const myUserQuery = useQuery<{me: IUser}>(
         "{ me { pseudo, id, username, email, permissionGroup { name, permissions { name } } } }",
@@ -44,62 +51,59 @@ function Main(): JSX.Element {
         return <></>;
     }
 
-    return <div id="dashboard">
-        <div className="background">
-            <div className="background-container">
-                <div className="image bg-sky-900" />
-                <div className="blur"></div>
+    return <ThemeProvider theme={theme}>
+        <Paper id="dashboard">
+            <div id="dashboard-content">
+                <Sidebar
+                    activePage={currentDashboardPage}
+                    onNavigationRequest={onNavigationRequest}
+                    isLoggedIn={!myUser?.pseudo}
+                    onLogout={() => {
+                        myUserQuery.forceUpdate();
+                        setCurrentDashboardPage("home");
+                    }}
+
+                    myPermissions={(myUser?.permissionGroup?.permissions || []).map(p => p.name)}
+                />
+
+                <Router currentPage={currentDashboardPage}>
+                    <RouterPage key="login">
+                        <LoginPage
+                            onLoginSuccess={() => {
+                                myUserQuery.forceUpdate();
+                                setCurrentDashboardPage("home");
+                            }}
+                            onLoginFailure={() => {
+                                console.log("FAILURE");
+                            }}
+                        />
+                    </RouterPage>
+
+                    <RouterPage key="home">
+                        <></>
+                    </RouterPage>
+
+                    <RouterPage key="users">
+                        <UsersPage
+                            myUser={myUser}
+                            afterImpersonate={() => {
+                                myUserQuery.forceUpdate();
+                                setCurrentDashboardPage("home");
+                            }}
+                        />
+                    </RouterPage>
+
+                    <RouterPage key="permissions">
+                        <PermissionsPage />
+                    </RouterPage>
+
+                    <RouterPage key="logs">
+                        <LogsPage />
+                    </RouterPage>
+                </Router>
             </div>
-        </div>
-        <div id="dashboard-content">
-            <Sidebar
-                activePage={currentDashboardPage}
-                onNavigationRequest={onNavigationRequest}
-                isLoggedIn={!myUser?.pseudo}
-                onLogout={() => {
-                    myUserQuery.forceUpdate();
-                    setCurrentDashboardPage("home");
-                }}
-
-                myPermissions={(myUser?.permissionGroup?.permissions || []).map(p => p.name)}/>
-
-            <Router currentPage={currentDashboardPage}>
-                <RouterPage key="login">
-                    <LoginPage
-                        onLoginSuccess={() => {
-                            myUserQuery.forceUpdate();
-                            setCurrentDashboardPage("home");
-                        }}
-                        onLoginFailure={() => {
-                            console.log("FAILURE");
-                        }}
-                    />
-                </RouterPage>
-
-                <RouterPage key="home">
-
-                </RouterPage>
-
-                <RouterPage key="users">
-                    <UsersPage
-                        myUser={myUser}
-                        afterImpersonate={() => {
-                            myUserQuery.forceUpdate();
-                            setCurrentDashboardPage("home");
-                        }}
-                    />
-                </RouterPage>
-
-                <RouterPage key="permissions">
-                    <PermissionsPage />
-                </RouterPage>
-
-                <RouterPage key="logs">
-                    <LogsPage />
-                </RouterPage>
-            </Router>
-        </div>
-    </div>;
+        </Paper>
+    </ThemeProvider>;
 }
 
 window.addEventListener("load", () => {

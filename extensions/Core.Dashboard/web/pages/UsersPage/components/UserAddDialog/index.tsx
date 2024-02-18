@@ -3,6 +3,7 @@ import { IPermissionGroup } from "@extensions/Core.Usermgmt/Interfaces/ModelType
 import { useMutation, useQuery } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 import "./style.css";
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, MenuItem, Select, TextField } from "@mui/material";
 
 interface UserEditorDialogProps {
     onClose: () => void;
@@ -43,55 +44,78 @@ export default function UserAddDialog(props: UserEditorDialogProps): JSX.Element
         });
     };
 
-    return <div className="dialog-container">
-        <div className="dialog user-add-dialog">
-            <div className="dialog-header">
-                <p>Add User</p>
-                <div className="dialog-buttons">
-                    <button className="dialog-button-close" onClick={() => props.onClose()}>X</button>
-                </div>
+    return <Dialog open={true} className="dialog user-add-dialog" PaperProps={{
+        className: "w-full max-w-md",
+    }}>
+        <DialogTitle className="flex">
+            <p>Add User</p>
+        </DialogTitle>
+        <DialogContent className="flex flex-col gap-2 mt-2">
+            <TextField
+                type="text"
+                value={username}
+                onChange={e => setUsername(e.target.value)}
+                label="Username"
+                size="small"
+            />
+
+            <TextField
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                label="Email"
+                size="small"
+            />
+
+            <FormControlLabel
+                label="IsActive"
+                control={
+                    <Checkbox
+                        checked={isActive}
+                        onChange={e => setIsActive(e.target.checked)}
+                    />
+                }
+            />
+
+            <div className="relative">
+                <TextField
+                    label="Password"
+                    className="w-full"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)} />
+                <Button
+                    color="error"
+                    size="small"
+                    className="absolute right-1 top-0 bottom-0"
+                    onMouseDown={() => setShowPassword(true)}
+                    onMouseUp={() => setShowPassword(false)}
+                >show</Button>
             </div>
-            <div className="dialog-body">
-                <label>Username</label>
-                <input type="text" value={username} onChange={e => setUsername(e.target.value)}/>
 
-                <label>Email</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)}/>
+            <Select
+                value={String(permissionGroup?.id) ?? "0"}
+                onChange={e => setPermissionGroup(permissionGroups.find(pg => String(pg.id) === String(e.target.value)))}
+            >
+                {permissionGroups.map(pg => <MenuItem key={pg.id} value={pg.id}>{pg.name}</MenuItem>)}
+            </Select>
+        </DialogContent>
+        <DialogActions>
+            <div className="flex flex-row gap-1 col-span-1 md:col-span-2 mt-2">
+                <Button
+                    color="success"
+                    onClick={() => {
+                        addUser();
+                    }}
+                >Save</Button>
 
-                <div className="grid grid-cols-2 col-span-1 md:col-span-2 text-left">
-                    <label>IsActive</label>
-                    <div className="text-xl"><input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} /></div>
-                </div>
-
-                <label>Password</label>
-                <div className="relative">
-                    <input
-                        className="w-full"
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)} />
-                    <button
-                        className="absolute right-1 top-0 bottom-0 text-sm text-black font-thin hover:text-red-600"
-                        onMouseDown={() => setShowPassword(true)}
-                        onMouseUp={() => setShowPassword(false)}
-                    >show</button>
-                </div>
-
-                <label>Permission Group</label>
-                <select value={String(permissionGroup?.id) ?? "0"} onChange={e => setPermissionGroup(permissionGroups.find(pg => String(pg.id) === e.target.value))}>
-                    {permissionGroups.map(pg => <option key={pg.id} value={pg.id}>{pg.name}</option>)}
-                </select>
-
-                <div className="flex flex-col gap-1 col-span-1 md:col-span-2 mt-2">
-                    <button
-                        className="save-button"
-                        onClick={() => {
-                            addUser();
-                        }}
-                    >Save</button>
-                </div>
+                <Button
+                    onClick={() => {
+                        props.onClose();
+                    }}
+                >Close</Button>
             </div>
-        </div>
-    </div>;
+        </DialogActions>
+    </Dialog>;
 }
 

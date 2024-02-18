@@ -132,6 +132,8 @@ export default class CoreWeb implements IExtension {
         this.events.emit("express-loaded", this.app);
         this.server = this.app.listen(this.config.port, this.config.hostname);
 
+        this.enableLiveReload(100, false);
+
         LogBuilder
             .start()
             .level("INFO")
