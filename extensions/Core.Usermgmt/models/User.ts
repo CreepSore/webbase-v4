@@ -1,6 +1,7 @@
 import * as crypto from "crypto";
 import mongoose, { Schema } from "mongoose";
 import IUser from "../types/IUser";
+import AuthenticationHandler from "../authentication-handlers/AuthenticationHandler";
 
 const schema = new mongoose.Schema<IUser>({
     username: {type: String, unique: true},
@@ -29,11 +30,7 @@ schema.pre("save", async function(next) {
         return;
     }
 
-    this.authentication.password = crypto
-        .createHash("sha256")
-        .update(this.authentication.password)
-        .digest("hex");
-
+    this.authentication.password = AuthenticationHandler.hashPassword(this.authentication.password);
     next();
 });
 

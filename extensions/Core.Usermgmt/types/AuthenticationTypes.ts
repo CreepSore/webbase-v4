@@ -22,5 +22,11 @@ type AuthenticationType = (
     | PasswordTotpAuthenticationType
 );
 
+export type {
+    PasswordAuthenticationType,
+    TotpAuthenticationType,
+    PasswordTotpAuthenticationType,
+};
+
 export default AuthenticationType;
 

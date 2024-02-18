@@ -12,8 +12,6 @@ import IPermission from "./types/IPermission";
 import Permissions, { PermissionEntry, PermissionLayer } from "./permissions";
 import IUser from "./types/IUser";
 import IPermissionGroup from "./types/IPermissionGroup";
-import LogBuilder from "@service/logger/LogBuilder";
-import AuthenticationType from "./types/AuthenticationTypes";
 
 class CoreUsermgmtConfig {
 
@@ -86,7 +84,7 @@ export default class CoreUsermgmt implements IExtension {
         return Permission.findOne({name: toFind});
     }
 
-    private async createPermission(
+    private async createPermissionLayer(
         currentLayer: PermissionLayer,
         currentPath: string = "",
         adminGroup: HydratedDocument<IPermissionGroup> = null,
@@ -121,7 +119,7 @@ export default class CoreUsermgmt implements IExtension {
                 continue;
             }
 
-            await this.createPermission(value as PermissionLayer, newPath, _adminGroup, _anonymousGroup);
+            await this.createPermissionLayer(value as PermissionLayer, newPath, _adminGroup, _anonymousGroup);
         }
 
         await _adminGroup.save();
@@ -152,7 +150,7 @@ export default class CoreUsermgmt implements IExtension {
             anonymousGroup = await newGroup.save();
         }
 
-        await this.createPermission(Permissions);
+        await this.createPermissionLayer(Permissions);
 
         if(!(await this.getRootUser())) {
             await new User({
