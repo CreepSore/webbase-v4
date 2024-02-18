@@ -3,6 +3,7 @@ import React from "react";
 
 
 import "./style.css";
+import { Alert, Button, Card, Paper, TextField } from "@mui/material";
 
 interface LoginPageProps {
     onLoginSuccess?: (userId: string) => void;
@@ -17,7 +18,12 @@ const errorMapping: {[key: string]: string} = {
 export default function LoginPage(props: LoginPageProps): JSX.Element {
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
+
     const [loginError, setLoginError] = React.useState("");
+    const [usernameError, setUsernameError] = React.useState(false);
+    const [passwordError, setPasswordError] = React.useState(false);
+
+
     const doLoginMutation = useMutation(`mutation Login($username: String!, $password: String!) {
         loginByCredentials(username:$username, password:$password)
     }`, {onSuccess: (data: string, errors) => {
@@ -37,25 +43,66 @@ export default function LoginPage(props: LoginPageProps): JSX.Element {
         }
     }});
 
-    return <div id="login">
-        <div className="login-form">
-            <input
-                type="text"
-                className={`login-input ${username ? "valid" : "invalid"}`}
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                autoComplete="username" />
-            <input
-                type="password"
-                className={`login-input ${password ? "valid" : "invalid"}`}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                autoComplete="current-password" />
-            {loginError && <p className="error-alert">{loginError}</p>}
-            <button
-                className={`login-input ${username && password ? "valid" : "invalid"}`}
-                onClick={() => doLoginMutation.execute({username, password})}
-            >Login</button>
-        </div>
+    const doLogin = (): void => {
+        if(!username) {
+            setUsernameError(true);
+        }
+
+        if(!password) {
+            setPasswordError(true);
+        }
+
+        if(!username || !password) {
+            return;
+        }
+
+        doLoginMutation.execute({username, password});
+    };
+
+    return <div className="flex justify-center items-center w-[100vw] h-[100vh]">
+        <Card className="max-w-md w-full" elevation={2}>
+            <form className="flex flex-col gap-2 p-4" onSubmit={e => {
+                e.preventDefault();
+                doLogin();
+            }}>
+                <TextField
+                    error={Boolean(loginError) || usernameError}
+                    type="text"
+                    value={username}
+                    onChange={e => {
+                        if(e.target.value) {
+                            setUsernameError(false);
+                        }
+
+                        setUsername(e.target.value);
+                    }}
+                    autoComplete="username"
+                    label="Username"
+                />
+
+                <TextField
+                    error={Boolean(loginError) || passwordError}
+                    type="password"
+                    value={password}
+                    onChange={e => {
+                        if(e.target.value) {
+                            setPasswordError(false);
+                        }
+                        setPassword(e.target.value);
+                    }}
+                    autoComplete="password"
+                    label="Password"
+                />
+
+                <Button
+                    color={Boolean(loginError) ? "error" : "primary"}
+                    variant="outlined"
+                    className={`login-input ${username && password ? "valid" : "invalid"}`}
+                    type="submit"
+                >Login</Button>
+
+                {loginError && <Alert color="error" severity="error" className="error-alert">{loginError}</Alert>}
+            </form>
+        </Card>
     </div>;
 }

@@ -50,12 +50,12 @@ export default class ChildApplication implements IApplication {
 
                 this.extensionService
                     .loadExtensionsFromExtensionsFolder()
+                    .then(this.extensionService.startExtensions)
                     .then(() => {
-                        this.extensionService
-                            .startExtensions()
-                            .then(() => {
-                                this.events.emit("after-startup", this.extensionService.executionContext);
-                            });
+                        console.log("INFO", "ChildApplication.ts", "Child Application Startup successful.");
+                        console.log("INFO", "ChildApplication.ts", `Got handshake from parent. Our id is [${this.id}]`);
+
+                        this.events.emit("after-startup", this.extensionService.executionContext);
                     });
 
                 process.removeListener("message", listenForId);
@@ -70,7 +70,6 @@ export default class ChildApplication implements IApplication {
         process.on?.("message", listenForId);
         process.send({type: "CA_HANDSHAKE"});
 
-        this.events = new EventEmitter();
         const config = this.loadConfig();
         this.events.emit("config-loaded", config);
 

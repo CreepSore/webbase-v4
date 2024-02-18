@@ -6,6 +6,7 @@ import INavigator from "../../interfaces/INavigator";
 import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
 import DashboardPermissions from "@extensions/Core.Dashboard/permissions";
 import "./style.css";
+import { Button, Paper } from "@mui/material";
 
 interface SidebarButtonProps {
     label: string;
@@ -14,10 +15,12 @@ interface SidebarButtonProps {
 }
 
 function SidebarButton(props: SidebarButtonProps): JSX.Element {
-    return <button
+    return <Button
+        variant="outlined"
+        color="success"
         className={props.active === true ? "active" : ""}
         onClick={() => props.onClick?.()}
-    ><p>{props.label}</p></button>;
+    ><p>{props.label}</p></Button>;
 }
 
 interface SidebarNavigationButtonProps extends INavigator {
@@ -27,12 +30,14 @@ interface SidebarNavigationButtonProps extends INavigator {
 }
 
 function SidebarNavigationButton(props: SidebarNavigationButtonProps): JSX.Element {
-    return <button
+    return <Button
+        variant="outlined"
+        color="success"
         className={props.activePage === props.pageKey ? "active" : ""}
         onClick={() => {
             props.onNavigationRequest(props.pageKey);
         }}
-    ><p>{props.label}</p></button>;
+    ><p>{props.label}</p></Button>;
 }
 
 interface SidebarRegisteredPagesProps {
@@ -64,7 +69,7 @@ function SidebarRegisteredPages(props: SidebarRegisteredPagesProps): JSX.Element
             }}
         ><p>Views</p></button>}
 
-        <div
+        <Paper
             className={`fixed ${menuOpen ? "block" : "hidden"} min-w-[200px] max-w-[80%]`}
             ref={menuRef}
         >
@@ -73,7 +78,7 @@ function SidebarRegisteredPages(props: SidebarRegisteredPagesProps): JSX.Element
                 key={page.id}
                 onClick={() => (location.href = page.href)}
             >{page.name}</button>)}
-        </div>
+        </Paper>
     </>;
 }
 
@@ -106,14 +111,19 @@ export default function Sidebar(props: SidebarProps): JSX.Element {
 
     return props.isLoggedIn ? <>
         <button className="fixed top-0 left-0 z-50 xl:hidden text-white p-2 bg-black/10" onClick={() => menuRef.current?.classList?.toggle?.("flex")}>M</button>
-        <div className="dashboard-sidebar" ref={menuRef}>
+        <div className="dashboard-sidebar flex flex-col gap-2" ref={menuRef}>
             <SidebarNavigationButton pageKey={"home"} label={"Home"} activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />
-            {props.myPermissions.includes(UsermgmtPermissions.ViewUser.name) && <SidebarNavigationButton pageKey="users" label="Users" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
-            {props.myPermissions.includes(UsermgmtPermissions.ViewPermissions.name) && <SidebarNavigationButton pageKey="permissions" label="Permissions" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
-            {props.myPermissions.includes(DashboardPermissions.ViewLogs.name) && <SidebarNavigationButton pageKey="logs" label="Logs" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+            {props.myPermissions.includes(UsermgmtPermissions.ViewUser.name)
+                && <SidebarNavigationButton pageKey="users" label="Users" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+            {props.myPermissions.includes(UsermgmtPermissions.ViewPermissions.name)
+                && <SidebarNavigationButton pageKey="permissions" label="Permissions" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+            {props.myPermissions.includes(DashboardPermissions.ViewLogs.name)
+                && <SidebarNavigationButton pageKey="logs" label="Logs" activePage={props.activePage} onNavigationRequest={props.onNavigationRequest} />}
+
             <SidebarRegisteredPages
                 pages={pages}
             />
+
             <SidebarButton label="Logout" onClick={() => doLogoutMutation.execute()} />
         </div>
     </> : <></>;

@@ -7,6 +7,7 @@ import { useQuery } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 import UsermgmtPermissions from "@extensions/Core.Usermgmt.Web/permissions";
 import UserEditorDialog from "./components/UserEditorDialog";
 import UserAddDialog from "./components/UserAddDialog";
+import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 
 interface UsersTableRowProps {
     user: IUser;
@@ -14,13 +15,15 @@ interface UsersTableRowProps {
 }
 
 function UsersTableRow(props: UsersTableRowProps): JSX.Element {
-    return <tr>
-        <td>{props.user.id}</td>
-        <td>{props.user.username}</td>
-        <td>{props.user.email}</td>
-        <td>{props.user.permissionGroup.name}</td>
-        <td><button className="edit-button" onClick={() => props.onStartEditUser(props.user)}>Edit</button></td>
-    </tr>;
+    return <TableRow>
+        <TableCell>{props.user.id}</TableCell>
+        <TableCell>{props.user.username}</TableCell>
+        <TableCell>{props.user.email}</TableCell>
+        <TableCell>{props.user.permissionGroup.name}</TableCell>
+        <TableCell>
+            <Button variant="outlined" color="info" onClick={() => props.onStartEditUser(props.user)}>Edit</Button>
+        </TableCell>
+    </TableRow>;
 }
 
 interface UsersTableProps {
@@ -32,26 +35,28 @@ interface UsersTableProps {
 }
 
 function UsersTable(props: UsersTableProps): JSX.Element {
-    return <div className="users-table-container">
-        <table className="users-table">
-            <thead>
-                <tr>
-                    <th scope="col">Id</th>
-                    <th scope="col">Username</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Permission Group</th>
-                    <th scope="col"><button className="add-button" onClick={() => props.onStartAddUser()}>Add</button></th>
-                </tr>
-            </thead>
-            <tbody>
+    return <TableContainer className="users-table-container">
+        <Table className="users-table" size="small">
+            <TableHead>
+                <TableRow>
+                    <TableCell scope="col">Id</TableCell>
+                    <TableCell scope="col">Username</TableCell>
+                    <TableCell scope="col">Email</TableCell>
+                    <TableCell scope="col">Permission Group</TableCell>
+                    <TableCell scope="col">
+                        <Button variant="outlined" color="success" onClick={() => props.onStartAddUser()}>Add</Button>
+                    </TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
                 {props.users.map(user => <UsersTableRow
                     key={user.id}
                     user={user}
                     onStartEditUser={props.onStartEditUser}
                 />)}
-            </tbody>
-        </table>
-    </div>;
+            </TableBody>
+        </Table>
+    </TableContainer>;
 }
 
 interface UsersPageProps {

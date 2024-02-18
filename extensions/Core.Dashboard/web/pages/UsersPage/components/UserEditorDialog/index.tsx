@@ -3,6 +3,7 @@ import IUser, { IPermissionGroup } from "@extensions/Core.Usermgmt/Interfaces/Mo
 import { useMutation, useQuery } from "@extensions/Core.GraphQL/web/GraphQLHooks";
 
 import "./style.css";
+import { Button, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, MenuItem, Select, Table, TableBody, TableCell, TableRow, TextField } from "@mui/material";
 
 interface UserEditorDialogProps {
     user: IUser,
@@ -103,98 +104,138 @@ export default function UserEditorDialog(props: UserEditorDialogProps): JSX.Elem
         impersonateUserMutation.execute({id: props.user.id});
     };
 
-    return <div className="dialog-container">
-        <div className="dialog user-edit-dialog">
-            <div className="dialog-header">
-                <p>Edit User</p>
-                <div className="dialog-buttons">
-                    <button className="dialog-button-close" onClick={() => props.onClose()}>X</button>
-                </div>
+    return <Dialog open={true} className="dialog user-edit-dialog" PaperProps={{
+        className: "w-full max-w-md",
+    }}>
+        <DialogTitle className="flex">
+            <p>Edit User</p>
+            <div className="flex-grow"></div>
+            <div>
+                <Button
+                    color="error"
+                    className="delete-button"
+                    onClick={() => {
+                        const newCount = deleteCount - 1;
+                        if(newCount === 0) {
+                            deleteUser();
+                            setDeleteCount(4);
+                        }
+                        else {
+                            setDeleteCount(newCount);
+                        }
+                    }}
+                >{deleteCount === 4 ? "Delete" : `Please confirm (${deleteCount})`}</Button>
             </div>
-            <div className="dialog-body">
-                <label>Username</label>
-                <input type="text" value={username} onChange={e => setUsername(e.target.value)}/>
+        </DialogTitle>
+        <DialogContent className="flex flex-col gap-2">
+            <TextField size="small" label="Username" type="text" value={username} onChange={e => setUsername(e.target.value)}/>
 
-                <label>Email</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)}/>
+            <TextField size="small" label="Email" type="email" value={email} onChange={e => setEmail(e.target.value)}/>
 
-                <div className="grid grid-cols-2 col-span-1 md:col-span-2 text-left">
-                    <label>IsActive</label>
-                    <div className="text-xl"><input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} /></div>
+            <div className="grid grid-cols-2 col-span-1 md:col-span-2 text-left">
+                <FormControlLabel
+                    label="IsActive"
+                    control={
+                        <Checkbox
+                            checked={isActive}
+                            onChange={e => setIsActive(e.target.checked)}
+                        />
+                    }
+                />
 
-                    <label>Update Password</label>
-                    <div className="text-xl"><input type="checkbox" checked={updatePassword} onChange={e => setUpdatePassword(e.target.checked)} /></div>
+                <FormControlLabel
+                    label="Update Password"
+                    control={
+                        <Checkbox
+                            checked={updatePassword}
+                            onChange={e => setUpdatePassword(e.target.checked)}
+                        />
+                    }
+                />
+            </div>
+
+            {updatePassword && <>
+                <label>Password</label>
+                <div className="relative">
+                    <TextField
+                        size="small"
+                        label="Password"
+                        className="w-full"
+                        type={showPassword ? "text" : "password"}
+                        value={password}
+                        onChange={e => setPassword(e.target.value)} />
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        className="absolute right-1 top-0 bottom-0"
+                        onMouseDown={() => setShowPassword(true)}
+                        onMouseUp={() => setShowPassword(false)}
+                    >show</Button>
                 </div>
+            </>}
 
-                {updatePassword && <>
-                    <label>Password</label>
-                    <div className="relative">
-                        <input
-                            className="w-full"
-                            type={showPassword ? "text" : "password"}
-                            value={password}
-                            onChange={e => setPassword(e.target.value)} />
-                        <button
-                            className="absolute right-1 top-0 bottom-0 text-sm text-black font-thin hover:text-red-600"
-                            onMouseDown={() => setShowPassword(true)}
-                            onMouseUp={() => setShowPassword(false)}
-                        >show</button>
-                    </div>
-                </>}
+            <Select
+                label="Permission Group"
+                value={String(permissionGroup?.id) ?? "0"}
+                onChange={e => setPermissionGroup(permissionGroups.find(pg => String(pg.id) === String(e.target.value)))}
+            >
+                {permissionGroups.map(pg => <MenuItem key={pg.id} value={pg.id}>{pg.name}</MenuItem>)}
+            </Select>
 
-                <label>Permission Group</label>
-                <select value={String(permissionGroup?.id) ?? "0"} onChange={e => setPermissionGroup(permissionGroups.find(pg => String(pg.id) === e.target.value))}>
-                    {permissionGroups.map(pg => <option key={pg.id} value={pg.id}>{pg.name}</option>)}
-                </select>
-
-                <div className="grid grid-cols-3 col-span-2 overflow-y-auto md:max-h-[200px]">
-                    <div className="col-span-3">
-                        <button
-                            className="add-api-key-button"
-                            onClick={() => {
-                                addApiKeyMutation.execute({id: props.user.id});
-                            }}
-                        >Create ApiKey</button>
-                    </div>
-                    {apiKeys.map(apiKey => <React.Fragment key={apiKey.id}>
-                        <div>{apiKey.id}</div>
-                        <div>{new Date(apiKey.validUntil).toISOString()}</div>
-                        <div>
-                            <button
-                                className="del-api-key-button"
-                                onClick={() => {
-                                    delApiKeyMutation.execute({id: apiKey.id});
-                                }}
-                            >Delete</button>
-                        </div>
-                    </React.Fragment>)}
-                </div>
-
-                <div className="flex flex-col gap-1 col-span-1 md:col-span-2 mt-2">
-                    <button
-                        className="save-button"
-                        onClick={() => saveUser()}
-                    >Save</button>
-                    <button
-                        className="impersonate-button"
-                        onClick={() => impersonateUser()}
-                    >Impersonate</button>
-                    <button
-                        className="delete-button"
+            <div className="w-full overflow-y-auto md:max-h-[200px]">
+                <div className="col-span-3">
+                    <Button
+                        color="success"
+                        variant="outlined"
+                        className="add-api-key-button"
                         onClick={() => {
-                            const newCount = deleteCount - 1;
-                            if(newCount === 0) {
-                                deleteUser();
-                                setDeleteCount(4);
-                            }
-                            else {
-                                setDeleteCount(newCount);
-                            }
+                            addApiKeyMutation.execute({id: props.user.id});
                         }}
-                    >{deleteCount === 4 ? "Delete" : `Please confirm (${deleteCount})`}</button>
+                    >Create ApiKey</Button>
                 </div>
+                <Table>
+                    <TableBody>
+                        {apiKeys.map(apiKey => <TableRow key={apiKey.id}>
+                            <TableCell>{apiKey.id}</TableCell>
+                            <TableCell>{new Date(apiKey.validUntil).toISOString()}</TableCell>
+                            <TableCell>
+                                <Button
+                                    color="error"
+                                    variant="outlined"
+                                    className="del-api-key-button"
+                                    onClick={() => {
+                                        delApiKeyMutation.execute({id: apiKey.id});
+                                    }}
+                                >Delete</Button>
+                            </TableCell>
+                        </TableRow>)}
+                    </TableBody>
+                </Table>
             </div>
-        </div>
-    </div>;
+        </DialogContent>
+        <DialogActions>
+            <div className="flex flex-row gap-1 col-span-1 md:col-span-2 mt-2">
+                <Button
+                    color="success"
+                    variant="outlined"
+                    onClick={() => {
+                        saveUser();
+                    }}
+                >Save</Button>
+
+                <Button
+                    className="impersonate-button"
+                    onClick={() => impersonateUser()}
+                >Impersonate</Button>
+
+                <Button
+                    onClick={() => {
+                        props.onClose();
+                    }}
+                >Close</Button>
+            </div>
+        </DialogActions>
+    </Dialog>;
 }
 

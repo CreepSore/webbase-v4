@@ -96,6 +96,8 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         const coreGraphQl = this.$(CoreGraphQL);
         const coreUsermgmt = this.$(CoreUsermgmt);
 
+        coreWeb.enableLiveReload(100, true);
+
         await coreUsermgmt.createPermissions(...Object.values(Permissions));
         this.umgmtGql = umgmtGraphQl;
         const mainUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
