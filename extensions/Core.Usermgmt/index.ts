@@ -4,9 +4,16 @@ import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreDb from "@extensions/Core.Db";
-import mongoose from "mongoose";
-
-class LoginError extends Error { }
+import mongoose, { HydratedDocument } from "mongoose";
+import User from "./models/User";
+import PermissionGroup from "./models/PermissionGroup";
+import Permission from "./models/Permission";
+import IPermission from "./types/IPermission";
+import Permissions, { PermissionEntry, PermissionLayer } from "./permissions";
+import IUser from "./types/IUser";
+import IPermissionGroup from "./types/IPermissionGroup";
+import LogBuilder from "@service/logger/LogBuilder";
+import AuthenticationType from "./types/AuthenticationTypes";
 
 class CoreUsermgmtConfig {
 
@@ -41,6 +48,7 @@ export default class CoreUsermgmt implements IExtension {
 
         const coreDb = this.$(CoreDb);
         this.db = coreDb.db;
+
         await this.setupSchema();
     }
 
@@ -48,8 +56,125 @@ export default class CoreUsermgmt implements IExtension {
 
     }
 
-    private async setupSchema(): Promise<void> {
+    getRootUser(): Promise<HydratedDocument<IUser>> {
+        return User.findOne({username: "Root"}).populate({
+            path: "groups",
+            populate: {
+                path: "permissions",
+            },
+        });
+    }
 
+    getAnonymousUser(): Promise<HydratedDocument<IUser>> {
+        return User.findOne({username: "Anonymous"}).populate({
+            path: "groups",
+            populate: {
+                path: "permissions",
+            },
+        });
+    }
+
+    getWildcardPermission(): Promise<HydratedDocument<IPermission>> {
+        return this.findPermission(Permissions.ALL);
+    }
+
+    findPermission(permission: PermissionEntry): Promise<HydratedDocument<IPermission>> {
+        const toFind = typeof permission === "string"
+            ? permission
+            : permission?.name;
+
+        return Permission.findOne({name: toFind});
+    }
+
+    private async createPermission(
+        currentLayer: PermissionLayer,
+        currentPath: string = "",
+        adminGroup: HydratedDocument<IPermissionGroup> = null,
+        anonymousGroup: HydratedDocument<IPermissionGroup> = null,
+    ): Promise<void> {
+        const _adminGroup = adminGroup ?? await PermissionGroup.findOne({name: "Administrator"});
+        const _anonymousGroup = anonymousGroup ?? await PermissionGroup.findOne({name: "Anonymous"});
+
+        for(const [key, value] of Object.entries(currentLayer)) {
+            const newPath = currentPath + "/" + key;
+
+            if(value.name) {
+                const exists = Boolean(await Permission.findOne({name: value.name, path: newPath}));
+                if(exists) {
+                    continue;
+                }
+
+                const savedPermission = await new Permission({
+                    name: value.name,
+                    description: value.description,
+                    path: newPath,
+                }).save();
+
+                if(value.isRoot) {
+                    _adminGroup.permissions.push(savedPermission);
+                }
+
+                if(value.isAnonymous) {
+                    _anonymousGroup.permissions.push(savedPermission);
+                }
+
+                continue;
+            }
+
+            await this.createPermission(value as PermissionLayer, newPath, _adminGroup, _anonymousGroup);
+        }
+
+        await _adminGroup.save();
+        await _anonymousGroup.save();
+    }
+
+    private async initializeDefaultEntries(): Promise<void> {
+        let administratorGroup = await PermissionGroup.findOne({name: "Administrator"});
+        let anonymousGroup = await PermissionGroup.findOne({name: "Anonymous"});
+
+        if(!administratorGroup) {
+            const newGroup = new PermissionGroup({
+                name: "Administrator",
+                description: "Administrator group",
+                permissions: [],
+            });
+
+            administratorGroup = await newGroup.save();
+        }
+
+        if(!anonymousGroup) {
+            const newGroup = new PermissionGroup({
+                name: "Anonymous",
+                description: "Anonymous group",
+                permissions: [],
+            });
+
+            anonymousGroup = await newGroup.save();
+        }
+
+        await this.createPermission(Permissions);
+
+        if(!(await this.getRootUser())) {
+            await new User({
+                username: "Root",
+                email: "root@localhost",
+                groups: [administratorGroup._id],
+                apiKeys: [],
+            }).save();
+        }
+
+        if(!(await this.getAnonymousUser())) {
+            await new User({
+                username: "Anonymous",
+                email: "anonymous@localhost",
+                groups: [anonymousGroup._id],
+                apiKeys: [],
+            }).save();
+        }
+    }
+
+    private async setupSchema(): Promise<void> {
+        await this.initializeDefaultEntries();
     }
 
     private checkConfig(): void {
