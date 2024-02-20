@@ -12,6 +12,7 @@ import IPermission from "./types/IPermission";
 import Permissions, { PermissionEntry, PermissionLayer } from "./permissions";
 import IUser from "./types/IUser";
 import IPermissionGroup from "./types/IPermissionGroup";
+import AuthenticationHandler from "./authentication-handlers/AuthenticationHandler";
 
 class CoreUsermgmtConfig {
 
@@ -158,6 +159,10 @@ export default class CoreUsermgmt implements IExtension {
                 email: "root@localhost",
                 groups: [administratorGroup._id],
                 apiKeys: [],
+                authentication: [{
+                    type: "password",
+                    password: AuthenticationHandler.hashPassword("password"),
+                }],
             }).save();
         }
 

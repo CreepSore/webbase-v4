@@ -4,7 +4,7 @@ import IPermissionGroup from "./IPermissionGroup";
 type IUser = {
     username: string;
     email?: string;
-    authentication: AuthenticationType;
+    authentication: AuthenticationType[];
     apiKeys: string[];
     groups: IPermissionGroup[];
 };
