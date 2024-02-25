@@ -21,6 +21,10 @@ export default class AuthenticationHandler {
             ));
         }
 
+        if(!this.user.authentication) {
+            return AuthenticationHandler.createErrorResult("Invalid Authentication Type", "INVALID_AUTHENTICATION_TYPE");
+        }
+
         const authenticationType = this.user.authentication.find(a => a.type === parameter.type);
         if(!authenticationType) {
             return AuthenticationHandler.createErrorResult("Invalid Authentication Type", "INVALID_AUTHENTICATION_TYPE");
@@ -70,7 +74,11 @@ export default class AuthenticationHandler {
     }
 
     getAuthenticationTypes(): AuthenticationType["type"][] {
-        if(!this.user.authentication?.length) {
+        if(!this.user) {
+            return null;
+        }
+
+        if(!this.user.authentication || this.user.authentication.length === 0) {
             return null;
         }
 
@@ -96,6 +104,24 @@ export default class AuthenticationHandler {
         if(save) {
             return this.user.save();
         }
+    }
+
+    static getRootUser(): Promise<HydratedDocument<IUser>> {
+        return User.findOne({username: "Root"}).populate({
+            path: "groups",
+            populate: {
+                path: "permissions",
+            },
+        });
+    }
+
+    static getAnonymousUser(): Promise<HydratedDocument<IUser>> {
+        return User.findOne({username: "Anonymous"}).populate({
+            path: "groups",
+            populate: {
+                path: "permissions",
+            },
+        });
     }
 
     private async authenticateWithPermanentKeyAuthentication(

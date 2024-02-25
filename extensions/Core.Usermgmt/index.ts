@@ -12,7 +12,8 @@ import IPermission from "./types/IPermission";
 import Permissions, { PermissionEntry, PermissionLayer } from "./permissions";
 import IUser from "./types/IUser";
 import IPermissionGroup from "./types/IPermissionGroup";
-import AuthenticationHandler from "./authentication-handlers/AuthenticationHandler";
+import AuthenticationHandler from "./handlers/AuthenticationHandler";
+import AuthorizationHandler from "./handlers/AuthorizationHandler";
 
 class CoreUsermgmtConfig {
 
@@ -53,36 +54,6 @@ export default class CoreUsermgmt implements IExtension {
 
     async stop(): Promise<void> {
 
-    }
-
-    getRootUser(): Promise<HydratedDocument<IUser>> {
-        return User.findOne({username: "Root"}).populate({
-            path: "groups",
-            populate: {
-                path: "permissions",
-            },
-        });
-    }
-
-    getAnonymousUser(): Promise<HydratedDocument<IUser>> {
-        return User.findOne({username: "Anonymous"}).populate({
-            path: "groups",
-            populate: {
-                path: "permissions",
-            },
-        });
-    }
-
-    getWildcardPermission(): Promise<HydratedDocument<IPermission>> {
-        return this.findPermission(Permissions.ALL);
-    }
-
-    findPermission(permission: PermissionEntry): Promise<HydratedDocument<IPermission>> {
-        const toFind = typeof permission === "string"
-            ? permission
-            : permission?.name;
-
-        return Permission.findOne({name: toFind});
     }
 
     private async createPermissionLayer(
@@ -153,7 +124,7 @@ export default class CoreUsermgmt implements IExtension {
 
         await this.createPermissionLayer(Permissions);
 
-        if(!(await this.getRootUser())) {
+        if(!(await AuthenticationHandler.getRootUser())) {
             await new User({
                 username: "Root",
                 email: "root@localhost",
@@ -166,7 +137,7 @@ export default class CoreUsermgmt implements IExtension {
             }).save();
         }
 
-        if(!(await this.getAnonymousUser())) {
+        if(!(await AuthenticationHandler.getAnonymousUser())) {
             await new User({
                 username: "Anonymous",
                 email: "anonymous@localhost",

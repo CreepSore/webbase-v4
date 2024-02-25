@@ -4,6 +4,10 @@ const Urls = {
         me: "/authentication/me",
         getAuthType: "/authentication/type/:username",
         login: "/authentication/login",
+        logout: "/authentication/logout",
+    },
+    users: {
+        get: "/users",
     },
 } as const;
 

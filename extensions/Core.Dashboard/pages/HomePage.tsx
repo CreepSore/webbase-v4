@@ -1,9 +1,6 @@
-import { Paper } from "@mui/material";
 import * as React from "react";
-import Navbar from "../components/Navbar";
+import BasePage from "./BasePage";
 
 export default function HomePage(): JSX.Element {
-    return <Paper square>
-        <Navbar />
-    </Paper>;
+    return <BasePage>hom</BasePage>;
 }

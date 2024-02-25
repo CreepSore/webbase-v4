@@ -9,12 +9,14 @@ import RouterPage from "@extensions/Core.React/Router/RouterPage";
 import useNavigationHandler from "@extensions/Core.React/Navigator/useNavigationHandler";
 import NavigationKeys from "./NavigationKeys";
 import NavigatorContext from "@extensions/Core.React/Navigator/NavigatorContext";
-import LoginPage from "../pages/LoginPage";
 
 import "./style.css";
 import useMe from "@extensions/Core.Usermgmt.Web/web/hooks/useMe";
 import Loader from "@extensions/Core.React/Loader/Loader";
 import HomePage from "../pages/HomePage";
+import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
+import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
+import UsersPage from "../pages/UsersPage";
 
 function Main(): JSX.Element {
     const navigator = useNavigationHandler<NavigationKeys>({
@@ -34,39 +36,38 @@ function Main(): JSX.Element {
         },
     });
 
-    const [me, updateMe] = useMe();
+    const me = useMe();
 
     React.useEffect(() => {
-        if(me) {
-            if(me.username === "Anonymous") {
-                navigator.forceCurrentPage("login");
-                return;
-            }
-
-            navigator.forceCurrentPage("home");
+        if(!me.me) {
+            return;
         }
-    }, [me]);
+
+        if(me.me.username === "Anonymous") {
+            UsermgmtWebApi.startLoginProcess(location.href);
+            return;
+        }
+
+        navigator.forceCurrentPage("home");
+    }, [me.me]);
 
     return <ThemeProvider theme={theme}>
         <NavigatorContext.Provider value={navigator}>
-            <Router currentPage={navigator.currentPage}>
-                <RouterPage key="init">
-                    <Loader />
-                </RouterPage>
+            <MeContext.Provider value={me}>
+                <Router currentPage={navigator.currentPage}>
+                    <RouterPage key="init">
+                        <Loader />
+                    </RouterPage>
 
-                <RouterPage key="login">
-                    <LoginPage
-                        onLoginSucceeded={() => {
-                            updateMe();
-                            navigator.forceCurrentPage("home");
-                        }}
-                    />
-                </RouterPage>
+                    <RouterPage key="home">
+                        <HomePage />
+                    </RouterPage>
 
-                <RouterPage key="home">
-                    <HomePage />
-                </RouterPage>
-            </Router>
+                    <RouterPage key="users">
+                        <UsersPage />
+                    </RouterPage>
+                </Router>
+            </MeContext.Provider>
         </NavigatorContext.Provider>
     </ThemeProvider>;
 }

@@ -5,10 +5,6 @@ import AuthenticationParameters from "@extensions/Core.Usermgmt/types/Authentica
 import IUser from "@extensions/Core.Usermgmt/types/IUser";
 
 export default class UsermgmtWebApi {
-    static async getAuthenticationType(username: string): Promise<AuthenticationType["type"] | "none"> {
-        return await this.fetchWrapper(fetch(this.buildUrl(Urls.auth.getAuthType)));
-    }
-
     static me(): Promise<IUser> {
         return this.fetchWrapper(fetch(this.buildUrl(Urls.auth.me)));
     }
@@ -23,6 +19,22 @@ export default class UsermgmtWebApi {
         }), true);
     }
 
+    static logout(): Promise<void> {
+        return new Promise((res, rej) => {
+            fetch(this.buildUrl(Urls.auth.logout), {
+                method: "GET",
+            }).then(() => {})
+                .catch(() => {})
+                .finally(() => res());
+        });
+    }
+
+    static getUsers(): Promise<IUser[]> {
+        return this.fetchWrapper(fetch(this.buildUrl(Urls.users.get), {
+            method: "GET",
+        }), false);
+    }
+
     static async fetchWrapper<T>(response: Promise<Response>, ignoreStatusCode: boolean = false): Promise<T> {
         const finishedResponse = await response;
         const jsonData = await finishedResponse.json();
@@ -34,7 +46,25 @@ export default class UsermgmtWebApi {
         return jsonData as T;
     }
 
-    static buildUrl(path: string): string {
-        return `${Urls.base}/${path}`;
+    static async getAuthenticationTypes(username: string): Promise<AuthenticationType["type"][]> {
+        return await this.fetchWrapper(fetch(this.buildUrl(Urls.auth.getAuthType, [[/:username/g, username]])));
+    }
+
+    static startLoginProcess(redirectUri: string): void {
+        const url = new URL(location.href);
+        url.pathname = "/core.usermgmt.web/login";
+        url.searchParams.forEach((value, key) => url.searchParams.delete(key));
+        url.searchParams.set("redirect_uri", redirectUri);
+        location.href = url.href;
+    }
+
+    static buildUrl(path: string, replace: [RegExp, string][] = []): string {
+        let finalPath = `${Urls.base}/${path}`;
+
+        for(const [key, value] of replace) {
+            finalPath = finalPath.replace(key, value);
+        }
+
+        return finalPath;
     }
 }

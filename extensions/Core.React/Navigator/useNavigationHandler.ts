@@ -27,11 +27,13 @@ export default function useNavigationHandler<
         setPageStack([...pageStack, {navKey: currentPage, args: currentArgs}]);
         setCurrentPage(key);
         setCurrentArgs(args);
+
+        location.hash = key;
     };
 
-    const doBackRequest = (): void => {
+    const doBackRequest = (): boolean => {
         if(pageStack.length === 0) {
-            return;
+            return false;
         }
 
         const previousPage = pageStack[pageStack.length - 1];
@@ -40,15 +42,32 @@ export default function useNavigationHandler<
         setPageStack(newStack);
         setCurrentPage(previousPage.navKey);
         setCurrentArgs(previousPage.args);
+        return true;
     };
 
     const forceCurrentPage = (page: NavigationKeyType): void => {
         setCurrentPage(page);
+        location.hash = page;
     };
 
     const updateCurrentArguments = (args: NavigationArgumentsType): void => {
         setCurrentArgs(args);
     };
+
+    React.useEffect(() => {
+        const callback = (event: PopStateEvent):void => {
+            const hash = location.hash.substring(1);
+            if(!doBackRequest() && hash) {
+                forceCurrentPage(hash as NavigationKeyType);
+            }
+        };
+
+        window.addEventListener("popstate", callback);
+
+        return () => {
+            window.removeEventListener("popstate", callback);
+        };
+    }, []);
 
     return {
         currentPage,

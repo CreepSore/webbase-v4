@@ -8,6 +8,7 @@ import CoreWeb from "@extensions/Core.Web";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
 import createAuthenticationRouter from "./routers/AuthenticationRouter";
 import Urls from "./urls";
+import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
 
 declare module "express-session" {
     interface SessionData {
@@ -67,7 +68,8 @@ export default class CoreUsermgmtWeb implements IExtension {
         const coreWeb = this.$(CoreWeb);
         const coreUsermgmt = this.$(CoreUsermgmt);
 
-        coreWeb.app.use(Urls.base, createAuthenticationRouter(await coreUsermgmt.getAnonymousUser()));
+        coreWeb.addAppRoute("/core.usermgmt.web/login", coreWeb.addScriptFromFile("Core.Usermgmt.Web.Main", "Core.Usermgmt.Web.js"));
+        coreWeb.app.use(Urls.base, createAuthenticationRouter(await AuthenticationHandler.getAnonymousUser()));
     }
 
     private async startChildApp(executionContext: IChildAppExecutionContext): Promise<void> {
