@@ -34,6 +34,7 @@ function Main(): JSX.Element {
 }
 
 window.addEventListener("load", () => {
+    document.title = "Login";
     ReactDOM.createRoot(document.querySelector("#react-container") as Element).render(<Main />);
 });
 

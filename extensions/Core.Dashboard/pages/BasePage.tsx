@@ -1,6 +1,6 @@
 import { Breakpoint, Container, Paper } from "@mui/material";
 import * as React from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../components/navigation/Navbar";
 
 interface BasePageProperties {
     maxWidth?: false | Breakpoint;

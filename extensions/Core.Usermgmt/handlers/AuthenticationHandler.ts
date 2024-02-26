@@ -5,6 +5,7 @@ import User from "../models/User";
 import AuthenticationParameters, { OnceKeyAuthenticationParameters, PasswordAuthenticationParameters, PasswordTotpAuthenticationParameters, PermanentKeyAuthenticationParameters, TotpAuthenticationParameters } from "../types/AuthenticationParameters";
 import AuthenticationResult from "../types/AuthenticationResult";
 import AuthenticationType, { OnceKeyAuthenticationType, PasswordAuthenticationType, PasswordTotpAuthenticationType, PermanentKeyAuthenticationType, TotpAuthenticationType } from "../types/AuthenticationTypes";
+import TotpHandler from "./TotpHandler";
 
 export default class AuthenticationHandler {
     user: HydratedDocument<IUser>;
@@ -193,8 +194,26 @@ export default class AuthenticationHandler {
             return AuthenticationHandler.createErrorResult("Invalid totp-code length", "INVALID_TOTP_LENGTH");
         }
 
-        // TODO: TOTP
-        return AuthenticationHandler.createErrorResult("NOT_IMPLEMENTED", "NOT_IMPLEMENTED");
+        if(parameter.totp.length !== 6) {
+            return AuthenticationHandler.createErrorResult("Invalid totp key", "INVALID_TOTP_KEY");
+        }
+
+        try {
+            if(!TotpHandler.validate(parameter.totp, authenticationType.secret)) {
+                return AuthenticationHandler.createErrorResult("Invalid totp-code provided", "INVALID_TOTP_CODE");
+            }
+        }
+        catch {
+            return AuthenticationHandler.createErrorResult("Failed to calculate TOTP", "TOTP_CALCULATION_FAILED");
+        }
+
+        return {
+            success: true,
+            additionalInformation: {},
+            error: null,
+            errorCode: null,
+            userId: this.user._id.toString(),
+        };
     }
 
     private async authenticateWithPasswordTotpAuthentication(
@@ -209,12 +228,16 @@ export default class AuthenticationHandler {
             return AuthenticationHandler.createErrorResult("Invalid totp-code length", "INVALID_TOTP_LENGTH");
         }
 
+        if(parameter.totp.length !== 6) {
+            return AuthenticationHandler.createErrorResult("Invalid totp key", "INVALID_TOTP_KEY");
+        }
+
         const passwordAuthResult = await this.authenticateWithPasswordAuthentication({
             type: "password",
             password: authenticationType.password,
         }, {
             type: "password",
-            password: authenticationType.password,
+            password: parameter.password,
         });
 
         if(!passwordAuthResult.success) {

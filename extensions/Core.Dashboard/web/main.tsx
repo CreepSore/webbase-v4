@@ -73,6 +73,7 @@ function Main(): JSX.Element {
 }
 
 window.addEventListener("load", () => {
+    document.title = "Dashboard";
     ReactDOM.createRoot(document.querySelector("#react-container") as Element).render(<Main />);
 });
 

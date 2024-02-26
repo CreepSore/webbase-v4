@@ -11,6 +11,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Search as SearchIcon } from "@mui/icons-material";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
+import EditUserDialog from "../components/dialogs/CreateUserDialogs";
 
 export default function UsersPage(): JSX.Element {
     const me = React.useContext(MeContext);
@@ -53,29 +54,12 @@ export default function UsersPage(): JSX.Element {
         </Dialog>}
 
         {/* CREATE DIALOG */}
-        {createDialogVisible && <Dialog open fullWidth>
-            <DialogTitle>Create User</DialogTitle>
-            <DialogContent>
+        {createDialogVisible && <EditUserDialog
+            onUserCreated={(user) => {
 
-            </DialogContent>
-            <DialogActions>
-                <Button
-                    color="success"
-                    variant="outlined"
-                    onClick={() => {
-                        setUserToDelete(null);
-                        updateUsers();
-                    }}
-                    size="small"
-                >Create</Button>
-
-                <Button
-                    variant="outlined"
-                    onClick={() => setUserToDelete(null)}
-                    size="small"
-                >Cancel</Button>
-            </DialogActions>
-        </Dialog>}
+            }}
+            onClose={() => setCreateDialogVisible(false)}
+        />}
 
         {/* CONTENT */}
         <Table size="small">

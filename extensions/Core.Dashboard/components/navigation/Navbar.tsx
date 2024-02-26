@@ -33,7 +33,7 @@ export default function Navbar(): JSX.Element {
                     className="cursor-pointer"
                     onClick={() => {
                         UsermgmtWebApi.logout()
-                            .then(() => (location.href = location.href));
+                            .then(() => location.reload());
                     }}
                 >Logout</Link>
             </div>

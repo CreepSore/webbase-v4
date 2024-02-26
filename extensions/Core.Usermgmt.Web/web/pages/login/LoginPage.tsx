@@ -2,10 +2,11 @@ import * as React from "react";
 import useMe from "@extensions/Core.Usermgmt.Web/web/hooks/useMe";
 import IUser from "@extensions/Core.Usermgmt/types/IUser";
 import UsermgmtWebApi from "../../UsermgmtWebApi";
-import { Alert, Button, CircularProgress, Container, MenuItem, Paper, Select, TextField } from "@mui/material";
+import { Alert, Button, CircularProgress, Container, IconButton, MenuItem, Paper, Select, TextField } from "@mui/material";
 import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
 import AuthenticationParameters from "@extensions/Core.Usermgmt/types/AuthenticationParameters";
 import Loader from "@extensions/Core.React/Loader/Loader";
+import TotpInput from "../../components/totp-input/TotpInput";
 
 enum LoginStep {
     INVALID_STATE = 0,
@@ -36,6 +37,7 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
     const [totp, setTotp] = React.useState("");
 
     const [loginError, setLoginError] = React.useState("");
+    const isUserError = React.useMemo(() => loginError.includes?.("User"), [loginError]);
 
     const [selectedAuthenticationType, setSelectedAuthenticationType] = React.useState<AuthenticationType["type"]>(null);
     const [authenticationTypes, setAuthenticationTypes] = React.useState<AuthenticationType["type"][]>(null);
@@ -49,6 +51,12 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
             props.onLogin?.(me.me);
         }
     }, [me]);
+
+    React.useEffect(() => {
+        if(totp.length === 6) {
+            continueLoginProcess();
+        }
+    }, [totp]);
 
     const buildAuthParameters = (): AuthenticationParameters & {username: string} => {
         const result: any = {type: selectedAuthenticationType, username};
@@ -70,6 +78,10 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
             if(!loginResult.success) {
                 if(loginResult.error) {
                     setLoginError(loginResult.error);
+
+                    if(selectedAuthenticationType === "password_totp" || selectedAuthenticationType === "totp") {
+                        setStep(LoginStep.USER_INPUT);
+                    }
                 }
                 return;
             }
@@ -86,24 +98,33 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
         if(step === LoginStep.USER_INPUT) {
             setPassword("");
             setTotp("");
+            setLoginError("");
 
             const authTypes = await UsermgmtWebApi.getAuthenticationTypes(username);
+            if(!authTypes) {
+                setLoginError("Invalid Username");
+                return;
+            }
+
             setAuthenticationTypes(authTypes);
 
-            if(authTypes.length > 0) {
+            if(authTypes.length !== 0) {
                 setSelectedAuthenticationType(authTypes[0]);
+            }
 
+            if(authTypes.length > 1) {
+                setStep(LoginStep.CHOOSE_AUTH_TYPE);
+                return;
+            }
+
+            if(authTypes.length === 1) {
                 const newState = stateMapping[authTypes[0]];
                 if(!newState) {
                     return;
                 }
 
                 setStep(newState);
-                return;
-            }
 
-            if(authTypes.length === 1) {
-                setStep(LoginStep.CHOOSE_AUTH_TYPE);
                 return;
             }
 
@@ -150,7 +171,18 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
                         continueLoginProcess();
                     }}
                 >
-                    <h1 className="font-thin text-2xl pb-2">Login</h1>
+                    <div className="flex justify-between w-full mb-4">
+                        <h1 className="font-thin text-2xl pb-2">Login</h1>
+                        {step !== LoginStep.USER_INPUT && <div>
+                            <Button
+                                size="small"
+                                variant="text"
+                                onClick={() => {
+                                    setStep(LoginStep.USER_INPUT);
+                                }}
+                            >Cancel</Button>
+                        </div>}
+                    </div>
 
                     {step === LoginStep.LOADING && <div className="flex items-center justify-center py-4">
                         <CircularProgress />
@@ -159,11 +191,14 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
                     {loginError && <Alert severity="error">{loginError}</Alert>}
 
                     {step !== LoginStep.LOADING && <TextField
+                        variant="standard"
                         value={username}
                         onChange={e => setUsername(e.target.value)}
                         label="Username"
                         disabled={step !== LoginStep.USER_INPUT}
                         size={step !== LoginStep.USER_INPUT ? "small" : "medium"}
+                        autoFocus={step === LoginStep.USER_INPUT}
+                        error={isUserError}
                     />}
 
                     {step === LoginStep.CHOOSE_AUTH_TYPE &&
@@ -177,19 +212,25 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
                         </Select>
                     }
 
-                    {step === LoginStep.DO_LOGIN_PASSWORD && <>
-                        <TextField
-                            type="password"
-                            label="Password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            disabled={step !== LoginStep.DO_LOGIN_PASSWORD}
-                            size={step !== LoginStep.DO_LOGIN_PASSWORD ? "small" : "medium"}
-                            autoFocus
-                        />
-                    </>}
+                    {step === LoginStep.DO_LOGIN_PASSWORD && <TextField
+                        variant="standard"
+                        type="password"
+                        label="Password"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        disabled={step !== LoginStep.DO_LOGIN_PASSWORD}
+                        size={step !== LoginStep.DO_LOGIN_PASSWORD ? "small" : "medium"}
+                        autoFocus
+                    />}
 
-                    {step !== LoginStep.LOADING && <Button variant="outlined" type="submit">Login</Button>}
+                    {step === LoginStep.DO_LOGIN_TOTP && <TotpInput
+                        onFinished={(totpValue) => {
+                            setTotp(totpValue);
+                        }}
+                        autoFocus
+                    />}
+
+                    {step !== LoginStep.LOADING && step !== LoginStep.DO_LOGIN_TOTP && <Button variant="outlined" type="submit" className="!mt-4">Login</Button>}
                 </form>
             </Paper>
         </Container>
