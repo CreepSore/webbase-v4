@@ -11,7 +11,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Search as SearchIcon } from "@mui/icons-material";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
-import EditUserDialog from "../components/dialogs/CreateUserDialogs";
+import EditUserDialog from "../components/dialogs/EditUserDialogs";
 
 export default function UsersPage(): JSX.Element {
     const me = React.useContext(MeContext);
@@ -55,7 +55,8 @@ export default function UsersPage(): JSX.Element {
 
         {/* CREATE DIALOG */}
         {createDialogVisible && <EditUserDialog
-            onUserCreated={(user) => {
+            type="create"
+            onUserEdited={(user) => {
 
             }}
             onClose={() => setCreateDialogVisible(false)}

@@ -100,7 +100,7 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
             setTotp("");
             setLoginError("");
 
-            const authTypes = await UsermgmtWebApi.getAuthenticationTypes(username);
+            const authTypes = await UsermgmtWebApi.getUserAuthenticationTypes(username);
             if(!authTypes) {
                 setLoginError("Invalid Username");
                 return;

@@ -2,19 +2,18 @@ import * as express from "express";
 import Urls from "../urls";
 import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
 import User from "@extensions/Core.Usermgmt/models/User";
-import { HydratedDocument } from "mongoose";
-import IUser from "@extensions/Core.Usermgmt/types/IUser";
 import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
+import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
 
-export default function createAuthenticationRouter(anonymousUser: HydratedDocument<IUser>): express.Router {
+export default function createAuthenticationRouter(): express.Router {
     // eslint-disable-next-line new-cap
     const router = express.Router();
 
     router.get(Urls.auth.me, async(req, res) => {
         let meUser = await User.findById(req.session.userId);
         if(!meUser) {
-            meUser = anonymousUser;
+            meUser = await AuthenticationHandler.getAnonymousUser();
         }
 
         await meUser.populate({
@@ -53,6 +52,10 @@ export default function createAuthenticationRouter(anonymousUser: HydratedDocume
         }
 
         res.status(authResult.success ? 200 : 400).json(authResult);
+    });
+
+    router.get(Urls.auth.getAuthTypes, AuthorizationHandler.middleware([Permissions.AUTH.VIEW_TYPES]), async(req, res) => {
+        res.status(200).json(["password", "password_totp", "totp", "once_key", "permanent_key"] as AuthenticationType["type"][]);
     });
 
     return router;

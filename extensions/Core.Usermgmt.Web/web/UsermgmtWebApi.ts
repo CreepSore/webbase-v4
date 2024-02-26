@@ -3,6 +3,7 @@ import Urls from "../urls";
 import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
 import AuthenticationParameters from "@extensions/Core.Usermgmt/types/AuthenticationParameters";
 import IUser from "@extensions/Core.Usermgmt/types/IUser";
+import IPermissionGroup from "@extensions/Core.Usermgmt/types/IPermissionGroup";
 
 export default class UsermgmtWebApi {
     static me(): Promise<IUser> {
@@ -46,8 +47,16 @@ export default class UsermgmtWebApi {
         return jsonData as T;
     }
 
-    static async getAuthenticationTypes(username: string): Promise<AuthenticationType["type"][]> {
+    static async getUserAuthenticationTypes(username: string): Promise<AuthenticationType["type"][]> {
         return await this.fetchWrapper(fetch(this.buildUrl(Urls.auth.getAuthType, [[/:username/g, username]])));
+    }
+
+    static async getPermissionGroups(): Promise<IPermissionGroup[]> {
+        return await this.fetchWrapper(fetch(this.buildUrl(Urls.permissions.getGroups)));
+    }
+
+    static async getAuthenticationTypes(): Promise<AuthenticationType["type"][]> {
+        return await this.fetchWrapper(fetch(this.buildUrl(Urls.auth.getAuthTypes)));
     }
 
     static startLoginProcess(redirectUri: string): void {
