@@ -207,6 +207,7 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
                             onChange={e => setSelectedAuthenticationType(e.target.value as AuthenticationType["type"])}
                             disabled={step !== LoginStep.CHOOSE_AUTH_TYPE}
                             size={step !== LoginStep.CHOOSE_AUTH_TYPE ? "small" : "medium"}
+                            autoFocus
                         >
                             {authenticationTypes.map(at => <MenuItem key={at} value={at}>{at}</MenuItem>)}
                         </Select>
