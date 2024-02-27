@@ -61,8 +61,6 @@ export default class Core implements IExtension {
             return;
         }
 
-        LoggerService
-
         if(executionContext.contextType !== "app") {
             return;
         }
