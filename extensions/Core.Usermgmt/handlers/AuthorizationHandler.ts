@@ -55,7 +55,7 @@ export default class AuthorizationHandler {
     }
 
     static async fromRequest(req: express.Request): Promise<AuthorizationHandler> {
-        return new AuthorizationHandler(await this.requestToUser(req));
+        return new AuthorizationHandler((await this.requestToUser(req)) || await AuthenticationHandler.getAnonymousUser());
     }
 
     static fromUserObject(userFilter: UserFilter): Promise<AuthorizationHandler> {
@@ -177,6 +177,9 @@ export default class AuthorizationHandler {
 
     private static async fetchUser(filter: FilterQuery<IUser>): Promise<HydratedDocument<IUser>> {
         const user = await User.findOne(filter);
+
+        if(!user) return null;
+
         await user.populate({
             path: "groups",
             populate: {
