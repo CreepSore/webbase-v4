@@ -23,35 +23,39 @@ export default function EditAuthTypeDialog<AuthType extends AuthenticationType>(
     const [keys, setKeys] = React.useState<string[]>(props.authenticationType.keys || []);
     const [key, setKey] = React.useState("");
 
-    const generateAuthType = (): AuthType => {
+    const generateAuthType = (): AuthType & {wasEdited: boolean} => {
         switch(props.authenticationType.type) {
             case "password": return {
                 type: "password",
                 password,
-            } as AuthType;
+                wasEdited: true,
+            } as unknown as AuthType & {wasEdited: boolean};
 
             case "password_totp": return {
                 type: "password_totp",
                 password,
                 secret: totpKey,
-            } as AuthType;
+                wasEdited: true,
+            } as unknown as AuthType & {wasEdited: boolean};
 
             case "permanent_key": return {
                 type: "permanent_key",
                 keys,
-            } as AuthType;
+                wasEdited: true,
+            } as unknown as AuthType & {wasEdited: boolean};
 
             case "once_key": return {
                 type: "permanent_key",
                 keys,
-            } as AuthType;
+                wasEdited: true,
+            } as unknown as AuthType & {wasEdited: boolean};
 
             default: return null;
         }
     };
 
     return <Dialog open fullWidth>
-        <DialogTitle><h1 className="font-thin">Edit Auth Type - "{props.authenticationType.type}"</h1></DialogTitle>
+        <DialogTitle><p className="font-thin">Edit Auth Type - "{props.authenticationType.type}"</p></DialogTitle>
 
         <DialogContent>
             <form

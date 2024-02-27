@@ -67,6 +67,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.10",
     "@mui/material": "^5.15.10",
+    "@mui/x-data-grid": "^6.19.5",
     "cssnano": "^6.0.1",
     "express": "^4.18.1",
     "express-session": "^1.17.3",

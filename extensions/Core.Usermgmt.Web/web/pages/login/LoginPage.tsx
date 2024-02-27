@@ -6,7 +6,7 @@ import { Alert, Button, CircularProgress, Container, IconButton, MenuItem, Paper
 import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
 import AuthenticationParameters from "@extensions/Core.Usermgmt/types/AuthenticationParameters";
 import Loader from "@extensions/Core.React/Loader/Loader";
-import TotpInput from "../../components/totp-input/TotpInput";
+import TotpInput from "../../components/TotpInput/TotpInput";
 
 enum LoginStep {
     INVALID_STATE = 0,

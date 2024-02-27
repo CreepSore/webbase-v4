@@ -17,6 +17,7 @@ import HomePage from "../pages/HomePage";
 import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import UsersPage from "../pages/UsersPage";
+import PermissionsPage from "../pages/PermissionsPage";
 
 function Main(): JSX.Element {
     const navigator = useNavigationHandler<NavigationKeys>({
@@ -65,6 +66,10 @@ function Main(): JSX.Element {
 
                     <RouterPage key="users">
                         <UsersPage />
+                    </RouterPage>
+
+                    <RouterPage key="permissions">
+                        <PermissionsPage />
                     </RouterPage>
                 </Router>
             </MeContext.Provider>

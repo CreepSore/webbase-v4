@@ -10,6 +10,7 @@ import createAuthenticationRouter from "./routers/AuthenticationRouter";
 import Urls from "./urls";
 import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
 import createPermissionRouter from "./routers/PermissionRouter";
+import createUserRouter from "./routers/UserRouter";
 
 declare module "express-session" {
     interface SessionData {
@@ -72,8 +73,13 @@ export default class CoreUsermgmtWeb implements IExtension {
         coreWeb.addAppRoute("/core.usermgmt.web/login", coreWeb.addScriptFromFile("Core.Usermgmt.Web.Main", "Core.Usermgmt.Web.js"));
         coreWeb.app.use(
             Urls.base,
+            (req, res, next) => {
+                res.set("Cache-Control", "no-store");
+                next();
+            },
             createAuthenticationRouter(),
             createPermissionRouter(),
+            createUserRouter(),
         );
     }
 

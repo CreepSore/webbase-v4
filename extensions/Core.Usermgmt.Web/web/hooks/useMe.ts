@@ -2,9 +2,9 @@ import * as React from "react";
 import IUser from "@extensions/Core.Usermgmt/types/IUser";
 import UsermgmtWebApi from "../UsermgmtWebApi";
 import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
-import Permissions from "@extensions/Core.Usermgmt/permissions";
+import Permissions, { PermissionEntry } from "@extensions/Core.Usermgmt/permissions";
 
-export default function useMe(): {me: IUser, update: () => void, hasPermission: (key: string) => boolean, isLoading: boolean} {
+export default function useMe(): {me: IUser, update: () => void, hasPermission: (key: string|PermissionEntry) => boolean, isLoading: boolean} {
     const [loading, setLoading] = React.useState(true);
     const [currentMe, setCurrentMe] = React.useState<IUser>(null);
 
@@ -35,9 +35,10 @@ export default function useMe(): {me: IUser, update: () => void, hasPermission: 
             });
     };
 
-    const hasPermission = (name: string): boolean => {
+    const hasPermission = (name: string|PermissionEntry): boolean => {
         if(hasWildcardPermission) return true;
-        return (permissions || []).some(p => p.name === name);
+
+        return (permissions || []).some(p => p.name === (typeof name === "string" ? name : name.name));
     };
 
     React.useEffect(() => {

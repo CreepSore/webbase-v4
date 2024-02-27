@@ -12,13 +12,15 @@ import { Search as SearchIcon } from "@mui/icons-material";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
 import EditUserDialog from "../components/dialogs/EditUserDialogs";
+import PermissionCheck from "@extensions/Core.Usermgmt.Web/web/components/PermissionCheck";
 
 export default function UsersPage(): JSX.Element {
     const me = React.useContext(MeContext);
     const [rowRefs, setRowRefs] = React.useState<Map<IUser, HTMLElement>>(new Map());
     const [users, usersLoading, updateUsers] = useFetchApi(() => UsermgmtWebApi.getUsers(), [], () => setRowRefs(new Map()));
     const [userToDelete, setUserToDelete] = React.useState<IUser>(null);
-    const [createDialogVisible, setCreateDialogVisible] = React.useState(false);
+    const [editDialogMode, setEditDialogMode] = React.useState<"edit"|"create">(null);
+    const [editDialogUser, setEditDialogUser] = React.useState<IUser>(null);
     const [openPopper, setOpenMenu] = React.useState<IUser>(null);
     const isLoading = React.useMemo(() => usersLoading, [usersLoading]);
 
@@ -54,12 +56,14 @@ export default function UsersPage(): JSX.Element {
         </Dialog>}
 
         {/* CREATE DIALOG */}
-        {createDialogVisible && <EditUserDialog
-            type="create"
-            onUserEdited={(user) => {
-
+        {editDialogMode && <EditUserDialog
+            type={editDialogMode}
+            user={editDialogUser}
+            onClose={() => {
+                setEditDialogMode(null);
+                setEditDialogUser(null);
+                updateUsers();
             }}
-            onClose={() => setCreateDialogVisible(false)}
         />}
 
         {/* CONTENT */}
@@ -69,10 +73,12 @@ export default function UsersPage(): JSX.Element {
                     <TableCell>Username</TableCell>
                     <TableCell>Auth-Methods</TableCell>
                     <TableCell align="right">
-                        <IconButton
-                            color="success"
-                            onClick={() => setCreateDialogVisible(true)}
-                        ><AddIcon /></IconButton>
+                        <PermissionCheck permissions={[Permissions.USERS.EDIT]}>
+                            <IconButton
+                                color="success"
+                                onClick={() => setEditDialogMode("create")}
+                            ><AddIcon /></IconButton>
+                        </PermissionCheck>
                     </TableCell>
                 </TableRow>
             </TableHead>
@@ -82,27 +88,34 @@ export default function UsersPage(): JSX.Element {
                     <TableCell>{u.username}</TableCell>
                     <TableCell>{(u.authentication || []).map(a => a.type).join(", ")}</TableCell>
                     <TableCell align="right">
-                        <ButtonGroup>
-                            <Button
-                                color="error"
-                                variant="outlined"
-                                disabled={["Root", "Anonymous"].includes(u.username)}
-                                onClick={() => setUserToDelete(u)}
-                                size="small"
-                            ><DeleteForeverIcon/> Delete</Button>
-                            <Button onClick={() => setOpenMenu(u)} ref={ref => addRef(u, ref)}><ExpandMoreIcon /></Button>
-                        </ButtonGroup>
+                        <PermissionCheck permissions={[Permissions.USERS.EDIT]}>
+                            <ButtonGroup>
+                                <Button
+                                    color="error"
+                                    variant="outlined"
+                                    disabled={["Root", "Anonymous"].includes(u.username)}
+                                    onClick={() => setUserToDelete(u)}
+                                    size="small"
+                                ><DeleteForeverIcon/> Delete</Button>
+                                <Button onClick={() => setOpenMenu(u)} ref={ref => addRef(u, ref)}><ExpandMoreIcon /></Button>
+                            </ButtonGroup>
 
-                        <Menu
-                            open={openPopper === u}
-                            anchorEl={rowRefs.get(u)}
-                            onClose={() => setOpenMenu(null)}
-                        >
-                            {me.hasPermission(Permissions.USERS.VIEW.name) && <MenuItem>
-                                <ListItemIcon><SearchIcon /></ListItemIcon>
-                                <ListItemText>View</ListItemText>
-                            </MenuItem>}
-                        </Menu>
+                            <Menu
+                                open={openPopper === u}
+                                anchorEl={rowRefs.get(u)}
+                                onClose={() => setOpenMenu(null)}
+                            >
+                                {me.hasPermission(Permissions.USERS.EDIT.name) &&
+                                    <MenuItem onClick={() => {
+                                        setEditDialogMode("edit");
+                                        setEditDialogUser(u);
+                                    }}>
+                                        <ListItemIcon><SearchIcon /></ListItemIcon>
+                                        <ListItemText>Edit</ListItemText>
+                                    </MenuItem>
+                                }
+                            </Menu>
+                        </PermissionCheck>
                     </TableCell>
                 </TableRow>)}
             </TableBody>

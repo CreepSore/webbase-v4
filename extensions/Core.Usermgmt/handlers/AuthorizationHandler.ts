@@ -34,13 +34,6 @@ export default class AuthorizationHandler {
             .flat(1);
 
         this.hasWildcardPermission = this.permissions.some(p => p.name === Permissions.ALL.name);
-
-        LogBuilder
-            .start()
-            .level("INFO")
-            .line("ok")
-            .object("permissions", this.permissions)
-            .done();
     }
 
     hasPermissions(permissions: PermissionEntry[]): boolean {

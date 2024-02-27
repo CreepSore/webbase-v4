@@ -1,15 +1,10 @@
 import {EventEmitter} from "events";
-import * as fs from "fs";
-import * as path from "path";
 
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreWeb from "@extensions/Core.Web";
-import LoggerService from "@service/logger/LoggerService";
-import CacheLogger from "@service/logger/CacheLogger";
 
-import Permissions from "./permissions";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
 import Core from "@extensions/Core";
 

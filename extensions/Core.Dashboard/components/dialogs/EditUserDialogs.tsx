@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as uuid from "uuid";
 import IUser from "@extensions/Core.Usermgmt/types/IUser";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
+import { Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControl, InputLabel, MenuItem, Select, Stack, TextField, Typography } from "@mui/material";
 import useFetchApi from "@extensions/Core.React/hooks/useFetchApi";
 import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
 import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
@@ -11,6 +11,7 @@ interface EditUserDialogProperties {
     type: "edit"|"create";
     user?: IUser;
     onUserEdited?: (user: IUser) => void;
+    onUserCreated?: (user: IUser) => void;
     onClose?: () => void;
 }
 
@@ -36,7 +37,12 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
         },
     );
 
-    const [user, setUser] = React.useState<Partial<IUser>>(props.user || {});
+    const [user, setUser] = React.useState<Partial<IUser>>(props.user || {
+        username: "",
+        apiKeys: [],
+        authentication: [],
+        groups: [],
+    });
 
     const [authTypeDialogMode, setAuthTypeDialogMode] = React.useState(null);
     const [authTypeDialogType, setAuthTypeDialogType] = React.useState<Partial<AuthenticationType>>(null);
@@ -66,18 +72,19 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
 
     const editUser = (): void => {
         if(props.type === "create") {
-            // TODO
+            UsermgmtWebApi.createUser(user as IUser)
+                .then(() => props?.onUserCreated?.(user as IUser));
         }
         else if(props.type === "edit") {
-            // TODO
+            UsermgmtWebApi.editUser(user as IUser)
+                .then(() => props?.onUserEdited?.(user as IUser));
         }
 
-        props.onUserEdited?.(user as IUser);
         props.onClose?.();
     };
 
     return <Dialog open fullWidth>
-        <DialogTitle>Create User</DialogTitle>
+        <DialogTitle>{props.type === "create" ? "Create" : "Edit"} User</DialogTitle>
         <DialogContent>
             {authTypeDialogType && <EditAuthTypeDialog
                 type={authTypeDialogMode}
@@ -125,6 +132,9 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
                             mergeUserProperties({
                                 groups: (e.target.value as string[]).map(groupKey => availableGroups.find(group => group.name === groupKey)),
                             });
+                        }}
+                        renderValue={(selected) => {
+                            return selected.map(value => <Chip className="mr-2" key={value} label={value} />);
                         }}
                         error={errorGroups}
                         required
@@ -204,7 +214,7 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
                     </div>
 
                     <div className="overflow-y-auto max-h-32">
-                        {(user.apiKeys || []).map(key => <div className="flex justify-between">
+                        {(user.apiKeys || []).map(key => <div className="flex justify-between" key={key}>
                             <p>{key}</p>
                             <Button
                                 color="error"

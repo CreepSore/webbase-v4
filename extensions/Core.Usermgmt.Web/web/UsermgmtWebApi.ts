@@ -4,6 +4,7 @@ import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTy
 import AuthenticationParameters from "@extensions/Core.Usermgmt/types/AuthenticationParameters";
 import IUser from "@extensions/Core.Usermgmt/types/IUser";
 import IPermissionGroup from "@extensions/Core.Usermgmt/types/IPermissionGroup";
+import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
 
 export default class UsermgmtWebApi {
     static me(): Promise<IUser> {
@@ -48,15 +49,59 @@ export default class UsermgmtWebApi {
     }
 
     static async getUserAuthenticationTypes(username: string): Promise<AuthenticationType["type"][]> {
-        return await this.fetchWrapper(fetch(this.buildUrl(Urls.auth.getAuthType, [[/:username/g, username]])));
+        return await this.get(this.buildUrl(Urls.auth.getAuthType, [[/:username/g, username]]));
     }
 
     static async getPermissionGroups(): Promise<IPermissionGroup[]> {
-        return await this.fetchWrapper(fetch(this.buildUrl(Urls.permissions.getGroups)));
+        return await this.get(this.buildUrl(Urls.permissions.groups.get));
+    }
+
+    static async editPermissionGroup(group: IPermissionGroup): Promise<void> {
+        this.fetchWrapper(fetch(this.buildUrl(Urls.permissions.groups.edit, [[/:name/g, group.name]]), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(group),
+        }));
+    }
+
+    static async createPermissionGroup(group: IPermissionGroup): Promise<void> {
+        this.fetchWrapper(fetch(this.buildUrl(Urls.permissions.groups.create), {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(group),
+        }));
+    }
+
+    static async createUser(user: IUser): Promise<void> {
+        this.fetchWrapper(fetch(this.buildUrl(Urls.users.create), {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(user),
+        }));
+    }
+
+    static async editUser(user: IUser): Promise<void> {
+        this.fetchWrapper(fetch(this.buildUrl(Urls.users.edit, [[/:name/g, user.username]]), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(user),
+        }));
+    }
+
+    static async getPermissions(): Promise<IPermission[]> {
+        return await this.get(this.buildUrl(Urls.permissions.get));
     }
 
     static async getAuthenticationTypes(): Promise<AuthenticationType["type"][]> {
-        return await this.fetchWrapper(fetch(this.buildUrl(Urls.auth.getAuthTypes)));
+        return await this.get(this.buildUrl(Urls.auth.getAuthTypes));
     }
 
     static startLoginProcess(redirectUri: string): void {
@@ -75,5 +120,9 @@ export default class UsermgmtWebApi {
         }
 
         return finalPath;
+    }
+
+    private static get<T>(url: string): Promise<T> {
+        return this.fetchWrapper(fetch(url));
     }
 }
