@@ -8,13 +8,30 @@ import CoreWeb from "@extensions/Core.Web";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
 import createAuthenticationRouter from "./routers/AuthenticationRouter";
 import Urls from "./urls";
-import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
 import createPermissionRouter from "./routers/PermissionRouter";
 import createUserRouter from "./routers/UserRouter";
+import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
+import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
+import LogBuilder from "@service/logger/LogBuilder";
 
 declare module "express-session" {
     interface SessionData {
         userId: string;
+    }
+}
+
+// ! Disabling these rules since they're fucked up
+declare global {
+    // eslint-disable-next-line no-unused-vars
+    namespace Express {
+        // eslint-disable-next-line no-unused-vars
+        interface Request {
+            additionalData: {authorizationHandler: AuthorizationHandler}
+        }
+
+        interface Response {
+            additionalData: {authorizationHandler: AuthorizationHandler}
+        }
     }
 }
 
@@ -68,7 +85,25 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     private async startMain(executionContext: IAppExecutionContext): Promise<void> {
         const coreWeb = this.$(CoreWeb);
-        const coreUsermgmt = this.$(CoreUsermgmt);
+
+        coreWeb.app.use(async(req, res, next) => {
+            try {
+                const authorizationHandler = await AuthorizationHandler.fromRequest(req);
+                req.additionalData.authorizationHandler = authorizationHandler;
+                res.additionalData.authorizationHandler = authorizationHandler;
+
+                next();
+            }
+            catch(ex) {
+                LogBuilder
+                    .start()
+                    .level("ERROR")
+                    .info("Core.Usermgmt.Web")
+                    .line("Failed to initialize authorization handler")
+                    .object("error", ex)
+                    .done();
+            }
+        });
 
         coreWeb.addAppRoute("/core.usermgmt.web/login", coreWeb.addScriptFromFile("Core.Usermgmt.Web.Main", "Core.Usermgmt.Web.js"));
         coreWeb.app.use(

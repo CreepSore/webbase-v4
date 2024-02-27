@@ -54,6 +54,10 @@ export default class AuthorizationHandler {
         return new AuthorizationHandler(await this.fetchUser({_id: id}));
     }
 
+    static async fromRequest(req: express.Request): Promise<AuthorizationHandler> {
+        return new AuthorizationHandler(await this.requestToUser(req));
+    }
+
     static fromUserObject(userFilter: UserFilter): Promise<AuthorizationHandler> {
         if(userFilter._id) {
             return this.fromUserId(userFilter._id);
@@ -66,6 +70,12 @@ export default class AuthorizationHandler {
     }
 
     static middleware(permissions: PermissionEntry[], onErrorCallback?: express.RequestHandler): express.RequestHandler {
+        // ! As a matter of fact, because this function is here it
+        // ! means that we break the single-responsibility-pattern.
+        // ! This SHOULD be inside of Core.Usermgmt.Web, but i think it
+        // ! makes more sense if it's here.
+        // ! Since it's a static function, i think it's not a big deal.
+
         return async(req, res, next) => {
             try {
                 const authorizationHandler = await this.fromUserId(
@@ -102,6 +112,13 @@ export default class AuthorizationHandler {
                 res.status(500).json({success: false});
             }
         };
+    }
+
+    static async requestToUser(req: express.Request): Promise<HydratedDocument<IUser>> {
+        return await this.fetchUser({
+            _id: new mongoose.Types.ObjectId(req.session.userId)
+                || (await AuthenticationHandler.getAnonymousUser())._id,
+        });
     }
 
     static findPermission(permission: PermissionEntry): Promise<HydratedDocument<IPermission>> {
