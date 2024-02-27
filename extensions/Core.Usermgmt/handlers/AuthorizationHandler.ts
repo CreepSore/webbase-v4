@@ -4,9 +4,11 @@ import IUser from "../types/IUser";
 import User from "../models/User";
 import IPermission from "../types/IPermission";
 import LogBuilder from "@service/logger/LogBuilder";
-import Permissions, { PermissionEntry } from "../permissions";
+import Permissions, { PermissionEntry, PermissionLayer } from "../permissions";
 import Permission from "../models/Permission";
 import AuthenticationHandler from "./AuthenticationHandler";
+import IPermissionGroup from "../types/IPermissionGroup";
+import PermissionGroup from "../models/PermissionGroup";
 
 /**
  * Only use one of the options
@@ -112,6 +114,48 @@ export default class AuthorizationHandler {
 
     static getWildcardPermission(): Promise<HydratedDocument<IPermission>> {
         return this.findPermission(Permissions.ALL);
+    }
+
+    static async createPermissionLayer(
+        currentLayer: PermissionLayer,
+        currentPath: string = "",
+        adminGroup: HydratedDocument<IPermissionGroup> = null,
+        anonymousGroup: HydratedDocument<IPermissionGroup> = null,
+    ): Promise<void> {
+        const _adminGroup = adminGroup ?? await PermissionGroup.findOne({name: "Administrator"});
+        const _anonymousGroup = anonymousGroup ?? await PermissionGroup.findOne({name: "Anonymous"});
+
+        for(const [key, value] of Object.entries(currentLayer)) {
+            const newPath = currentPath + "/" + key;
+
+            if(value.name) {
+                const exists = Boolean(await Permission.findOne({name: value.name, path: newPath}));
+                if(exists) {
+                    continue;
+                }
+
+                const savedPermission = await new Permission({
+                    name: value.name,
+                    description: value.description,
+                    path: newPath,
+                }).save();
+
+                if(value.isRoot) {
+                    _adminGroup.permissions.push(savedPermission);
+                }
+
+                if(value.isAnonymous) {
+                    _anonymousGroup.permissions.push(savedPermission);
+                }
+
+                continue;
+            }
+
+            await this.createPermissionLayer(value as PermissionLayer, newPath, _adminGroup, _anonymousGroup);
+        }
+
+        await _adminGroup.save();
+        await _anonymousGroup.save();
     }
 
     private static async fetchUser(filter: FilterQuery<IUser>): Promise<HydratedDocument<IUser>> {

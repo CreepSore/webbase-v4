@@ -56,48 +56,6 @@ export default class CoreUsermgmt implements IExtension {
 
     }
 
-    private async createPermissionLayer(
-        currentLayer: PermissionLayer,
-        currentPath: string = "",
-        adminGroup: HydratedDocument<IPermissionGroup> = null,
-        anonymousGroup: HydratedDocument<IPermissionGroup> = null,
-    ): Promise<void> {
-        const _adminGroup = adminGroup ?? await PermissionGroup.findOne({name: "Administrator"});
-        const _anonymousGroup = anonymousGroup ?? await PermissionGroup.findOne({name: "Anonymous"});
-
-        for(const [key, value] of Object.entries(currentLayer)) {
-            const newPath = currentPath + "/" + key;
-
-            if(value.name) {
-                const exists = Boolean(await Permission.findOne({name: value.name, path: newPath}));
-                if(exists) {
-                    continue;
-                }
-
-                const savedPermission = await new Permission({
-                    name: value.name,
-                    description: value.description,
-                    path: newPath,
-                }).save();
-
-                if(value.isRoot) {
-                    _adminGroup.permissions.push(savedPermission);
-                }
-
-                if(value.isAnonymous) {
-                    _anonymousGroup.permissions.push(savedPermission);
-                }
-
-                continue;
-            }
-
-            await this.createPermissionLayer(value as PermissionLayer, newPath, _adminGroup, _anonymousGroup);
-        }
-
-        await _adminGroup.save();
-        await _anonymousGroup.save();
-    }
-
     private async initializeDefaultEntries(): Promise<void> {
         let administratorGroup = await PermissionGroup.findOne({name: "Administrator"});
         let anonymousGroup = await PermissionGroup.findOne({name: "Anonymous"});
@@ -122,7 +80,7 @@ export default class CoreUsermgmt implements IExtension {
             anonymousGroup = await newGroup.save();
         }
 
-        await this.createPermissionLayer(Permissions);
+        await AuthorizationHandler.createPermissionLayer(Permissions);
 
         if(!(await AuthenticationHandler.getRootUser())) {
             await new User({
