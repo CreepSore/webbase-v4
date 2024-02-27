@@ -89,8 +89,8 @@ export default class CoreUsermgmtWeb implements IExtension {
         coreWeb.app.use(async(req, res, next) => {
             try {
                 const authorizationHandler = await AuthorizationHandler.fromRequest(req);
-                req.additionalData.authorizationHandler = authorizationHandler;
-                res.additionalData.authorizationHandler = authorizationHandler;
+                req.additionalData = {authorizationHandler};
+                res.additionalData = {authorizationHandler};
 
                 next();
             }
