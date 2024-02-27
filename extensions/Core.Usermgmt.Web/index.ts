@@ -1,3 +1,4 @@
+import * as dns from "dns/promises";
 import {EventEmitter} from "events";
 
 import IExecutionContext, { IAppExecutionContext, IChildExecutionContext as IChildAppExecutionContext, ICliExecutionContext } from "@service/extensions/IExecutionContext";
@@ -13,6 +14,7 @@ import createUserRouter from "./routers/UserRouter";
 import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
 import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
 import LogBuilder from "@service/logger/LogBuilder";
+import User from "@extensions/Core.Usermgmt/models/User";
 
 declare module "express-session" {
     interface SessionData {
@@ -36,7 +38,13 @@ declare global {
 }
 
 class CoreUsermgmtWebConfig {
-
+    autologin = {
+        enabled: false,
+        entries: [
+            {ip: "127.0.0.1", username: "Root"},
+            {dns: "localhost", username: "Root"},
+        ],
+    };
 }
 
 export default class CoreUsermgmtWeb implements IExtension {
@@ -49,6 +57,7 @@ export default class CoreUsermgmtWeb implements IExtension {
     };
 
     metadata: ExtensionMetadata = CoreUsermgmtWeb.metadata;
+    autologinEntries: {ip: string, username: string}[] = [];
 
     config: CoreUsermgmtWebConfig = new CoreUsermgmtWebConfig();
     events: EventEmitter = new EventEmitter();
@@ -84,10 +93,63 @@ export default class CoreUsermgmtWeb implements IExtension {
     }
 
     private async startMain(executionContext: IAppExecutionContext): Promise<void> {
+        if(this.config.autologin.enabled) {
+            this.autologinEntries = (await Promise.all(this.config.autologin.entries.map(async al => {
+                if(al.dns) {
+                    try {
+                        al.ip = (await dns.resolve4(al.dns))[0];
+                    }
+                    catch { return null; }
+                }
+
+                if(!al.ip) return null;
+
+                return {
+                    ip: al.ip,
+                    username: al.username,
+                };
+            }))).filter(Boolean);
+        }
+
         const coreWeb = this.$(CoreWeb);
 
         coreWeb.app.use(async(req, res, next) => {
             try {
+                try {
+                    const autologin = this.autologinEntries.find(
+                        login => login.ip === req.headers["x-forwarded-for"]
+                            || login.ip === req.socket.remoteAddress,
+                    )?.username;
+
+                    if(autologin && !req.session.userId) {
+                        LogBuilder
+                            .start()
+                            .level("WARN")
+                            .info("Core.Usermgmt.Web")
+                            .line("Automatic logon occured")
+                            .object("info", {
+                                ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+                                uid: autologin,
+                            }).done();
+
+                        const user = await User.findOne({username: autologin});
+
+                        if(user) {
+                            req.session.userId = user._id.toString();
+                        }
+                    }
+                }
+                catch(ex) {
+                    LogBuilder
+                        .start()
+                        .level("ERROR")
+                        .info("Core.Usermgmt.Web")
+                        .line("Autologin failed.")
+                        .object("error", ex)
+                        .done();
+                }
+
+
                 const authorizationHandler = await AuthorizationHandler.fromRequest(req);
                 req.additionalData = {authorizationHandler};
                 res.additionalData = {authorizationHandler};
