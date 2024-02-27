@@ -79,8 +79,16 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
                 if(loginResult.error) {
                     setLoginError(loginResult.error);
 
-                    if(selectedAuthenticationType === "password_totp" || selectedAuthenticationType === "totp") {
+                    if(
+                        selectedAuthenticationType === "password_totp"
+                        || selectedAuthenticationType === "totp"
+                        || selectedAuthenticationType === "once_key"
+                        || selectedAuthenticationType === "permanent_key"
+                    ) {
                         setStep(LoginStep.USER_INPUT);
+                    }
+                    else if(selectedAuthenticationType === "password") {
+                        setStep(LoginStep.DO_LOGIN_PASSWORD);
                     }
                 }
                 return;
