@@ -83,7 +83,7 @@ export default class AuthorizationHandler {
                     || (await AuthenticationHandler.getAnonymousUser())._id,
                 );
 
-                if(!authorizationHandler.hasPermissions(permissions)) {
+                if(!authorizationHandler.hasPermissions(...permissions)) {
                     if(onErrorCallback) {
                         onErrorCallback(req, res, next);
                         return;
