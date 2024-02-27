@@ -15,6 +15,7 @@ import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
 import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
 import LogBuilder from "@service/logger/LogBuilder";
 import User from "@extensions/Core.Usermgmt/models/User";
+import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
 
 declare module "express-session" {
     interface SessionData {
@@ -115,13 +116,13 @@ export default class CoreUsermgmtWeb implements IExtension {
 
         coreWeb.app.use(async(req, res, next) => {
             try {
-                try {
+                if(!req.session.userId) {
                     const autologin = this.autologinEntries.find(
                         login => login.ip === req.headers["x-forwarded-for"]
                             || login.ip === req.socket.remoteAddress,
                     )?.username;
 
-                    if(autologin && !req.session.userId) {
+                    if(autologin) {
                         LogBuilder
                             .start()
                             .level("WARN")
@@ -139,18 +140,23 @@ export default class CoreUsermgmtWeb implements IExtension {
                         }
                     }
                 }
-                catch(ex) {
-                    LogBuilder
-                        .start()
-                        .level("ERROR")
-                        .info("Core.Usermgmt.Web")
-                        .line("Autologin failed.")
-                        .object("error", ex)
-                        .done();
+            }
+            catch(ex) {
+                LogBuilder
+                    .start()
+                    .level("ERROR")
+                    .info("Core.Usermgmt.Web")
+                    .line("Autologin failed.")
+                    .object("error", ex)
+                    .done();
+            }
+
+            try {
+                const authorizationHandler = await AuthorizationHandler.fromRequest(req);
+                if(authorizationHandler.isApiKeyLogon) {
+                    req.session.userId = authorizationHandler.user._id.toString();
                 }
 
-
-                const authorizationHandler = await AuthorizationHandler.fromRequest(req);
                 req.additionalData = {authorizationHandler};
                 res.additionalData = {authorizationHandler};
 

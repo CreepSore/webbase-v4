@@ -17,6 +17,7 @@ type UserFilter = {_id?: mongoose.Types.ObjectId, username?: string};
 
 export default class AuthorizationHandler {
     user: HydratedDocument<IUser>;
+    isApiKeyLogon: boolean;
     permissions: IPermission[] = [];
     hasWildcardPermission: boolean;
 
@@ -46,16 +47,43 @@ export default class AuthorizationHandler {
         return permissions.every(p => this.permissions.some(up => up.name === p.name));
     }
 
+    /**
+     * This will ALWAYS fall back to the anonymous user!
+     */
     static async fromUsername(username: string): Promise<AuthorizationHandler> {
-        return new AuthorizationHandler(await this.fetchUser({username}));
+        return new AuthorizationHandler((await this.fetchUser({username})) || await AuthenticationHandler.getAnonymousUser());
     }
 
+    /**
+     * This will ALWAYS fall back to the anonymous user!
+     */
     static async fromUserId(id: mongoose.Types.ObjectId): Promise<AuthorizationHandler> {
-        return new AuthorizationHandler(await this.fetchUser({_id: id}));
+        return new AuthorizationHandler((await this.fetchUser({_id: id})) || await AuthenticationHandler.getAnonymousUser());
     }
 
+    /**
+     * This will ALWAYS fall back to the anonymous user!
+     */
     static async fromRequest(req: express.Request): Promise<AuthorizationHandler> {
+        if(req.query) {
+            return this.fromApiKey(req.query.apiKey as string);
+        }
+
         return new AuthorizationHandler((await this.requestToUser(req)) || await AuthenticationHandler.getAnonymousUser());
+    }
+
+    /**
+     * This will ALWAYS fall back to the anonymous user!
+     */
+    static async fromApiKey(key: string): Promise<AuthorizationHandler> {
+        const fetchedUser = await this.fetchUser({apiKeys: key});
+        const handler = new AuthorizationHandler(fetchedUser || await AuthenticationHandler.getAnonymousUser());
+
+        if(fetchedUser) {
+            handler.isApiKeyLogon = true;
+        }
+
+        return handler;
     }
 
     static fromUserObject(userFilter: UserFilter): Promise<AuthorizationHandler> {
