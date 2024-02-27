@@ -50,7 +50,7 @@ export default class ChildApplication implements IApplication {
 
                 this.extensionService
                     .loadExtensionsFromExtensionsFolder()
-                    .then(this.extensionService.startExtensions)
+                    .then(() => this.extensionService.startExtensions())
                     .then(() => {
                         console.log("INFO", "ChildApplication.ts", "Child Application Startup successful.");
                         console.log("INFO", "ChildApplication.ts", `Got handshake from parent. Our id is [${this.id}]`);
