@@ -38,7 +38,7 @@ export default class AuthorizationHandler {
         this.hasWildcardPermission = this.permissions.some(p => p.name === Permissions.ALL.name);
     }
 
-    hasPermissions(permissions: PermissionEntry[]): boolean {
+    hasPermissions(...permissions: PermissionEntry[]): boolean {
         if(this.hasWildcardPermission) {
             return true;
         }
