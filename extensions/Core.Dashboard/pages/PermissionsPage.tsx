@@ -133,7 +133,11 @@ export default function PermissionsPage(): JSX.Element {
             setSelPermGroupName(e.target.value);
         }}>
             {(showNoneEntry || loadingPermissionGroups) && <MenuItem value="None">None</MenuItem>}
-            <PermissionCheck permissions={[Permissions.PERMISSIONS.EDIT]}><MenuItem value="Create"><AddIcon /> Create</MenuItem></PermissionCheck>
+
+            {me.hasPermission(Permissions.PERMISSIONS.EDIT) &&
+                <MenuItem value="Create"><AddIcon /> Create</MenuItem>
+            }
+
             {(permissionGroups || []).map(pg => <MenuItem
                 key={pg.name}
                 value={pg.name}
