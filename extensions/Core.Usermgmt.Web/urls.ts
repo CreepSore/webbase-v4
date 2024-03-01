@@ -11,6 +11,7 @@ const Urls = {
         get: "/users", // GET
         create: "/user", // PUT
         edit: "/user/:name", // POST
+        "delete": "/user/:name", // DELETE
         impersonate: "/user/:name/impersonate", // POST
     },
     permissions: {

@@ -143,5 +143,23 @@ export default function createUserRouter(): express.Router {
         }
     });
 
+    router.delete(Urls.users.delete, AuthorizationHandler.middleware(([Permissions.USERS.DELETE])), async(req, res) => {
+        try {
+            const user = await User.findOne({username: req.params.name});
+
+            if(!user) {
+                res.status(400).json({success: false});
+                return;
+            }
+
+            await user.deleteOne();
+
+            res.status(200).json({success: true});
+        }
+        catch(ex) {
+            res.status(500).json({success: false, error: ex.message});
+        }
+    });
+
     return router;
 }

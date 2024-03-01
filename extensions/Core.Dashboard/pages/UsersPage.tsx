@@ -41,8 +41,12 @@ export default function UsersPage(): JSX.Element {
                     color="success"
                     variant="outlined"
                     onClick={() => {
-                        setUserToDelete(null);
-                        updateUsers();
+                        UsermgmtWebApi.deleteUser(userToDelete)
+                            .catch(() => {})
+                            .then(() => {
+                                updateUsers();
+                                setUserToDelete(null);
+                            });
                     }}
                     size="small"
                 >OK</Button>
@@ -93,7 +97,7 @@ export default function UsersPage(): JSX.Element {
                                 <Button
                                     color="error"
                                     variant="outlined"
-                                    disabled={["Root", "Anonymous"].includes(u.username)}
+                                    disabled={["Root", "Anonymous"].includes(u.username) || !me.hasPermission(Permissions.USERS.DELETE)}
                                     onClick={() => setUserToDelete(u)}
                                     size="small"
                                 ><DeleteForeverIcon/> Delete</Button>

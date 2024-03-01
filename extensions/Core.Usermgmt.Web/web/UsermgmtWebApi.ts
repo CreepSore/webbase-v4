@@ -96,6 +96,12 @@ export default class UsermgmtWebApi {
         }));
     }
 
+    static deleteUser(user: IUser): Promise<void> {
+        return this.fetchWrapper(fetch(this.buildUrl(Urls.users.delete, [[/:name/g, user.username]]), {
+            method: "DELETE",
+        }));
+    }
+
     static impersonateUser(user: IUser): Promise<void> {
         return this.fetchWrapper(fetch(this.buildUrl(Urls.users.impersonate, [[/:name/g, user.username]]), {
             method: "POST",
