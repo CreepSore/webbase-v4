@@ -1,21 +1,10 @@
 import {EventEmitter} from "events";
-import * as fs from "fs";
-import * as path from "path";
 
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreWeb from "@extensions/Core.Web";
-import CoreUsermgmtGraphQL from "@extensions/Core.Usermgmt.GraphQL";
-import IGraphQLExtension from "@extensions/Core.GraphQL/IGraphQLExtension";
 
-import { GraphQLSchema } from "graphql";
-import * as GraphQLTools from "@graphql-tools/schema";
-import LoggerService from "@service/logger/LoggerService";
-import CacheLogger from "@service/logger/CacheLogger";
-
-import Permissions from "./permissions";
-import CoreGraphQL from "@extensions/Core.GraphQL";
 import CoreUsermgmt from "@extensions/Core.Usermgmt";
 import Core from "@extensions/Core";
 
@@ -30,13 +19,13 @@ class CoreDashboardConfig {
 
 }
 
-export default class CoreDashboard implements IExtension, IGraphQLExtension {
+export default class CoreDashboard implements IExtension {
     static metadata: ExtensionMetadata = {
         name: "Core.Dashboard",
         version: "2.0.0",
         description: "Dashboard Module",
         author: "ehdes",
-        dependencies: [Core, CoreUsermgmt, CoreUsermgmtGraphQL, CoreGraphQL, CoreWeb],
+        dependencies: [Core, CoreUsermgmt, CoreWeb],
     };
 
     metadata: ExtensionMetadata = CoreDashboard.metadata;
@@ -46,42 +35,10 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
     $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     pages: IDashboardPage[];
-    umgmtGql: CoreUsermgmtGraphQL;
-
 
     constructor() {
         this.config = this.loadConfig(true);
         this.pages = [];
-    }
-
-    async buildGraphQLContext(req: any): Promise<{[key: string]: any}> {
-        return {};
-    }
-
-    buildGraphQLSchema(): GraphQLSchema {
-        return GraphQLTools.makeExecutableSchema({
-            typeDefs: fs.readFileSync(path.join(this.metadata.extensionPath, "schema.graphql"), "utf8"),
-            resolvers: {
-                Query: {
-                    logs: (parent, args, context, info) => {
-                        if(!this.umgmtGql.hasPermissions(context, Permissions.ViewLogs.name)) {
-                            throw new Error("Invalid Permissions");
-                        }
-
-                        const cacheLogger = LoggerService.getLogger("cache") as CacheLogger;
-                        return cacheLogger.logEntries.map(le => {
-                            return {
-                                ...le,
-                                date: new Date(le.date).toISOString(),
-                            };
-                        });
-                    },
-                    pages: (parent, args, context, info) => {
-                        return this.pages.filter(page => this.umgmtGql.hasPermissions(context, ...page.neededPermissions));
-                    },
-                },
-            },
-        });
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
@@ -92,18 +49,8 @@ export default class CoreDashboard implements IExtension, IGraphQLExtension {
         }
 
         const coreWeb = this.$(CoreWeb);
-        const umgmtGraphQl = this.$(CoreUsermgmtGraphQL);
-        const coreGraphQl = this.$(CoreGraphQL);
-        const coreUsermgmt = this.$(CoreUsermgmt);
-
-        coreWeb.enableLiveReload(100, true);
-
-        await coreUsermgmt.createPermissions(...Object.values(Permissions));
-        this.umgmtGql = umgmtGraphQl;
-        const mainUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
-        coreWeb.addAppRoute("/core.dashboard", mainUrl);
-
-        coreGraphQl.registerExtension(this);
+        const scriptUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
+        coreWeb.addAppRoute("/core.dashboard", scriptUrl);
     }
 
     async stop(): Promise<void> {

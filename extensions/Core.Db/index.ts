@@ -3,21 +3,21 @@ import {EventEmitter} from "events";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import * as knex from "knex";
 import LogBuilder from "@service/logger/LogBuilder";
 import Core from "@extensions/Core";
+import mongoose from "mongoose";
 
 class CoreDbConfig {
-    client: string = "sqlite3";
+    client: string = "mongodb";
     connection = {
-        filename: "./storage.db",
+        uri: "mongodb://localhost:27017/webbase-v4",
     };
 }
 
 export default class CoreDb implements IExtension {
     static metadata: ExtensionMetadata = {
         name: "Core.Db",
-        version: "1.0.0",
+        version: "2.0.0",
         description: "Core Database Module",
         author: "ehdes",
         dependencies: [Core],
@@ -26,7 +26,7 @@ export default class CoreDb implements IExtension {
     metadata: ExtensionMetadata = CoreDb.metadata;
 
     config: CoreDbConfig;
-    db: knex.Knex;
+    db: typeof mongoose;
     configLoader: ConfigLoader<typeof this.config>;
     events: EventEmitter = new EventEmitter();
 
@@ -40,42 +40,24 @@ export default class CoreDb implements IExtension {
         }
         this.checkConfig();
 
-        const config = {...this.config};
-        // @ts-ignore
-        config.log = {
-            warn(message: string) {
-                console.log("WARN", "Knex", message);
-            },
-            error(message: string) {
-                console.log("ERROR", "Knex", message);
-            },
-            deprecate(message: string) {
-                console.log("DEPRECATE", "Knex", message);
-            },
-            debug(message: string) {
-                console.log("DEBUG", "Knex", message);
-            },
-        };
+        this.db = await mongoose.connect(this.config.connection.uri);
 
-        this.db = knex.knex(config);
         LogBuilder
             .start()
             .level("INFO")
             .info("Core.Db")
             .line("Initialized Connection to the Database")
-            .debugObject("config", this.db.client.connectionSettings)
+            .debugObject("config", this.config.connection)
             .done();
 
         this.events.emit("db-loaded", this.db);
     }
 
     async stop(): Promise<void> {
-        this.db.destroy();
+        this.db.connection.close();
     }
 
-    // ! For aesthetic IntelliSense reasons we don't care about that rule here
-    // eslint-disable-next-line no-shadow
-    onDbLoaded(callback: (knex: knex.Knex) => void): void {
+    onDbLoaded(callback: (db: typeof mongoose) => void): void {
         this.events.on("db-loaded", callback);
     }
 

@@ -1,17 +1,18 @@
 import {EventEmitter} from "events";
 
+import * as uuid from "uuid";
+
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreDb from "@extensions/Core.Db";
-import { Knex } from "knex";
-
-import User from "@extensions/Core.Usermgmt/Models/User";
-import ApiKey from "@extensions/Core.Usermgmt/Models/ApiKey";
-import PermissionGroup from "@extensions/Core.Usermgmt/Models/PermissionGroup";
-import Permission from "@extensions/Core.Usermgmt/Models/Permission";
-
-class LoginError extends Error { }
+import mongoose from "mongoose";
+import User from "./models/User";
+import PermissionGroup from "./models/PermissionGroup";
+import Permissions from "./permissions";
+import AuthenticationHandler from "./handlers/AuthenticationHandler";
+import AuthorizationHandler from "./handlers/AuthorizationHandler";
+import LogBuilder from "@service/logger/LogBuilder";
 
 class CoreUsermgmtConfig {
 
@@ -20,7 +21,7 @@ class CoreUsermgmtConfig {
 export default class CoreUsermgmt implements IExtension {
     static metadata: ExtensionMetadata = {
         name: "Core.Usermgmt",
-        version: "1.0.0",
+        version: "2.0.0",
         description: "Usermanagement Module",
         author: "ehdes",
         dependencies: [CoreDb],
@@ -30,6 +31,7 @@ export default class CoreUsermgmt implements IExtension {
 
     config: CoreUsermgmtConfig;
     events: EventEmitter = new EventEmitter();
+    db: typeof mongoose;
     $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     constructor() {
@@ -44,101 +46,75 @@ export default class CoreUsermgmt implements IExtension {
         }
 
         const coreDb = this.$(CoreDb);
-        await this.setupSchema(coreDb.db);
+        this.db = coreDb.db;
+
+        await this.setupSchema();
     }
 
     async stop(): Promise<void> {
 
     }
 
-    async loginByCredentials(credentials: {email?: string, username?: string, password: string}): Promise<User> {
-        if(credentials.email && credentials.username) return null;
-        const where: Partial<User> = {password: User.hashPassword(credentials.password)};
-        if(credentials.email) {
-            where.email = credentials.email;
-        }
-        else if(credentials.username) {
-            where.username = credentials.username;
-        }
-        else {
-            throw new LoginError("INVALID_CREDENTIALS");
-        }
+    private async initializeDefaultEntries(): Promise<void> {
+        let administratorGroup = await PermissionGroup.findOne({name: "Administrator"});
+        let anonymousGroup = await PermissionGroup.findOne({name: "Anonymous"});
 
-        const user = await User.use().where(where).first();
-        if(!user) {
-            throw new LoginError("INVALID_CREDENTIALS");
-        }
-        else if(!user.isActive) {
-            throw new LoginError("USER_INACTIVE");
-        }
-
-        return user;
-    }
-
-    async loginByApiKey(apiKey: string): Promise<User> {
-        const foundApiKey = (await ApiKey.use().where({id: apiKey}).first()) as Partial<ApiKey>;
-        if(!foundApiKey) throw new LoginError("INVALID_API_KEY");
-
-        const user = await User.use().where({id: foundApiKey.userId}).first() as Partial<User>;
-        if(!user) {
-            throw new LoginError("INVALID_API_KEY");
-        }
-
-        if(!user.isActive) {
-            throw new LoginError("USER_INACTIVE");
-        }
-
-        return user as User;
-    }
-
-    async createPermissions(...permissions: Partial<Permission>[]): Promise<Partial<Permission>[]> {
-        return await Promise.all(permissions.map(async p => {
-            const foundPerm = await Permission.use().where({name: p.name}).first();
-            if(foundPerm) {
-                return foundPerm;
-            }
-
-            p.created = new Date();
-            await Permission.use().insert(p);
-            return await Permission.use().where({name: p.name}).first();
-        }));
-    }
-
-    private async setupSchema(knex: Knex): Promise<void> {
-        await Permission.setup(knex);
-        await PermissionGroup.setup(knex);
-
-        await knex.schema.hasTable("permissiongrouppermissions")
-            .then(val => !val && knex.schema.createTable("permissiongrouppermissions", table => {
-                table.integer("permission")
-                    .references("id")
-                    .inTable("permissions");
-
-                table.integer("permissiongroup")
-                    .references("id")
-                    .inTable("permissiongroups");
-
-                table.unique(["permission", "permissiongroup"]);
-
-                table.dateTime("created");
-            }));
-
-        await User.setup(knex);
-        await ApiKey.setup(knex);
-
-        if(!await PermissionGroup.exists({name: "Anonymous"})) {
-            await PermissionGroup.create({
-                name: "Anonymous",
-                description: "Default Group",
-            });
-        }
-
-        if(!await PermissionGroup.exists({name: "Administrator"})) {
-            await PermissionGroup.create({
+        if(!administratorGroup) {
+            const newGroup = new PermissionGroup({
                 name: "Administrator",
-                description: "Administrator Group",
+                description: "Administrator group",
+                permissions: [],
             });
+
+            administratorGroup = await newGroup.save();
         }
+
+        if(!anonymousGroup) {
+            const newGroup = new PermissionGroup({
+                name: "Anonymous",
+                description: "Anonymous group",
+                permissions: [],
+            });
+
+            anonymousGroup = await newGroup.save();
+        }
+
+        await AuthorizationHandler.createPermissionLayer(Permissions);
+
+        if(!(await AuthenticationHandler.getRootUser())) {
+            const onceKey = uuid.v4();
+
+            LogBuilder
+                .start()
+                .level("WARN")
+                .info("Core.Usermgmt")
+                .line(`Root user created. One-Time-Key: [${onceKey}]`)
+                .done();
+
+            await new User({
+                username: "Root",
+                email: "root@localhost",
+                groups: [administratorGroup._id],
+                apiKeys: [],
+                authentication: [{
+                    type: "once_key",
+                    keys: [onceKey],
+                }],
+            }).save();
+        }
+
+        if(!(await AuthenticationHandler.getAnonymousUser())) {
+            await new User({
+                username: "Anonymous",
+                email: "anonymous@localhost",
+                groups: [anonymousGroup._id],
+                apiKeys: [],
+            }).save();
+        }
+    }
+
+    private async setupSchema(): Promise<void> {
+        await this.initializeDefaultEntries();
     }
 
     private checkConfig(): void {

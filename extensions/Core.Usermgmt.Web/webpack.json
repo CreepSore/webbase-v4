@@ -1,0 +1,7 @@
+{
+    "webBuildConfig": {
+        "entry": {
+            "Core.Usermgmt.Web.js": "./extensions/Core.Usermgmt.Web/web/main.tsx"
+        }
+    }
+}
