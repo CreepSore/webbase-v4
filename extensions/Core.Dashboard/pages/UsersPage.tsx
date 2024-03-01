@@ -88,7 +88,7 @@ export default function UsersPage(): JSX.Element {
                     <TableCell>{u.username}</TableCell>
                     <TableCell>{(u.authentication || []).map(a => a.type).join(", ")}</TableCell>
                     <TableCell align="right">
-                        <PermissionCheck permissions={[Permissions.USERS.EDIT]}>
+                        <PermissionCheck permissions={[[Permissions.USERS.EDIT], [Permissions.USERS.IMPERSONATE]]}>
                             <ButtonGroup>
                                 <Button
                                     color="error"
@@ -112,6 +112,14 @@ export default function UsersPage(): JSX.Element {
                                     }}>
                                         <ListItemIcon><SearchIcon /></ListItemIcon>
                                         <ListItemText>Edit</ListItemText>
+                                    </MenuItem>
+                                }
+
+                                {me.hasPermission(Permissions.USERS.IMPERSONATE.name) &&
+                                    <MenuItem onClick={() => {
+                                        UsermgmtWebApi.impersonateUser(u).catch(() => {}).then(() => {location.reload();});
+                                    }}>
+                                        <ListItemText>Impersonate</ListItemText>
                                     </MenuItem>
                                 }
                             </Menu>

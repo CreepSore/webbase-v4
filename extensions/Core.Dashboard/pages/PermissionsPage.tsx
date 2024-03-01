@@ -48,7 +48,7 @@ export default function PermissionsPage(): JSX.Element {
 
         const groupPerms = (selectedPermissionGroup?.permissions || []).map(p => p.name);
 
-        return permissions.map((p, i) => ({
+        return permissions.sort((a, b) => a.name.localeCompare(b.name)).map((p, i) => ({
             ...p,
             id: p.name,
             assigned: groupPerms.includes(p.name),
@@ -171,6 +171,12 @@ export default function PermissionsPage(): JSX.Element {
                 setHasUnsavedChanges(true);
 
                 return newRow;
+            }}
+            getRowClassName={(params) => {
+                if(params.row.assigned) {
+                    return "text-green-500";
+                }
+                return "";
             }}
             hideFooterPagination
             hideFooter

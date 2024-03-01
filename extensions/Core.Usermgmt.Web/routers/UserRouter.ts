@@ -82,6 +82,24 @@ export default function createUserRouter(): express.Router {
         }
     });
 
+    router.post(Urls.users.impersonate, AuthorizationHandler.middleware([Permissions.USERS.IMPERSONATE]), async(req, res) => {
+        try {
+            const user = await User.findOne({username: req.params.name});
+
+            if(!user) {
+                res.status(400).json({success: false});
+                return;
+            }
+
+            req.session.userId = user._id.toString();
+
+            res.status(200).json({success: true});
+        }
+        catch(ex) {
+            res.status(500).json({success: false, error: ex.message});
+        }
+    });
+
     router.post(Urls.users.edit, AuthorizationHandler.middleware([Permissions.USERS.EDIT]), async(req, res) => {
         try {
             const user = await User.findOne({username: req.params.name});

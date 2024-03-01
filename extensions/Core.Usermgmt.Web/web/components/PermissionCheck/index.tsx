@@ -4,7 +4,7 @@ import MeContext from "../me-provider/MeContext";
 import { PermissionEntry } from "@extensions/Core.Usermgmt/permissions";
 
 interface PermissionCheckProperties {
-    permissions: Array<string|PermissionEntry>;
+    permissions: Array<string|PermissionEntry>|Array<string[]|PermissionEntry[]>;
 }
 
 /**
@@ -12,7 +12,21 @@ interface PermissionCheckProperties {
  */
 export default function PermissionCheck(props: React.PropsWithChildren<PermissionCheckProperties>): JSX.Element {
     const me = useContext(MeContext);
-    const hasPermissions = React.useMemo(() => props.permissions.every(p => me.hasPermission(p)), [props.permissions, me?.me]);
+    const hasPermissions = React.useMemo(() => {
+        if(Array.isArray(props.permissions[0])) {
+            // ! WTF?
+            // @ts-ignore
+            return props.permissions.some((permissions: string[]|PermissionEntry[]) => {
+                return permissions.every(p => {
+                    return me.hasPermission(typeof p === "string" ? p : p.name);
+                });
+            });
+        }
+
+        return props.permissions.every((p: string|PermissionEntry) => {
+            return me.hasPermission(typeof p === "string" ? p : p.name);
+        });
+    }, [props.permissions, me?.me]);
 
     if(hasPermissions) {
         return <>{props.children}</>;

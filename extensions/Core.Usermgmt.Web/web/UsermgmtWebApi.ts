@@ -56,8 +56,8 @@ export default class UsermgmtWebApi {
         return await this.get(this.buildUrl(Urls.permissions.groups.get));
     }
 
-    static async editPermissionGroup(group: IPermissionGroup): Promise<void> {
-        this.fetchWrapper(fetch(this.buildUrl(Urls.permissions.groups.edit, [[/:name/g, group.name]]), {
+    static editPermissionGroup(group: IPermissionGroup): Promise<void> {
+        return this.fetchWrapper(fetch(this.buildUrl(Urls.permissions.groups.edit, [[/:name/g, group.name]]), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -66,8 +66,8 @@ export default class UsermgmtWebApi {
         }));
     }
 
-    static async createPermissionGroup(group: IPermissionGroup): Promise<void> {
-        this.fetchWrapper(fetch(this.buildUrl(Urls.permissions.groups.create), {
+    static createPermissionGroup(group: IPermissionGroup): Promise<void> {
+        return this.fetchWrapper(fetch(this.buildUrl(Urls.permissions.groups.create), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -76,8 +76,8 @@ export default class UsermgmtWebApi {
         }));
     }
 
-    static async createUser(user: IUser): Promise<void> {
-        this.fetchWrapper(fetch(this.buildUrl(Urls.users.create), {
+    static createUser(user: IUser): Promise<void> {
+        return this.fetchWrapper(fetch(this.buildUrl(Urls.users.create), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -86,13 +86,19 @@ export default class UsermgmtWebApi {
         }));
     }
 
-    static async editUser(user: IUser): Promise<void> {
-        this.fetchWrapper(fetch(this.buildUrl(Urls.users.edit, [[/:name/g, user.username]]), {
+    static editUser(user: IUser): Promise<void> {
+        return this.fetchWrapper(fetch(this.buildUrl(Urls.users.edit, [[/:name/g, user.username]]), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(user),
+        }));
+    }
+
+    static impersonateUser(user: IUser): Promise<void> {
+        return this.fetchWrapper(fetch(this.buildUrl(Urls.users.impersonate, [[/:name/g, user.username]]), {
+            method: "POST",
         }));
     }
 

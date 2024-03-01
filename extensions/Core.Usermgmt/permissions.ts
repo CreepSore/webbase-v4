@@ -18,6 +18,7 @@ const Permissions = {
     USERS: {
         VIEW: {name: "users/view", description: "View users", isRoot: true, isAnonymous: false},
         EDIT: {name: "users/edit", description: "Create and edit users", isRoot: true, isAnonymous: false},
+        IMPERSONATE: {name: "users/impersonate", description: "Impersonate users", isRoot: true, isAnonymous: false},
     },
     PERMISSIONS: {
         VIEW: {name: "permissions/view", description: "View all permissions and permission groups", isRoot: true, isAnonymous: false},
