@@ -6,6 +6,7 @@ import AuthenticationParameters, { OnceKeyAuthenticationParameters, PasswordAuth
 import AuthenticationResult from "../types/AuthenticationResult";
 import AuthenticationType, { OnceKeyAuthenticationType, PasswordAuthenticationType, PasswordTotpAuthenticationType, PermanentKeyAuthenticationType, TotpAuthenticationType } from "../types/AuthenticationTypes";
 import TotpHandler from "./TotpHandler";
+import LogBuilder from "@service/logger/LogBuilder";
 
 export default class AuthenticationHandler {
     user: HydratedDocument<IUser>;
@@ -129,33 +130,39 @@ export default class AuthenticationHandler {
         authenticationType: PermanentKeyAuthenticationType,
         parameter: PermanentKeyAuthenticationParameters,
     ): Promise <AuthenticationResult> {
-        if(authenticationType.keys.includes(parameter.key)) {
-            return {
-                success: true,
-                additionalInformation: {},
-                error: null,
-                errorCode: null,
-                userId: this.user._id.toString(),
-            };
+        if(!authenticationType.keys.includes(parameter.key)) {
+            return AuthenticationHandler.createErrorResult("Invalid Key", "INVALID_KEY");
         }
+
+        return {
+            success: true,
+            additionalInformation: {},
+            error: null,
+            errorCode: null,
+            userId: this.user._id.toString(),
+        };
     }
 
     private async authenticateWithOnceKeyAuthentication(
         authenticationType: OnceKeyAuthenticationType,
         parameter: OnceKeyAuthenticationParameters,
     ): Promise <AuthenticationResult> {
-        if(authenticationType.keys.includes(parameter.key)) {
-            authenticationType.keys = authenticationType.keys.filter(k => k !== parameter.key);
-            await this.user.save();
-
-            return {
-                success: true,
-                additionalInformation: {},
-                error: null,
-                errorCode: null,
-                userId: this.user._id.toString(),
-            };
+        if(!authenticationType.keys.includes(parameter.key)) {
+            return AuthenticationHandler.createErrorResult("Invalid Key", "INVALID_KEY");
         }
+
+        await User.updateOne(
+            { _id: this.user._id },
+            { $pull: { "authentication.$[].keys": parameter.key }},
+        );
+
+        return {
+            success: true,
+            additionalInformation: {},
+            error: null,
+            errorCode: null,
+            userId: this.user._id.toString(),
+        };
     }
 
     private async authenticateWithPasswordAuthentication(

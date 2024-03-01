@@ -107,6 +107,7 @@ export default function UsersPage(): JSX.Element {
                             >
                                 {me.hasPermission(Permissions.USERS.EDIT.name) &&
                                     <MenuItem onClick={() => {
+                                        setOpenMenu(null);
                                         setEditDialogMode("edit");
                                         setEditDialogUser(u);
                                     }}>
@@ -117,6 +118,7 @@ export default function UsersPage(): JSX.Element {
 
                                 {me.hasPermission(Permissions.USERS.IMPERSONATE.name) &&
                                     <MenuItem onClick={() => {
+                                        setOpenMenu(null);
                                         UsermgmtWebApi.impersonateUser(u).catch(() => {}).then(() => {location.reload();});
                                     }}>
                                         <ListItemText>Impersonate</ListItemText>

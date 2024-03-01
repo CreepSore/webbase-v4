@@ -14,6 +14,7 @@ enum LoginStep {
     CHOOSE_AUTH_TYPE,
     DO_LOGIN_PASSWORD,
     DO_LOGIN_TOTP,
+    DO_LOGIN_KEY,
     LOADING,
     FINISHED,
 }
@@ -26,6 +27,8 @@ const stateMapping: Record<string, LoginStep> = {
     password: LoginStep.DO_LOGIN_PASSWORD,
     password_totp: LoginStep.DO_LOGIN_PASSWORD,
     totp: LoginStep.DO_LOGIN_TOTP,
+    once_key: LoginStep.DO_LOGIN_KEY,
+    permanent_key: LoginStep.DO_LOGIN_KEY,
 } as const;
 
 export default function LoginPage(props: LoginPageProperties): JSX.Element {
@@ -34,6 +37,7 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
 
     const [username, setUsername] = React.useState("");
     const [password, setPassword] = React.useState("");
+    const [key, setKey] = React.useState("");
     const [totp, setTotp] = React.useState("");
 
     const [loginError, setLoginError] = React.useState("");
@@ -67,6 +71,10 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
 
         if(totp) {
             result.totp = totp;
+        }
+
+        if(key) {
+            result.key = key;
         }
 
         return result as AuthenticationParameters & {username: string};
@@ -107,6 +115,7 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
             setPassword("");
             setTotp("");
             setLoginError("");
+            setKey("");
 
             const authTypes = await UsermgmtWebApi.getUserAuthenticationTypes(username);
             if(!authTypes) {
@@ -153,7 +162,7 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
         if(step === LoginStep.DO_LOGIN_PASSWORD) {
             if(selectedAuthenticationType === "password") {
                 setStep(LoginStep.LOADING);
-                doLogin();
+                await doLogin();
             }
             else if(selectedAuthenticationType === "password_totp") {
                 setStep(LoginStep.DO_LOGIN_TOTP);
@@ -162,7 +171,12 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
         }
 
         if(step === LoginStep.DO_LOGIN_TOTP) {
-            doLogin();
+            await doLogin();
+            return;
+        }
+
+        if(step === LoginStep.DO_LOGIN_KEY) {
+            await doLogin();
             return;
         }
     };
@@ -236,6 +250,16 @@ export default function LoginPage(props: LoginPageProperties): JSX.Element {
                         onFinished={(totpValue) => {
                             setTotp(totpValue);
                         }}
+                        autoFocus
+                    />}
+
+                    {step === LoginStep.DO_LOGIN_KEY && <TextField
+                        variant="standard"
+                        label={selectedAuthenticationType === "once_key" ? "One-Time Key" : "Key"}
+                        value={key}
+                        onChange={e => setKey(e.target.value)}
+                        disabled={step !== LoginStep.DO_LOGIN_KEY}
+                        size={step !== LoginStep.DO_LOGIN_KEY ? "small" : "medium"}
                         autoFocus
                     />}
 

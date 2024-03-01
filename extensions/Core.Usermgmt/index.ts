@@ -1,19 +1,18 @@
 import {EventEmitter} from "events";
 
+import * as uuid from "uuid";
+
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreDb from "@extensions/Core.Db";
-import mongoose, { HydratedDocument } from "mongoose";
+import mongoose from "mongoose";
 import User from "./models/User";
 import PermissionGroup from "./models/PermissionGroup";
-import Permission from "./models/Permission";
-import IPermission from "./types/IPermission";
-import Permissions, { PermissionEntry, PermissionLayer } from "./permissions";
-import IUser from "./types/IUser";
-import IPermissionGroup from "./types/IPermissionGroup";
+import Permissions from "./permissions";
 import AuthenticationHandler from "./handlers/AuthenticationHandler";
 import AuthorizationHandler from "./handlers/AuthorizationHandler";
+import LogBuilder from "@service/logger/LogBuilder";
 
 class CoreUsermgmtConfig {
 
@@ -83,14 +82,23 @@ export default class CoreUsermgmt implements IExtension {
         await AuthorizationHandler.createPermissionLayer(Permissions);
 
         if(!(await AuthenticationHandler.getRootUser())) {
+            const onceKey = uuid.v4();
+
+            LogBuilder
+                .start()
+                .level("WARN")
+                .info("Core.Usermgmt")
+                .line(`Root user created. One-Time-Key: [${onceKey}]`)
+                .done();
+
             await new User({
                 username: "Root",
                 email: "root@localhost",
                 groups: [administratorGroup._id],
                 apiKeys: [],
                 authentication: [{
-                    type: "password",
-                    password: AuthenticationHandler.hashPassword("password"),
+                    type: "once_key",
+                    keys: [onceKey],
                 }],
             }).save();
         }
