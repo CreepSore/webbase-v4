@@ -2,6 +2,7 @@ const esbuild = require("esbuild");
 const path = require("path");
 const fs = require("fs");
 const minimist = require("minimist");
+const perf_hooks = require("perf_hooks");
 
 const tailwindcss = require("tailwindcss");
 const tailwindNesting = require("tailwindcss/nesting");
@@ -71,8 +72,9 @@ const buildWebApp = async function() {
     }
 
     console.log("Started building...");
+    const performance = perf_hooks.performance.measure("start");
     await esbuild.build(buildParams);
-    console.log("Build finished.");
+    console.log(`Build finished after ${Math.floor(performance.duration * 1000) / 1000}ms`);
 }
 
 const main = async function() {
