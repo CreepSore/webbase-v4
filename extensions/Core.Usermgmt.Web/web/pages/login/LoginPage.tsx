@@ -2,7 +2,17 @@ import * as React from "react";
 import useMe from "@extensions/Core.Usermgmt.Web/web/hooks/useMe";
 import IUser from "@extensions/Core.Usermgmt/types/IUser";
 import UsermgmtWebApi from "../../UsermgmtWebApi";
-import { Alert, Button, CircularProgress, Container, IconButton, MenuItem, Paper, Select, TextField } from "@mui/material";
+
+import Alert from "@mui/material/Alert";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import Container from "@mui/material/Container";
+import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
+import Select from "@mui/material/Select";
+import TextField from "@mui/material/TextField";
+
+
 import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
 import AuthenticationParameters from "@extensions/Core.Usermgmt/types/AuthenticationParameters";
 import Loader from "@extensions/Core.React/Loader/Loader";

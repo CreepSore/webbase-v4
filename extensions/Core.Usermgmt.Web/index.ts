@@ -11,11 +11,9 @@ import createAuthenticationRouter from "./routers/AuthenticationRouter";
 import Urls from "./urls";
 import createPermissionRouter from "./routers/PermissionRouter";
 import createUserRouter from "./routers/UserRouter";
-import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
 import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
 import LogBuilder from "@service/logger/LogBuilder";
 import User from "@extensions/Core.Usermgmt/models/User";
-import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
 
 declare module "express-session" {
     interface SessionData {

@@ -1,4 +1,8 @@
-import { Breakpoint, Container, Paper } from "@mui/material";
+import { Breakpoint } from "@mui/system/createTheme";
+import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
+
+
 import * as React from "react";
 import Navbar from "../components/navigation/Navbar";
 

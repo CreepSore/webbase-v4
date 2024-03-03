@@ -1,16 +1,27 @@
 import * as React from "react";
+
+import {DataGrid} from "@mui/x-data-grid/DataGrid";
+
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+
+
 import BasePage from "./BasePage";
-import { DataGrid } from "@mui/x-data-grid";
 import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
 import useFetchApi from "@extensions/Core.React/hooks/useFetchApi";
 import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
-import { Button, Dialog, DialogContent, DialogTitle, MenuItem, Select, Snackbar, Stack, TextField } from "@mui/material";
 import IPermissionGroup from "@extensions/Core.Usermgmt/types/IPermissionGroup";
 import Loader from "@extensions/Core.React/Loader/Loader";
 import AddIcon from "@mui/icons-material/Add";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
-import PermissionCheck from "@extensions/Core.Usermgmt.Web/web/components/PermissionCheck";
 
 type PermissionsRow = IPermission & {
     id: string,

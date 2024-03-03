@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import "./style.scss";
-import { ThemeProvider } from "@emotion/react";
-import { createTheme } from "@mui/material";
+import {createTheme} from "@mui/material/styles";
+import ThemeProvider from "@mui/system/ThemeProvider";
 
 import LoginPage from "./pages/login/LoginPage";
 
