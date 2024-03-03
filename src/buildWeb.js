@@ -18,7 +18,7 @@ const parsedArgs = minimist(process.argv.slice(2), {
         watch: "w",
     },
     string: ["mode"],
-    boolean: ["watch"],
+    boolean: ["watch", "meta"],
 });
 
 const getExtensionConfigs = function() {
@@ -61,7 +61,12 @@ const buildWebApp = async function() {
                 ].filter(Boolean)).process(source)
                 return css
             },
-        })]
+        })],
+        legalComments: "external",
+        minify: parsedArgs.mode !== "development",
+        lineLimit: parsedArgs.mode === "development" ? 0 : 0,
+        metafile: parsedArgs.meta,
+        treeShaking: parsedArgs.mode !== "development",
     };
 
     if(parsedArgs.watch) {
@@ -73,7 +78,17 @@ const buildWebApp = async function() {
 
     console.log("Started building...");
     const performance = perf_hooks.performance.measure("start");
-    await esbuild.build(buildParams);
+    const buildResult = await esbuild.build(buildParams);
+
+    const metaPath = path.resolve(__dirname, "..", "out", "meta.json");
+    if(fs.existsSync(metaPath)) {
+        fs.unlinkSync(metaPath);
+    }
+
+    if(buildResult.metafile && parsedArgs.meta) {
+        fs.writeFileSync(metaPath, JSON.stringify(buildResult.metafile, null, 4));
+    }
+
     console.log(`Build finished after ${Math.floor(performance.duration * 1000) / 1000}ms`);
 }
 
