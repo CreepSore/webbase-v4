@@ -1,0 +1,5 @@
+{
+    "entryPoints": [
+        "./extensions/Core.Dashboard/web/main.tsx"
+    ]
+}

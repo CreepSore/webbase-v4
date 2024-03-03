@@ -49,7 +49,7 @@ export default class CoreDashboard implements IExtension {
         }
 
         const coreWeb = this.$(CoreWeb);
-        const scriptUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard.Main.js");
+        const scriptUrl = coreWeb.addScriptFromFile("Core.Dashboard.Main", "Core.Dashboard/web/main.js");
         coreWeb.addAppRoute("/core.dashboard", scriptUrl);
     }
 

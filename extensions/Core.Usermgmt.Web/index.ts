@@ -173,7 +173,7 @@ export default class CoreUsermgmtWeb implements IExtension {
             }
         });
 
-        coreWeb.addAppRoute("/core.usermgmt.web/login", coreWeb.addScriptFromFile("Core.Usermgmt.Web.Main", "Core.Usermgmt.Web.js"));
+        coreWeb.addAppRoute("/core.usermgmt.web/login", coreWeb.addScriptFromFile("Core.Usermgmt.Web.Main", "Core.Usermgmt.Web/web/main.js"));
         coreWeb.app.use(
             Urls.base,
             (req, res, next) => {
