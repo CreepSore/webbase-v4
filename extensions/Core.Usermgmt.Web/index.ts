@@ -65,7 +65,7 @@ export default class CoreUsermgmtWeb implements IExtension {
     $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
