@@ -32,7 +32,7 @@ const buildAppConfig = (env, argv) => {
         },
         output: {
             path: path.resolve(__dirname, "out"),
-            filename: "[name].js",
+            filename: "[name]",
             clean: true,
         },
         devtool: argv.mode === "development" ? "inline-source-map" : false,

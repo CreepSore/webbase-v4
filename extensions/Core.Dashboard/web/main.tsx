@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import "./style.css";
+import "./style.scss";
 import { ThemeProvider } from "@emotion/react";
 import { createTheme } from "@mui/material";
 import Router from "@extensions/Core.React/Router";
@@ -10,7 +10,6 @@ import useNavigationHandler from "@extensions/Core.React/Navigator/useNavigation
 import NavigationKeys from "./NavigationKeys";
 import NavigatorContext from "@extensions/Core.React/Navigator/NavigatorContext";
 
-import "./style.css";
 import useMe from "@extensions/Core.Usermgmt.Web/web/hooks/useMe";
 import Loader from "@extensions/Core.React/Loader/Loader";
 import HomePage from "../pages/HomePage";

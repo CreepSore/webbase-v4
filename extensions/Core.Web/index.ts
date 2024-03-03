@@ -1,4 +1,5 @@
 import * as fs from "fs";
+import * as path from "path";
 import * as crypto from "crypto";
 import {EventEmitter} from "events";
 import {Server} from "net";
@@ -239,13 +240,23 @@ export default class CoreWeb implements IExtension {
         if(this.liveReload.enabled) return this;
         const oldHashes: {[key: string]: string} = {};
 
+        function getFiles(dir: string): string[] {
+            const subdirs = fs.readdirSync(dir);
+            const files = subdirs.map((subdir: string) => {
+                const res = path.resolve(dir, subdir);
+                return (fs.statSync(res)).isDirectory() ? getFiles(res) : res;
+            });
+
+            return files.reduce((a, f) => a.concat(f), []);
+        }
+
         this.liveReload.enabled = true;
-        this.liveReload.url = this.addScriptFromFile("Core.Web.LiveReload", "Core.Web.LiveReload.js");
+        this.liveReload.url = this.addScriptFromFile("Core.Web.LiveReload", "Core.Web/Core.Web.LiveReload.js");
         this.liveReload.waitMs = waitMs || this.liveReload.waitMs;
         this.liveReload.interval = setInterval(async() => {
             const runtime = Date.now();
-            const hasChange = (await Promise.all(fs.readdirSync("out").map((file) => {
-                const newContent = fs.readFileSync("out/" + file);
+            const hasChange = getFiles("out").map((file) => {
+                const newContent = fs.readFileSync(file);
                 const newHash = crypto.createHash("sha256").update(newContent).digest("hex");
                 const oldHash = oldHashes[file];
 
@@ -255,7 +266,7 @@ export default class CoreWeb implements IExtension {
                 }
 
                 return false;
-            }))).some(Boolean);
+            }).some(Boolean);
 
             if(hasChange) {
                 console.log("INFO", "Core.Web", `Firing Live-Reload event; Runtime = ${Date.now() - runtime}ms`);
