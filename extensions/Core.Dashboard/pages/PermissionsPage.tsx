@@ -133,7 +133,7 @@ export default function PermissionsPage(): JSX.Element {
             </Dialog>
         }
 
-        <Select value={loadingPermissionGroups ? "None" : selPermGroupName} onChange={e => {
+        <Select className="mt-3 mb-2" value={loadingPermissionGroups ? "None" : selPermGroupName} onChange={e => {
             if(e.target.value === "Create") {
                 setNewGroupName("");
                 setNewGroupDescription("");
