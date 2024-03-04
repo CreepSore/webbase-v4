@@ -133,7 +133,7 @@ export default class CoreWeb implements IExtension {
         this.events.emit("express-loaded", this.app);
         this.server = this.app.listen(this.config.port, this.config.hostname);
 
-        this.enableLiveReload(100, false);
+        this.enableLiveReload(-1, false);
 
         LogBuilder
             .start()
@@ -233,12 +233,11 @@ export default class CoreWeb implements IExtension {
         return src;
     }
 
-    enableLiveReload(waitMs: number = 0, productive: boolean = false): CoreWeb {
+    enableLiveReload(waitMs: number = -1, productive: boolean = false): CoreWeb {
         const {env} = process;
 
         if(!productive && env.DEBUG !== "true") return this;
         if(this.liveReload.enabled) return this;
-        const oldHashes: {[key: string]: string} = {};
 
         function getFiles(dir: string): string[] {
             const subdirs = fs.readdirSync(dir);
@@ -247,32 +246,44 @@ export default class CoreWeb implements IExtension {
                 return (fs.statSync(res)).isDirectory() ? getFiles(res) : res;
             });
 
-            return files.reduce((a, f) => a.concat(f), []);
+            return files.reduce((a, f) => a.concat(f), []) as string[];
         }
 
         this.liveReload.enabled = true;
         this.liveReload.url = this.addScriptFromFile("Core.Web.LiveReload", "Core.Web/Core.Web.LiveReload.js");
-        this.liveReload.waitMs = waitMs || this.liveReload.waitMs;
-        this.liveReload.interval = setInterval(async() => {
-            const runtime = Date.now();
-            const hasChange = getFiles("out").map((file) => {
-                const newContent = fs.readFileSync(file);
-                const newHash = crypto.createHash("sha256").update(newContent).digest("hex");
-                const oldHash = oldHashes[file];
+        if(waitMs > 0) {
+            const oldHashes: {[key: string]: string} = {};
 
-                if(newHash !== oldHash) {
-                    oldHashes[file] = newHash;
-                    return true;
+            this.liveReload.waitMs = waitMs || this.liveReload.waitMs;
+
+            this.liveReload.interval = setInterval(async() => {
+                const runtime = Date.now();
+                const hasChange = getFiles("out").map((file) => {
+                    const newContent = fs.readFileSync(file);
+                    const newHash = crypto.createHash("sha256").update(newContent).digest("hex");
+                    const oldHash = oldHashes[file];
+
+                    if(newHash !== oldHash) {
+                        oldHashes[file] = newHash;
+                        return true;
+                    }
+
+                    return false;
+                }).some(Boolean);
+
+                if(hasChange) {
+                    console.log("INFO", "Core.Web", `Firing Live-Reload event; Runtime = ${Date.now() - runtime}ms`);
+                    this.liveReload.emitter.emit("live-reload");
                 }
-
-                return false;
-            }).some(Boolean);
-
-            if(hasChange) {
-                console.log("INFO", "Core.Web", `Firing Live-Reload event; Runtime = ${Date.now() - runtime}ms`);
+            }, this.liveReload.waitMs);
+        }
+        else {
+            this.app.post("/Core.Web/ForceReload", async(req, res) => {
+                console.log("INFO", "Core.Web", "Firing Live-Reload event because of web-call");
                 this.liveReload.emitter.emit("live-reload");
-            }
-        }, this.liveReload.waitMs);
+                res.status(200).json({sucess: true});
+            });
+        }
 
         const expressWsApp = this.app as unknown as expressWs.Application;
         expressWsApp.ws("/Core.Web/LiveReload", (ws) => {
