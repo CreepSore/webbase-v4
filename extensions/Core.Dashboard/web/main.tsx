@@ -1,16 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import "./style.css";
-import { ThemeProvider } from "@emotion/react";
-import { createTheme } from "@mui/material";
+import "./style.scss";
+import ThemeProvider from "@mui/system/ThemeProvider";
+import {createTheme} from "@mui/material/styles";
 import Router from "@extensions/Core.React/Router";
 import RouterPage from "@extensions/Core.React/Router/RouterPage";
 import useNavigationHandler from "@extensions/Core.React/Navigator/useNavigationHandler";
 import NavigationKeys from "./NavigationKeys";
 import NavigatorContext from "@extensions/Core.React/Navigator/NavigatorContext";
 
-import "./style.css";
 import useMe from "@extensions/Core.Usermgmt.Web/web/hooks/useMe";
 import Loader from "@extensions/Core.React/Loader/Loader";
 import HomePage from "../pages/HomePage";

@@ -1,0 +1,5 @@
+{
+    "entryPoints": [
+        "./extensions/Core.Web/Core.Web.LiveReload.ts"
+    ]
+}

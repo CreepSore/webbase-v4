@@ -1,10 +1,15 @@
 import * as React from "react";
 
-import { Button, Drawer, IconButton } from "@mui/material";
+import Button from "@mui/material/Button";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+
+
 import CloseIcon from "@mui/icons-material/Close";
 import NavigatorContext from "@extensions/Core.React/Navigator/NavigatorContext";
 import PermissionCheck from "@extensions/Core.Usermgmt.Web/web/components/PermissionCheck";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
+
 
 interface NavdrawerProperties {
     open: boolean;

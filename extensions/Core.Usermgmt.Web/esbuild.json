@@ -1,0 +1,5 @@
+{
+    "entryPoints": [
+        "./extensions/Core.Usermgmt.Web/web/main.tsx"
+    ]
+}
