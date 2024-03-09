@@ -2,8 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 
 import "./style.scss";
-import { ThemeProvider } from "@emotion/react";
-import { createTheme } from "@mui/material";
+import ThemeProvider from "@mui/system/ThemeProvider";
+import {createTheme} from "@mui/material/styles";
 import Router from "@extensions/Core.React/Router";
 import RouterPage from "@extensions/Core.React/Router/RouterPage";
 import useNavigationHandler from "@extensions/Core.React/Navigator/useNavigationHandler";

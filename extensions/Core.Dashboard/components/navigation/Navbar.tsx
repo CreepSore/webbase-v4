@@ -1,6 +1,11 @@
 import * as React from "react";
 
-import { AppBar, IconButton, Link, Toolbar, useMediaQuery } from "@mui/material";
+import AppBar from "@mui/material/AppBar";
+import IconButton from "@mui/material/IconButton";
+import Link from "@mui/material/Link";
+import Toolbar from "@mui/material/Toolbar";
+import useMediaQuery from "@mui/material/useMediaQuery";
+
 import MenuIcon from "@mui/icons-material/Menu";
 
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";

@@ -11,11 +11,9 @@ import createAuthenticationRouter from "./routers/AuthenticationRouter";
 import Urls from "./urls";
 import createPermissionRouter from "./routers/PermissionRouter";
 import createUserRouter from "./routers/UserRouter";
-import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
 import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
 import LogBuilder from "@service/logger/LogBuilder";
 import User from "@extensions/Core.Usermgmt/models/User";
-import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
 
 declare module "express-session" {
     interface SessionData {
@@ -65,7 +63,7 @@ export default class CoreUsermgmtWeb implements IExtension {
     $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     constructor() {
-        this.config = this.loadConfig();
+        this.config = this.loadConfig(true);
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {

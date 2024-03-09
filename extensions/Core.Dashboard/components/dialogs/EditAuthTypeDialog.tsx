@@ -1,5 +1,10 @@
 import * as React from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, TextField } from "@mui/material";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
+import TextField from "@mui/material/TextField";
 import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
 
 interface EditAuthTypeDialogProperties<AuthType> {

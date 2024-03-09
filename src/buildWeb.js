@@ -2,6 +2,7 @@ const esbuild = require("esbuild");
 const path = require("path");
 const fs = require("fs");
 const minimist = require("minimist");
+const perf_hooks = require("perf_hooks");
 
 const tailwindcss = require("tailwindcss");
 const tailwindNesting = require("tailwindcss/nesting");
@@ -17,7 +18,7 @@ const parsedArgs = minimist(process.argv.slice(2), {
         watch: "w",
     },
     string: ["mode"],
-    boolean: ["watch"],
+    boolean: ["watch", "meta"],
 });
 
 const getExtensionConfigs = function() {
@@ -60,7 +61,12 @@ const buildWebApp = async function() {
                 ].filter(Boolean)).process(source)
                 return css
             },
-        })]
+        })],
+        legalComments: "external",
+        minify: parsedArgs.mode !== "development",
+        lineLimit: parsedArgs.mode === "development" ? 0 : 0,
+        metafile: parsedArgs.meta,
+        treeShaking: parsedArgs.mode !== "development",
     };
 
     if(parsedArgs.watch) {
@@ -71,8 +77,19 @@ const buildWebApp = async function() {
     }
 
     console.log("Started building...");
-    await esbuild.build(buildParams);
-    console.log("Build finished.");
+    const performance = perf_hooks.performance.measure("start");
+    const buildResult = await esbuild.build(buildParams);
+
+    const metaPath = path.resolve(__dirname, "..", "out", "meta.json");
+    if(fs.existsSync(metaPath)) {
+        fs.unlinkSync(metaPath);
+    }
+
+    if(buildResult.metafile && parsedArgs.meta) {
+        fs.writeFileSync(metaPath, JSON.stringify(buildResult.metafile, null, 4));
+    }
+
+    console.log(`Build finished after ${Math.floor(performance.duration * 1000) / 1000}ms`);
 }
 
 const main = async function() {

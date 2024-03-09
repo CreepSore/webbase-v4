@@ -1,5 +1,8 @@
 import * as React from "react";
-import { CircularProgress, Paper } from "@mui/material";
+
+import CircularProgress from "@mui/material/CircularProgress";
+import Paper from "@mui/material/Paper";
+
 
 interface LoaderProps {
 
