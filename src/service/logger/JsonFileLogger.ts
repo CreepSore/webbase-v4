@@ -21,12 +21,29 @@ export default class JsonFileLogger implements ILogger {
     }
 
     async log(log: ILogEntry): Promise<void> {
+        let objLog: any;
+        try {
+            if(log.objects) {
+                let cache: any[] = [];
+                objLog = JSON.stringify(log.objects, (key, value) => {
+                    if (typeof value === "object" && value !== null && !cache.includes(value)) {
+                        cache.push(value);
+                    }
+                    return value;
+                });
+                cache = null;
+            }
+        }
+        catch {
+            objLog = "";
+        }
+
         const logObj: any = {
-            date: log.date.getTime(),
+            timestamp: log.date.toISOString(),
             level: log.level,
-            infos: log.infos,
-            message: log.lines,
-            objects: log.objects,
+            info: (log.infos || []).join(" "),
+            message: (log.lines || []).join("\n"),
+            objects: objLog,
         };
 
         if(!this.removeId) {
