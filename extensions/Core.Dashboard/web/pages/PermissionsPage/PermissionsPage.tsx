@@ -13,15 +13,15 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 
 
-import BasePage from "./BasePage";
+import BasePage from "../BasePage/BasePage";
 import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
 import useFetchApi from "@extensions/Core.React/hooks/useFetchApi";
-import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
 import IPermissionGroup from "@extensions/Core.Usermgmt/types/IPermissionGroup";
 import Loader from "@extensions/Core.React/Loader/Loader";
 import AddIcon from "@mui/icons-material/Add";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
+import PermissionsPageController from "../../controllers/PermissionsPageController";
 
 type PermissionsRow = IPermission & {
     id: string,
@@ -29,13 +29,15 @@ type PermissionsRow = IPermission & {
 };
 
 export default function PermissionsPage(): JSX.Element {
+    const controller = React.useRef(new PermissionsPageController());
+
     const me = React.useContext(MeContext);
 
     const [
         permissionGroups,
         loadingPermissionGroups,
         updatePermissionGroups,
-    ] = useFetchApi(() => UsermgmtWebApi.getPermissionGroups(), []);
+    ] = useFetchApi(() => controller.current.getPermissionGroups(), []);
     const [selPermGroupName, setSelPermGroupName] = React.useState<string>("None");
     const [showNoneEntry, setShowNoneEntry] = React.useState(true);
     const selectedPermissionGroup = React.useMemo<IPermissionGroup>(() => {
@@ -45,7 +47,7 @@ export default function PermissionsPage(): JSX.Element {
     const [
         permissions,
         loadingPermissions,
-    ] = useFetchApi(() => UsermgmtWebApi.getPermissions(), []);
+    ] = useFetchApi(() => controller.current.getPermissions(), []);
 
     const isLoading = React.useMemo(() =>
         loadingPermissionGroups
@@ -92,12 +94,11 @@ export default function PermissionsPage(): JSX.Element {
                 <DialogTitle><h1 className="text-xl font-thin">Create PermissionGroup</h1></DialogTitle>
                 <DialogContent>
                     <form onSubmit={(e) => {
-                        UsermgmtWebApi.createPermissionGroup({
+                        controller.current.createPermissionGroup({
                             name: newGroupName,
                             description: newGroupDescription,
-                            permissions: [],
-                        }).then(() => {
-                            updatePermissionGroups().then((data) => {
+                        }).then(() => updatePermissionGroups())
+                            .then((data) => {
                                 setCreateDialogOpen(false);
 
                                 const newGroup = data.find(pg => pg.name === newGroupName);
@@ -105,7 +106,6 @@ export default function PermissionsPage(): JSX.Element {
                                     setSelPermGroupName(newGroup.name);
                                 }
                             });
-                        });
 
                         e.preventDefault();
                     }}>
@@ -207,7 +207,8 @@ export default function PermissionsPage(): JSX.Element {
                     onClick={() => {
                         setHasUnsavedChanges(false);
 
-                        UsermgmtWebApi.editPermissionGroup(selectedPermissionGroup)
+                        controller.current
+                            .editPermissionGroup(selectedPermissionGroup)
                             .then(() => updatePermissionGroups());
                     }}
                 >Save</Button>

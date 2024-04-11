@@ -79,6 +79,7 @@ const buildWebApp = async function() {
                     name: "Live-Reload",
                     setup(build) {
                         build.onEnd(async() => {
+                            console.log("Rebuilt files");
                             try {
                                 await fetch(`http://localhost:${webConfig.port}/Core.Web/ForceReload`, {method: "POST"});
                             }

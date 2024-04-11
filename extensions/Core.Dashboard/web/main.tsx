@@ -12,14 +12,13 @@ import NavigatorContext from "@extensions/Core.React/Navigator/NavigatorContext"
 
 import useMe from "@extensions/Core.Usermgmt.Web/web/hooks/useMe";
 import Loader from "@extensions/Core.React/Loader/Loader";
-import HomePage from "../pages/HomePage";
+import HomePage from "./pages/HomePage/HomePage";
 import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
-import UsersPage from "../pages/UsersPage";
-import PermissionsPage from "../pages/PermissionsPage";
+import UsersPage from "./pages/UsersPage/UsersPage";
+import PermissionsPage from "./pages/PermissionsPage/PermissionsPage";
 import DataStreamContext from "@extensions/Core.React/DataStream/DataStreamContext";
 import useDataStream from "@extensions/Core.React/hooks/useDataStream";
-import { IDataStreamData } from "@extensions/Core.React/DataStream/DataStream";
 
 function Main(): JSX.Element {
     const navigator = useNavigationHandler<NavigationKeys>({

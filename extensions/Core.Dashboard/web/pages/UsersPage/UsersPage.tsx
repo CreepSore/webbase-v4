@@ -1,7 +1,6 @@
 import * as React from "react";
-import BasePage from "./BasePage";
+import BasePage from "../BasePage/BasePage";
 import useFetchApi from "@extensions/Core.React/hooks/useFetchApi";
-import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
 import Loader from "@extensions/Core.React/Loader/Loader";
 
 import Button from "@mui/material/Button";
@@ -30,13 +29,16 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Search as SearchIcon } from "@mui/icons-material";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
-import EditUserDialog from "../components/dialogs/EditUserDialogs";
+import EditUserDialog from "../../components/dialogs/EditUserDialogs";
 import PermissionCheck from "@extensions/Core.Usermgmt.Web/web/components/PermissionCheck";
+import UsersPageController from "../../controllers/UsersPageController";
 
 export default function UsersPage(): JSX.Element {
+    const controller = React.useRef(new UsersPageController());
+
     const me = React.useContext(MeContext);
     const [rowRefs, setRowRefs] = React.useState<Map<IUser, HTMLElement>>(new Map());
-    const [users, usersLoading, updateUsers] = useFetchApi(() => UsermgmtWebApi.getUsers(), [], () => setRowRefs(new Map()));
+    const [users, usersLoading, updateUsers] = useFetchApi(() => controller.current.getUsers(), [], () => setRowRefs(new Map()));
     const [userToDelete, setUserToDelete] = React.useState<IUser>(null);
     const [editDialogMode, setEditDialogMode] = React.useState<"edit"|"create">(null);
     const [editDialogUser, setEditDialogUser] = React.useState<IUser>(null);
@@ -60,12 +62,7 @@ export default function UsersPage(): JSX.Element {
                     color="success"
                     variant="outlined"
                     onClick={() => {
-                        UsermgmtWebApi.deleteUser(userToDelete)
-                            .catch(() => {})
-                            .then(() => {
-                                updateUsers();
-                                setUserToDelete(null);
-                            });
+                        controller.current.deleteUser(userToDelete);
                     }}
                     size="small"
                 >OK</Button>
@@ -142,7 +139,9 @@ export default function UsersPage(): JSX.Element {
                                 {me.hasPermission(Permissions.USERS.IMPERSONATE.name) &&
                                     <MenuItem onClick={() => {
                                         setOpenMenu(null);
-                                        UsermgmtWebApi.impersonateUser(u).catch(() => {}).then(() => {location.reload();});
+                                        controller.current
+                                            .impersonateUser(u)
+                                            .then(() => location.reload());
                                     }}>
                                         <ListItemText>Impersonate</ListItemText>
                                     </MenuItem>
