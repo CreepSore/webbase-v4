@@ -4,7 +4,7 @@ import Paper from "@mui/material/Paper";
 
 
 import * as React from "react";
-import Navbar from "../components/navigation/Navbar";
+import Navbar from "../../components/navigation/Navbar";
 
 interface BasePageProperties {
     maxWidth?: false | Breakpoint;

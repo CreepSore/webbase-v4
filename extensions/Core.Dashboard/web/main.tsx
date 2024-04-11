@@ -12,11 +12,13 @@ import NavigatorContext from "@extensions/Core.React/Navigator/NavigatorContext"
 
 import useMe from "@extensions/Core.Usermgmt.Web/web/hooks/useMe";
 import Loader from "@extensions/Core.React/Loader/Loader";
-import HomePage from "../pages/HomePage";
+import HomePage from "./pages/HomePage/HomePage";
 import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
-import UsersPage from "../pages/UsersPage";
-import PermissionsPage from "../pages/PermissionsPage";
+import UsersPage from "./pages/UsersPage/UsersPage";
+import PermissionsPage from "./pages/PermissionsPage/PermissionsPage";
+import DataStreamContext from "@extensions/Core.React/DataStream/DataStreamContext";
+import useDataStream from "@extensions/Core.React/hooks/useDataStream";
 
 function Main(): JSX.Element {
     const navigator = useNavigationHandler<NavigationKeys>({
@@ -36,6 +38,8 @@ function Main(): JSX.Element {
         },
     });
 
+    const dataStream = useDataStream();
+
     const me = useMe();
 
     React.useEffect(() => {
@@ -52,27 +56,29 @@ function Main(): JSX.Element {
     }, [me.me]);
 
     return <ThemeProvider theme={theme}>
-        <NavigatorContext.Provider value={navigator}>
-            <MeContext.Provider value={me}>
-                <Router currentPage={navigator.currentPage}>
-                    <RouterPage key="init">
-                        <Loader />
-                    </RouterPage>
+        <DataStreamContext.Provider value={dataStream}>
+            <NavigatorContext.Provider value={navigator}>
+                <MeContext.Provider value={me}>
+                    <Router currentPage={navigator.currentPage}>
+                        <RouterPage key="init">
+                            <Loader />
+                        </RouterPage>
 
-                    <RouterPage key="home">
-                        <HomePage />
-                    </RouterPage>
+                        <RouterPage key="home">
+                            <HomePage />
+                        </RouterPage>
 
-                    <RouterPage key="users">
-                        <UsersPage />
-                    </RouterPage>
+                        <RouterPage key="users">
+                            <UsersPage />
+                        </RouterPage>
 
-                    <RouterPage key="permissions">
-                        <PermissionsPage />
-                    </RouterPage>
-                </Router>
-            </MeContext.Provider>
-        </NavigatorContext.Provider>
+                        <RouterPage key="permissions">
+                            <PermissionsPage />
+                        </RouterPage>
+                    </Router>
+                </MeContext.Provider>
+            </NavigatorContext.Provider>
+        </DataStreamContext.Provider>
     </ThemeProvider>;
 }
 

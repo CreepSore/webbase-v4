@@ -29,8 +29,20 @@ export default function Navdrawer(props: NavdrawerProperties): JSX.Element {
         </div>
 
         <div className="flex flex-col">
-            <PermissionCheck permissions={[Permissions.USERS.VIEW]}><Button size="large" onClick={() => navigator.doNavigationRequest("users", {})}>Users</Button></PermissionCheck>
-            <PermissionCheck permissions={[Permissions.PERMISSIONS.VIEW]}><Button size="large" onClick={() => navigator.doNavigationRequest("permissions", {})}>Permissions</Button></PermissionCheck>
+            <PermissionCheck permissions={[Permissions.USERS.VIEW]}>
+                <Button
+                    className="!w-[250px]"
+                    size="large"
+                    onClick={() => navigator.doNavigationRequest("users", {})}
+                >Users</Button>
+            </PermissionCheck>
+
+            <PermissionCheck permissions={[Permissions.PERMISSIONS.VIEW]}>
+                <Button
+                    size="large"
+                    onClick={() => navigator.doNavigationRequest("permissions", {})}
+                >Permissions</Button>
+            </PermissionCheck>
         </div>
     </Drawer>;
 }
