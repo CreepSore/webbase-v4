@@ -5,7 +5,7 @@ docs/
 !extensions/Core*
 !extensions/Custom.Template/
 !extensions/Custom.Template.webpack.json
-cfg/*
+cfg/
 extensions/disabled.json
 storage.db
 
