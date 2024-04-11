@@ -1,13 +1,18 @@
 # Webbase v4
 
 ## 📑 Index
-1. 🌐 Introduction
-2. 🎨 Design Choices
-3. 🧩 Core-Modules
-4. 🔌 Developing Extensions
-5. 🏗️ Building and Starting the Application
-6. 📜 Logs
-7. ⚙ Environment
+- [Webbase v4](#webbase-v4)
+  - [📑 Index](#-index)
+  - [🌐 Introduction](#-introduction)
+  - [🎨 Design Choices](#-design-choices)
+    - [Main Principle](#main-principle)
+    - [🧩 Core-Modules Introduction](#-core-modules-introduction)
+  - [🔌 Developing Extensions](#-developing-extensions)
+  - [🏗️ Building and starting the Application](#️-building-and-starting-the-application)
+    - [Building and starting the Application](#building-and-starting-the-application)
+    - [Configuration](#configuration)
+  - [📜 Logs](#-logs)
+  - [⚙ Environment](#-environment)
 
 ## 🌐 Introduction
 
@@ -117,7 +122,7 @@ You can simply copy them into their parent directory and adapt the configuration
 Normally the Core-Extensions do **NOT** throw an error if no config exists.
 This ensures a clean first start.
 
-If you already have config files somewhere on your system, you can use enviroment variables to specify the base path (see [Enviornment Variables](#⚙-environment)).
+If you already have config files somewhere on your system, you can use enviroment variables to specify the base path (see [Enviornment Variables](#-environment)).
 
 
 ## 📜 Logs
