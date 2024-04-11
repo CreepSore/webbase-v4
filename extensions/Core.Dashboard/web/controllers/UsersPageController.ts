@@ -20,7 +20,7 @@ export default class UsersPageController {
             return Promise.resolve({success: false, error: "Invalid User specified"});
         }
 
-        return new Promise((res, rej) => {
+        return new Promise((res) => {
             UsermgmtWebApi
                 .deleteUser(user)
                 .catch(() => {})
