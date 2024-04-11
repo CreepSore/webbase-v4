@@ -144,7 +144,7 @@ Example:
 `console.log("INFO", "Core", "Loggers initialized successfully")`
 
 logs
-`[2022-10-21T15:05:55.785Z][ INFO][Core] Loggers initialized successfully
+`[2022-10-21T15:05:55.785Z][ INFO][Core] Loggers initialized successfully`
 using all registered loggers.
 
 There is also a High-Level Logging API available. Using it looks like this:
