@@ -97,10 +97,18 @@ export default class ConfigLoader<T> {
     }
 
     static createConfigPath(configName: string): string {
+        if(process.env.CFG_PATH) {
+            return path.resolve(process.env.CFG_PATH, configName);
+        }
+
         return path.resolve(".", "cfg", configName);
     }
 
     static createTemplateConfigPath(configName: string): string {
+        if(process.env.CFG_PATH_TEMPLATE) {
+            return path.resolve(process.env.CFG_PATH_TEMPLATE, "template", configName);
+        }
+
         return path.resolve(".", "cfg", "template", configName);
     }
 

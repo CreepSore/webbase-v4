@@ -7,15 +7,16 @@
 4. Developing Extensions
 5. Building and starting the application
 6. Logs
+7. Environment
 
-## Introduction#
+## Introduction
 The webbase-v4 is an application-framework targetted to building web-apps using express.js. Despite its name, it's also possible to build normal nodejs-applications with it.
 
 ---
 
 ## Design Choices
 ### Main Principle
-The main principle of the framework is, that it's built modular. If you don't need certain features (for example [[#Core Db]], you can simply disable the loading of that extension (watch out: you have to disable the loading of Core.Usermgmt too, to mitigate module-resolving-errors).
+The main principle of the framework is, that it's built modular. If you don't need certain features (for example [Core_Db](#coredb), you can simply disable the loading of that extension (watch out: you have to disable the loading of Core.Usermgmt too, to mitigate module-resolving-errors).
 This makes for an incredibly small filesize, due to the application being built with webpack, configured to not pack any modules you might not need.
 Not only the logic that you may implement is built like an extension, but the Core-logic too.
 The only few things that you are not able to disable are the absolute core things, like the [ExtensionService](https://github.com/CreepSore/webbase-v4/blob/master/src/service/extensions/ExtensionService.ts) and the [ConfigLoader](https://github.com/CreepSore/webbase-v4/blob/master/src/logic/config/ConfigLoader.ts), since these is the components that handle all extension-loading and configuration. The goal of this project was to develop a neat boilerplate that can handle everything IF needed, and not handle anything at all, when not.
@@ -45,7 +46,7 @@ The only few things that you are not able to disable are the absolute core thing
 - Core.ReactComponents
 
 ### Core-Modules Introduction
-The core modules provide the most basic functionality for almost everything that you need to develop a web-application. Per default, all core modules are enabled; however they can be disabled (see [[#ExtensionService]])
+The core modules provide the most basic functionality for almost everything that you need to develop a web-application. Per default, all core modules are enabled; however they can be disabled (see [ExtensionService](https://github.com/CreepSore/webbase-v4/blob/main/#extensionservice))
 
 
 ### Core
@@ -84,7 +85,7 @@ The Custom.Template is a copyable module-file with some base-functionality like 
 ---
 
 ## Developing Extensions
-When loading an extension, the [[#ExtensionService]] passes the current Execution-Context to the extension. The context is built as follows:
+When loading an extension, the [ExtensionService](https://github.com/CreepSore/webbase-v4/blob/main/#extensionservice) passes the current Execution-Context to the extension. The context is built as follows:
 
 | Property-Name    | Type             | Description                                   |
 | ---------------- | ---------------- | --------------------------------------------- |
@@ -123,7 +124,7 @@ The metadata defines basic information about the module, like name, dependencies
 | version       | string   | The version of the module. This can be defined however you want.                                             |
 | description   | string   | The description of the module. This can be an empty string.                                                  |
 | author        | string   | The author of the module. This can be an empty string.                                                       |
-| dependencies  | string[] | The dependencies of the module, referenced by their metadata-name.                                           | 
+| dependencies  | string[] | The dependencies of the module, referenced by their metadata-name.                                           |
 
 When defining the dependencies, you don't need to specify modules that may be imported by any parent dependency. They'll get loaded automatically doing a binary tree traversal, starting with all modules that do not have any dependency at all (for example, "Core"). 
 
@@ -132,7 +133,7 @@ When defining the dependencies, you don't need to specify modules that may be im
 ## Building and starting the application
 To start the app, you need to run `npm start`. The sources get built before startup (default 
 out-directory is `out/`). To only build the app you can run `npm run build`.
-To make developing frontend-scripts easier you can use `npm run watchWeb`. This will start webpack as a watch-deamon, which compiles all frontend sources when it detects any changes. Keep in mind that if you add a new webpack config file (like specified in [[#Folder structure]]), you need to restart the command.
+To make developing frontend-scripts easier you can use `npm run watchWeb`. This will start webpack as a watch-deamon, which compiles all frontend sources when it detects any changes. Keep in mind that if you add a new webpack config file (like specified in [Folder structure](https://github.com/CreepSore/webbase-v4/blob/main/#folder-structure)), you need to restart the command.
 
 ---
 
@@ -154,3 +155,9 @@ Example:
 logs
 `[2022-10-21T15:05:55.785Z][ INFO][Core] Loggers initialized successfully
 using all registered loggers.
+
+## Environment
+| Name              | Description                                                          | Example              |
+| ----------------- | -------------------------------------------------------------------- | -------------------- |
+| CFG_PATH          | Absolute path to the config files                                    | /mnt/config          |
+| CFG_TEMPLATE_PATH | Absolute path where the template config files should be generated at | /mnt/config/template |
