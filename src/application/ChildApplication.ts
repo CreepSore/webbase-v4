@@ -15,6 +15,7 @@ import FileLogger from "@service/logger/FileLogger";
 import ChildConsoleLogger from "@service/logger/ChildConsoleLogger";
 import IExtension from "@service/extensions/IExtension";
 import { runPlatformDependent } from "@service/utils/multiplatform";
+import JsonFileLogger from "@service/logger/JsonFileLogger";
 
 export default class ChildApplication implements IApplication {
     static currentExecutablePath: string;
@@ -64,7 +65,8 @@ export default class ChildApplication implements IApplication {
 
         LoggerService
             .addLogger(new ChildConsoleLogger(this, true))
-            .addLogger(new FileLogger(`logs/out_child_${this.childType}_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`))
+            .addLogger(new FileLogger(`logs/out_child_${this.childType}_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3")}.log`))
+            .addLogger(new JsonFileLogger(`jsonlogs/out_child_${this.childType}_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3")}.log`))
             .hookConsoleLog();
 
         process.on?.("message", listenForId);
