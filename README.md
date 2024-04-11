@@ -9,7 +9,7 @@
     - [🧩 Core-Modules Introduction](#-core-modules-introduction)
   - [🔌 Developing Extensions](#-developing-extensions)
   - [🏗️ Building and starting the Application](#️-building-and-starting-the-application)
-    - [Building and starting the Application](#building-and-starting-the-application)
+    - [Building](#building)
     - [Configuration](#configuration)
   - [📜 Logs](#-logs)
   - [⚙ Environment](#-environment)
@@ -70,8 +70,8 @@ We are using Webpack to build the app sources and esbuild to build the web sourc
 
 Our goal is to eventually build everything using esbuild.
 
-### Building and starting the Application
-To build the application, you must
+### Building
+To build the application, you must:
 
 1. Clone the repository
 2. Install the dependencies
