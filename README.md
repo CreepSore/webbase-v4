@@ -158,6 +158,9 @@ LogBuilder
     .done();
 ```
 
+Using this instead of `console.log` is preferrable, since it is able to do much more.  
+See [LogBuilder.ts](https://github.com/CreepSore/webbase-v4/blob/master/src/service/logger/LogBuilder.ts) for more information.
+
 ## ⚙ Environment
 | Name              | Description                                                          | Example              |
 | ----------------- | -------------------------------------------------------------------- | -------------------- |
