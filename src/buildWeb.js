@@ -51,6 +51,7 @@ const buildWebApp = async function() {
         plugins: [sassPlugin({
             type: "style",
             async transform(source, resolveDir) {
+                // @ts-ignore
                 const {css} = await postcss([
                     // @ts-ignore
                     postcssPresetEnv({stage: 0}),
