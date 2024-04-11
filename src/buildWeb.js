@@ -70,7 +70,30 @@ const buildWebApp = async function() {
     };
 
     if(parsedArgs.watch) {
+        try {
+            const webConfigPath = path.resolve(__dirname, "..", "cfg", "Core.Web.json");
+            const webConfig = JSON.parse(fs.readFileSync(webConfigPath, "utf8"));
+            if(fs.existsSync(webConfigPath)) {
+                buildParams.plugins ??= [];
+                buildParams.plugins.push({
+                    name: "Live-Reload",
+                    setup(build) {
+                        build.onEnd(async() => {
+                            try {
+                                await fetch(`http://localhost:${webConfig.port}/Core.Web/ForceReload`, {method: "POST"});
+                            }
+                            catch {
+                                console.log("ERROR", "ForceReload-Endpoint does not seem to be active.");
+                            }
+                        });
+                    }
+                });
+            }
+        }
+        catch {}
+
         const context = await esbuild.context(buildParams);
+
         await context.watch();
         console.log("Watching for changes...");
         return;
