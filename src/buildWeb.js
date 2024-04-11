@@ -67,6 +67,10 @@ const buildWebApp = async function() {
         lineLimit: parsedArgs.mode === "development" ? 0 : 0,
         metafile: parsedArgs.meta,
         treeShaking: parsedArgs.mode !== "development",
+        splitting: true,
+        format: "esm",
+        chunkNames: "chunks/[name]-[hash]",
+        publicPath: "/",
     };
 
     if(parsedArgs.watch) {
