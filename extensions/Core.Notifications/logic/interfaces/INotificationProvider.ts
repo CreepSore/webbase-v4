@@ -5,4 +5,5 @@ export default interface INotificationProvider {
     start(): Promise<void>;
     stop(): Promise<void>;
     broadcastNotification(message: INotification): Promise<void>;
+    sendNotification<T = any>(target: T, message: INotification): Promise<void>;
 }

@@ -24,4 +24,16 @@ export default class MailNotificationProvider implements INotificationProvider {
             text: message.message,
         });
     }
+
+    async sendNotification<T = any>(target: T, message: INotification): Promise<void> {
+        if(typeof target !== "string") {
+            return;
+        }
+
+        await this.coreMail.sendMail("ALERT", {
+            subject: message.title,
+            text: message.message,
+            to: target as string,
+        });
+    }
 }

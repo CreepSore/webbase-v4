@@ -6,7 +6,6 @@ import AuthenticationParameters, { OnceKeyAuthenticationParameters, PasswordAuth
 import AuthenticationResult from "../types/AuthenticationResult";
 import AuthenticationType, { OnceKeyAuthenticationType, PasswordAuthenticationType, PasswordTotpAuthenticationType, PermanentKeyAuthenticationType, TotpAuthenticationType } from "../types/AuthenticationTypes";
 import TotpHandler from "./TotpHandler";
-import LogBuilder from "@service/logger/LogBuilder";
 
 export default class AuthenticationHandler {
     user: HydratedDocument<IUser>;
