@@ -9,9 +9,10 @@ import minimist from "minimist";
 (async() => {
     const args = minimist(process.argv.slice(2), {
         alias: {
-            command: "c",
+            cli: "c",
         },
-        string: ["command", "childApp"],
+        string: ["childApp"],
+        "boolean": ["cli"],
     });
 
     // ! Keep in mind that __filename should NOT work here.
@@ -19,7 +20,7 @@ import minimist from "minimist";
     ChildApplication.initializeStaticClass(__filename);
 
     let app: IApplication;
-    if(args.command) {
+    if(args.cli) {
         app = new CliApplication(args);
     }
     else if(args.childApp) {
