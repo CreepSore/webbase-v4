@@ -28,11 +28,11 @@ const buildAppConfig = (env, argv) => {
 
     return webpackMerge([{
         entry: {
-            "app.js": path.resolve(__dirname, "src", "app.ts"),
+            "app": path.resolve(__dirname, "src", "app.ts"),
         },
         output: {
             path: path.resolve(__dirname, "out"),
-            filename: "[name]",
+            filename: "[name].js",
             clean: true,
         },
         devtool: argv.mode === "development" ? "inline-source-map" : false,

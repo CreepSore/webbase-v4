@@ -230,9 +230,14 @@ export default class CoreWeb implements IExtension {
         try {
             const chunkDir = path.resolve(__dirname, "chunks");
             const files = fs.readdirSync(chunkDir).filter(f => f.endsWith(".js"));
+            const expressRouter: express.Router = this.app._router;
+            expressRouter.stack = expressRouter.stack.filter((e: {path: string}) => !(e.path || "").startsWith("/chunks/"));
 
             for(const file of files) {
-                this.addScriptFromFile(file, `chunks/${file}`, {url: `/chunks/${file}`, type: "module"});
+                const scriptPath = `chunks/${file}`;
+                const scriptUrl = `/chunks/${file}`;
+
+                this.addScriptFromFile(file, scriptPath, {url: scriptUrl, type: "module"});
             }
         }
         catch(err) {
@@ -301,6 +306,7 @@ export default class CoreWeb implements IExtension {
         this.app.post("/Core.Web/ForceReload", async(req, res) => {
             console.log("INFO", "Core.Web", "Firing Live-Reload event because of web-call");
             this.liveReload.emitter.emit("live-reload");
+            this.addChunks();
             res.status(200).json({sucess: true});
         });
 

@@ -90,7 +90,12 @@ export default class ConfigLoader<T> {
         }
 
         if(fs.existsSync(exportPath)) {
-            fs.unlinkSync(exportPath);
+            try {
+                fs.unlinkSync(exportPath);
+            }
+            catch {
+                // i could not care less
+            }
         }
 
         fs.writeFileSync(exportPath, JSON.stringify(config, null, 4), { encoding: "utf8" });
