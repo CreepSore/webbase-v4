@@ -7,7 +7,6 @@
         @apply w-full h-screen min-h-screen flex;
 
         & > .background {
-            unset: all;
             @apply -z-50 fixed w-full h-full;
 
             & > .background-container {
