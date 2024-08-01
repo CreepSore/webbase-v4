@@ -6,10 +6,7 @@ const perf_hooks = require("perf_hooks");
 
 const tailwindcss = require("tailwindcss");
 const tailwindNesting = require("tailwindcss/nesting");
-const postcssImport = require("postcss-import");
-const cssnano = require("cssnano")
 const postcss = require("postcss");
-const postcssPresetEnv = require("postcss-preset-env");
 
 const { default: sassPlugin } = require("esbuild-sass-plugin");
 
@@ -53,15 +50,13 @@ const buildWebApp = async function() {
             async transform(source, resolveDir) {
                 // @ts-ignore
                 const {css} = await postcss([
-                    // @ts-ignore
-                    postcssPresetEnv({stage: 0}),
-                    postcssImport,
                     tailwindNesting,
-                    tailwindcss,
-                    cssnano
-                ].filter(Boolean)).process(source)
-                return css
+                    tailwindcss
+                ]).process(source);
+
+                return css;
             },
+            cache: false,
         })],
         legalComments: "external",
         minify: parsedArgs.mode !== "development",
