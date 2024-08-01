@@ -65,7 +65,7 @@ export default class AuthorizationHandler {
      * This will ALWAYS fall back to the anonymous user!
      */
     static async fromRequest(req: express.Request): Promise<AuthorizationHandler> {
-        if(req.query) {
+        if(req.query?.apiKey) {
             return this.fromApiKey(req.query.apiKey as string);
         }
 

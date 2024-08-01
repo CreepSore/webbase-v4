@@ -46,6 +46,10 @@ export default class LoggerService {
      * @memberof LoggerService
      */
     static hookConsoleLog(): void {
+        if(this.oldLog) {
+            return;
+        }
+
         this.oldLog = console.log;
         LogBuilder.onDone = entry => {
             this.logSync(entry);

@@ -5,6 +5,9 @@ import IApplication from "./IApplication";
 import ExtensionService from "@service/extensions/ExtensionService";
 import CommandHandler from "./CommandHandler";
 import IExtension, { IExtensionConstructor } from "@service/extensions/IExtension";
+import LoggerService from "../service/logger/LoggerService";
+import LogBuilder from "../service/logger/LogBuilder";
+import ConsoleLogger from "../service/logger/ConsoleLogger";
 
 
 export default class TestApplication implements IApplication {
@@ -12,9 +15,11 @@ export default class TestApplication implements IApplication {
     extensionService: ExtensionService = new ExtensionService();
     cmdHandler: CommandHandler = new CommandHandler();
     keepDependencies: string[];
+    preload: (extension: IExtension) => Promise<void>;
 
-    constructor(keepDependencies: string[]) {
+    constructor(keepDependencies: string[], preload?: (extension: IExtension) => Promise<void>) {
         this.keepDependencies = keepDependencies;
+        this.preload = preload;
     }
 
     async start(): Promise<void> {
@@ -22,14 +27,7 @@ export default class TestApplication implements IApplication {
 
         this.extensionService = await this.setupExtensionService();
 
-        this.extensionService.setContextInfo({
-            contextType: "test",
-            application: this,
-            extensionService: this.extensionService,
-        });
-
-        await this.extensionService.loadExtensionsFromExtensionsFolder();
-        await this.extensionService.startExtensions();
+        LoggerService.hookConsoleLog();
 
         console.log("INFO", "Test.ts", "Main Application Startup successful.");
     }
@@ -52,13 +50,21 @@ export default class TestApplication implements IApplication {
             extensionService.registerExtension(extension);
         }
 
-        extensionService.loadExtensions();
+        // @ts-ignore
+        extensionService.setContextInfo({
+            contextType: "test",
+            application: this,
+            extensionService: this.extensionService,
+        });
 
         const toKeep = extensionService.getExtensions(...this.keepDependencies);
+        await extensionService.loadExtensions();
 
         const addDependencies = (extension: IExtension): void => {
             for(const dependency of extension.metadata.resolvedDependencies) {
-                toKeep.push(dependency);
+                if(!toKeep.includes(dependency)) {
+                    toKeep.push(dependency);
+                }
                 addDependencies(dependency);
             }
         };
@@ -68,7 +74,20 @@ export default class TestApplication implements IApplication {
         }
 
         extensionService.extensions = toKeep;
+
+        if(this.preload) {
+            for(const extension of extensionService.extensions) {
+                await this.preload(extension);
+            }
+        }
+
         await extensionService.startExtensions();
+
+        if(!LogBuilder.onDone) {
+            LoggerService.hookConsoleLog();
+        }
+
+        LoggerService.loggers = [new ConsoleLogger(false)];
 
         return extensionService;
     }

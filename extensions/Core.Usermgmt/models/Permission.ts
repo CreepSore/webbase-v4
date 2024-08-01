@@ -3,7 +3,7 @@ import IPermission from "../types/IPermission";
 
 const schema = new mongoose.Schema<IPermission>({
     name: {type: String, required: true, unique: true},
-    path: {type: String, required: false},
+    path: {type: String, required: false, unique: true},
     description: {type: String, required: true},
 }, {
     virtuals: {

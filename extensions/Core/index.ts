@@ -81,33 +81,35 @@ export default class Core implements IExtension {
                 ));
         }
 
-        process.on("uncaughtException", (error, origin) => {
-            LogBuilder
-                .start()
-                .level("CRITICAL")
-                .info("Core")
-                .line("CRITICAL ERROR OCCURED - PROGRAM WILL CRASH")
-                .object("error", error)
-                .object("origin", origin)
-                .appendCallStack()
-                .done();
+        if(process) {
+            process.on("uncaughtException", (error, origin) => {
+                LogBuilder
+                    .start()
+                    .level("CRITICAL")
+                    .info("Core")
+                    .line("CRITICAL ERROR OCCURED - PROGRAM WILL CRASH")
+                    .object("error", error)
+                    .object("origin", origin)
+                    .appendCallStack()
+                    .done();
 
-            process.exit(1);
-        });
+                process.exit(1);
+            });
 
-        process.on("unhandledRejection", (reason, promise) => {
-            LogBuilder
-                .start()
-                .level("CRITICAL")
-                .info("Core")
-                .line("UNHANDLED REJECTION OCCURED - PROGRAM WILL CRASH")
-                .object("reason", reason)
-                .object("promise", promise)
-                .appendCallStack()
-                .done();
+            process.on("unhandledRejection", (reason, promise) => {
+                LogBuilder
+                    .start()
+                    .level("CRITICAL")
+                    .info("Core")
+                    .line("UNHANDLED REJECTION OCCURED - PROGRAM WILL CRASH")
+                    .object("reason", reason)
+                    .object("promise", promise)
+                    .appendCallStack()
+                    .done();
 
-            process.exit(1);
-        });
+                process.exit(1);
+            });
+        }
     }
 
     async stop(): Promise<void> {

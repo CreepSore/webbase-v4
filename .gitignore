@@ -8,6 +8,7 @@ docs/
 cfg/
 extensions/disabled.json
 storage.db
+*.heapsnapshot
 
 #############
 
