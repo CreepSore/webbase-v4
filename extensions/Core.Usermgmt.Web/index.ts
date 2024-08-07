@@ -116,8 +116,8 @@ export default class CoreUsermgmtWeb implements IExtension {
             try {
                 if(!req.session.userId) {
                     const autologin = this.autologinEntries.find(
-                        login => login.ip === req.headers["x-forwarded-for"]
-                            || login.ip === req.socket.remoteAddress,
+                        login => (req.headers["x-forwarded-for"] && login.ip === req.headers["x-forwarded-for"])
+                            || (!req.headers["x-forwarded-for"] && login.ip === req.socket.remoteAddress),
                     )?.username;
 
                     if(autologin) {

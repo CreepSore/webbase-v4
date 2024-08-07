@@ -1,5 +1,4 @@
 import * as React from "react";
-import INavigator from "./INavigator";
 import FullNavigator from "./FullNavigator";
 
 interface UseNavigationHandlerOptions<NavigationKeyType, NavigationArgumentsType> {
@@ -77,5 +76,6 @@ export default function useNavigationHandler<
         doNavigationRequest,
         doForwardsRequest: () => {},
         updateCurrentArguments,
+        pageStack,
     };
 }

@@ -8,7 +8,7 @@ export type {
 
 export interface IDataStreamData<KeyType extends string = any, ValueType = any> {
     type: KeyType;
-    value: ValueType;
+    data: ValueType;
 }
 
 export default class DataStream {
@@ -21,12 +21,12 @@ export default class DataStream {
 
     send<ValueType = any>(type: string, data: ValueType): void {
         this.events.get("receive").forEach(cb => {
-            (cb as DataStreamOnReceiveCallback)?.({type, value: data});
+            (cb as DataStreamOnReceiveCallback)?.({type, data});
         });
 
         [...this.validTypes].forEach(e => {
             (this.events.get(`receive-type-${e}`) || []).forEach(callback => {
-                (callback as DataStreamOnReceiveTypeCallback)?.(data, {type, value: data});
+                (callback as DataStreamOnReceiveTypeCallback)?.(data, {type, data});
             });
         });
     }
@@ -36,7 +36,7 @@ export default class DataStream {
     }
 
     removeReceiveListener(callback: DataStreamOnReceiveCallback<any, any>): void {
-        this.events.set("receive", this.events.get("receive").filter(e => e === callback));
+        this.events.set("receive", this.events.get("receive").filter(e => e !== callback));
     }
 
     receiveType<KeyType extends string, ValueType = any>(type: KeyType, callback: DataStreamOnReceiveTypeCallback<KeyType, ValueType>): void {
@@ -53,6 +53,6 @@ export default class DataStream {
             return;
         }
 
-        this.events.set(`receive-type-${type}`, this.events.get(`receive-type-${type}`).filter(e => e === callback));
+        this.events.set(`receive-type-${type}`, this.events.get(`receive-type-${type}`).filter(e => e !== callback));
     }
 }

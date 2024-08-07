@@ -26,12 +26,12 @@ import IUser from "@extensions/Core.Usermgmt/types/IUser";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Search as SearchIcon } from "@mui/icons-material";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
 import EditUserDialog from "../../components/dialogs/EditUserDialogs";
 import PermissionCheck from "@extensions/Core.Usermgmt.Web/web/components/PermissionCheck";
 import UsersPageController from "../../controllers/UsersPageController";
+import Search from "@mui/icons-material/Search";
 
 export default function UsersPage(): JSX.Element {
     const controller = React.useRef(new UsersPageController());
@@ -131,7 +131,7 @@ export default function UsersPage(): JSX.Element {
                                         setEditDialogMode("edit");
                                         setEditDialogUser(u);
                                     }}>
-                                        <ListItemIcon><SearchIcon /></ListItemIcon>
+                                        <ListItemIcon><Search /></ListItemIcon>
                                         <ListItemText>Edit</ListItemText>
                                     </MenuItem>
                                 }

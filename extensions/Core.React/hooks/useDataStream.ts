@@ -13,36 +13,39 @@ export type {
     useDataStreamReturnType,
 };
 
+const dataStreamObj = new DataStream();
+
+
 export default function useDataStream(): useDataStreamReturnType {
     const events = React.useRef<Map<string, Function[]>>(new Map());
-    const [dataStream, setDataStream] = React.useState(new DataStream());
+    const dataStream = React.useRef(dataStreamObj);
 
-    const receive: DataStream["receive"] = <ValueType = any>(callback: any): void => {
+    const receive: DataStream["receive"] = (callback: any): void => {
         if(!events.current.has("receive")) {
             events.current.set("receive", []);
         }
 
         events.current.get("receive").push(callback);
-        dataStream.receive(callback);
+        dataStream.current.receive(callback);
     };
 
     const removeReceiveListener: DataStream["removeReceiveListener"] = (callback: any): void => {
-        events.current.set("receive", events.current.get("receive").filter(e => e === callback));
-        dataStream.removeReceiveListener(callback);
+        events.current.set("receive", events.current.get("receive").filter(e => e !== callback));
+        dataStream.current.removeReceiveListener(callback);
     };
 
-    const receiveType: DataStream["receiveType"] = <KeyType extends string, ValueType = any>(type: any, callback: any): void => {
+    const receiveType: DataStream["receiveType"] = (type: any, callback: any): void => {
         if(!events.current.has(`receive-type-${type}`)) {
             events.current.set(`receive-type-${type}`, []);
         }
 
         events.current.get(`receive-type-${type}`).push(callback);
-        dataStream.receiveType(type, callback);
+        dataStream.current.receiveType(type, callback);
     };
 
     const removeReceiveTypeListener: DataStream["removeReceiveTypeListener"] = (type: any, callback: any): void => {
-        events.current.set(`receive-type-${type}`, events.current.get(`receive-type-${type}`).filter(e => e === callback));
-        dataStream.removeReceiveTypeListener(type, callback);
+        events.current.set(`receive-type-${type}`, events.current.get(`receive-type-${type}`).filter(e => e !== callback));
+        dataStream.current.removeReceiveTypeListener(type, callback);
     };
 
     React.useEffect(() => {
@@ -66,6 +69,6 @@ export default function useDataStream(): useDataStreamReturnType {
         removeReceiveListener,
         receiveType,
         removeReceiveTypeListener,
-        send: (...args) => dataStream.send(...args),
+        send: (...args) => dataStream.current.send(...args),
     };
 }

@@ -16,11 +16,6 @@ import ConfigLoader from "@logic/config/ConfigLoader";
 import LogBuilder from "@service/logger/LogBuilder";
 import Core from "@extensions/Core";
 
-type LoadedScript = {
-    src: string;
-    type: "module"|"normal";
-};
-
 // ! Disabling these rules since they're fucked up
 declare module "express-session" {
     export interface SessionData {

@@ -61,13 +61,8 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
     const [authTypeDialogType, setAuthTypeDialogType] = React.useState<Partial<AuthenticationType>>(null);
     const [selectedAuthType, setSelectedAuthType] = React.useState("");
 
-    const [errorUsername, setErrorUsername] = React.useState(false);
-    const [errorGroups, setErrorGroups] = React.useState(false);
-    const hasError = React.useMemo(
-        () => errorUsername
-            || errorGroups,
-        [errorUsername, errorGroups],
-    );
+    const [errorUsername] = React.useState(false);
+    const [errorGroups] = React.useState(false);
 
     // Functions
 
@@ -76,11 +71,6 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
             ...user,
             ...properties,
         });
-    };
-
-    const validate = (): void => {
-        setErrorUsername(Boolean(user.username));
-        setErrorGroups((user.groups.length || []) === 0);
     };
 
     const editUser = (): void => {
