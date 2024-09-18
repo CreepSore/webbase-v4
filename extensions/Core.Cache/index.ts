@@ -40,6 +40,8 @@ class CacheEntry<T> {
 
         if(this.refreshNextUpdate || (this.updateEveryMs > 0 && timeoutReached)) {
             this.refreshNextUpdate = false;
+            this.lastUpdate = new Date();
+
             LogBuilder
                 .start()
                 .level("INFO")
