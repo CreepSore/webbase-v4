@@ -152,7 +152,7 @@ There is also a High-Level Logging API available. Using it looks like this:
 ```javascript
 LogBuilder
     .start()
-    .level("INFO")
+    .level(LogBuilder.LogLevel.INFO)
     .info("Core")
     .line("Loggers initialized successfully")
     .done();

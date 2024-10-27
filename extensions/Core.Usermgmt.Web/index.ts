@@ -123,7 +123,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                     if(autologin) {
                         LogBuilder
                             .start()
-                            .level("WARN")
+                            .level(LogBuilder.LogLevel.WARN)
                             .info("Core.Usermgmt.Web")
                             .line("Automatic logon occured")
                             .object("info", {
@@ -142,7 +142,7 @@ export default class CoreUsermgmtWeb implements IExtension {
             catch(ex) {
                 LogBuilder
                     .start()
-                    .level("ERROR")
+                    .level(LogBuilder.LogLevel.ERROR)
                     .info("Core.Usermgmt.Web")
                     .line("Autologin failed.")
                     .object("error", ex)
@@ -163,7 +163,7 @@ export default class CoreUsermgmtWeb implements IExtension {
             catch(ex) {
                 LogBuilder
                     .start()
-                    .level("ERROR")
+                    .level(LogBuilder.LogLevel.ERROR)
                     .info("Core.Usermgmt.Web")
                     .line("Failed to initialize authorization handler")
                     .object("error", ex)

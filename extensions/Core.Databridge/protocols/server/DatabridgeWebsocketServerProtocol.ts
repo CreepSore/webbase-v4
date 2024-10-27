@@ -25,7 +25,7 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         if(!this.startCallback) {
             LogBuilder
                 .start()
-                .level("WARN")
+                .level(LogBuilder.LogLevel.WARN)
                 .info("DatabridgeWebSocketServerProtocol.ts")
                 .line("Use 'middleware' instead of start!")
                 .done();
@@ -39,7 +39,7 @@ export default class DatabridgeWebsocketServerProtocol implements IDatabridgeSer
         if(!this.stopCallback) {
             LogBuilder
                 .start()
-                .level("WARN")
+                .level(LogBuilder.LogLevel.WARN)
                 .info("DatabridgeWebSocketServerProtocol.ts")
                 .line("'stop' function is invalid.")
                 .done();

@@ -44,7 +44,7 @@ export class CacheEntry<T> {
 
             LogBuilder
                 .start()
-                .level("INFO")
+                .level(LogBuilder.LogLevel.INFO)
                 .info("Core.Cache")
                 .line(`Executing update-function for cache [${this.key}]`)
                 .done();
@@ -53,7 +53,7 @@ export class CacheEntry<T> {
 
             LogBuilder
                 .start()
-                .level("INFO")
+                .level(LogBuilder.LogLevel.INFO)
                 .info("Core.Cache")
                 .line(`Updated value for cache [${this.key}]`)
                 .debugObject("newValue", this.currentValue)

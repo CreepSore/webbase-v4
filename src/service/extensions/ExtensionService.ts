@@ -76,7 +76,7 @@ export default class ExtensionService {
                     if(!this.doSkipLogs) {
                         LogBuilder
                             .start()
-                            .level("INFO")
+                            .level(LogBuilder.LogLevel.INFO)
                             .info("ExtensionService.ts")
                             .line(`Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`)
                             .done();
@@ -85,7 +85,7 @@ export default class ExtensionService {
                 catch(err) {
                     LogBuilder
                         .start()
-                        .level("ERROR")
+                        .level(LogBuilder.LogLevel.ERROR)
                         .info("ExtensionService.ts")
                         .line(`Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed`)
                         .object("error", err)
@@ -148,7 +148,7 @@ export default class ExtensionService {
         if(!result) {
             LogBuilder
                 .start()
-                .level("WARN")
+                .level(LogBuilder.LogLevel.WARN)
                 .info("ExtensionService.ts")
                 .line(`Failed to get extension [${name}]`)
                 .done();

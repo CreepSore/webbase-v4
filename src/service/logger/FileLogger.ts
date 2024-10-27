@@ -32,6 +32,9 @@ export default class FileLogger implements ILogger {
             formatted = level;
         }
 
+        // ! This isn't async by choice!
+        // ! We don't want to risk mixing up log messages due to writing two
+        // ! entries at once.
         fs.appendFileSync(this.logfilePath, formatted);
     }
 }

@@ -73,7 +73,7 @@ export default class RemoteConsoleServer extends DatabridgeTcpServerProtocol {
 
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.RemoteConsole")
             .line("Client connected")
             .object("remoteConsoleClient", remoteConsoleClient)
@@ -89,7 +89,7 @@ export default class RemoteConsoleServer extends DatabridgeTcpServerProtocol {
 
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.RemoteConsole")
             .line("Client disconnected")
             .object("remoteConsoleClient", remoteConsoleClient)
@@ -101,7 +101,7 @@ export default class RemoteConsoleServer extends DatabridgeTcpServerProtocol {
     private async handleClientPacket(client: RemoteConsoleClient, packet: IDatabridgePacket<any, any>): Promise<void> {
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.RemoteConsole")
             .line("Received Packet")
             .object("packet", packet)
@@ -121,7 +121,7 @@ export default class RemoteConsoleServer extends DatabridgeTcpServerProtocol {
 
                     LogBuilder
                         .start()
-                        .level("WARN")
+                        .level(LogBuilder.LogLevel.WARN)
                         .info("Core.RemoteConsole")
                         .line("Client succeeded authentication request")
                         .object("remoteConsoleClient", client)
@@ -131,7 +131,7 @@ export default class RemoteConsoleServer extends DatabridgeTcpServerProtocol {
                 else {
                     LogBuilder
                         .start()
-                        .level("WARN")
+                        .level(LogBuilder.LogLevel.WARN)
                         .info("Core.RemoteConsole")
                         .line("Client failed authentication request")
                         .object("remoteConsoleClient", client)

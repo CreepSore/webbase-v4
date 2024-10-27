@@ -8,6 +8,14 @@ import ILogEntry from "./ILogEntry";
  * It supports adding various log information like level, messages, and objects, and can measure method execution times.
  */
 export default class LogBuilder {
+    static readonly LogLevel = {
+        NOTE: "NOTE",
+        INFO: "INFO",
+        ERROR: "ERROR",
+        WARN: "WARN",
+        CRITICAL: "CRITICAL",
+    } as const;
+
     logEntry: ILogEntry;
     static onDone: (log: ILogEntry) => void;
 
@@ -35,7 +43,7 @@ export default class LogBuilder {
 
                 const builder = LogBuilder
                     .start()
-                    .level("INFO");
+                    .LogBuilder.LogLevel.INFO;
 
                 if(infos.length > 0) {
                     builder.info(...infos);
@@ -89,7 +97,7 @@ export default class LogBuilder {
 
                 const builder = LogBuilder
                     .start()
-                    .level("INFO");
+                    .LogBuilder.LogLevel.INFO;
 
                 if(infos.length > 0) {
                     builder.info(...infos);

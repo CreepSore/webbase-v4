@@ -156,7 +156,7 @@ export default class ChildApplication implements IApplication {
 
                     LogBuilder
                         .start()
-                        .level("INFO")
+                        .level(LogBuilder.LogLevel.INFO)
                         .info("ChildApplication.ts", childAppType, childProcessId)
                         .line("Got handshake from ChildApplication.")
                         .done();
@@ -167,7 +167,7 @@ export default class ChildApplication implements IApplication {
             forkedProcess.once("exit", code => {
                 LogBuilder
                     .start()
-                    .level("INFO")
+                    .level(LogBuilder.LogLevel.INFO)
                     .info("ChildApplication.ts", childAppType, childProcessId, String(code))
                     .line("Child Application exited.")
                     .done();

@@ -19,7 +19,7 @@ export function $catchPromise(
                 ret.catch(() => {
                     const builder = LogBuilder
                         .start()
-                        .level("ERROR");
+                        .level(LogBuilder.LogLevel.ERROR);
 
                     if(infos.length > 0) {
                         builder.info(...infos);

@@ -126,7 +126,7 @@ export default class AuthorizationHandler {
             catch(ex) {
                 LogBuilder
                     .start()
-                    .level("ERROR")
+                    .level(LogBuilder.LogLevel.ERROR)
                     .info("AuthorizationHandler")
                     .line("An error occured while trying to initialize the AuthorizationHandler")
                     .object("error", ex)

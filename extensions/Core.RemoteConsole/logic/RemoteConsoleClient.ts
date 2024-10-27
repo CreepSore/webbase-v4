@@ -57,7 +57,7 @@ export default class RemoteConsoleClient extends DatabridgeTcpClientProtocol {
     private handleConnected(): void {
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.RemoteConsole.Client")
             .line("Connection established")
             .done();
@@ -72,7 +72,7 @@ export default class RemoteConsoleClient extends DatabridgeTcpClientProtocol {
     private async handleDisconnected(): Promise<void> {
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.RemoteConsole.Client")
             .line("Connection closed")
             .done();
@@ -98,7 +98,7 @@ export default class RemoteConsoleClient extends DatabridgeTcpClientProtocol {
             const commandResultPacket = packet as DatabridgePacket<ICommandExecutionResult, {result: any}>;
             LogBuilder
                 .start()
-                .level("INFO")
+                .level(LogBuilder.LogLevel.INFO)
                 .info("Core.RemoteConsole.Client")
                 .line(commandResultPacket.data.result as string)
                 .line(...commandResultPacket.data.log)

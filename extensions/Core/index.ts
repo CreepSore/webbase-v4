@@ -85,7 +85,7 @@ export default class Core implements IExtension {
             process.on("uncaughtException", (error, origin) => {
                 LogBuilder
                     .start()
-                    .level("CRITICAL")
+                    .level(LogBuilder.LogLevel.CRITICAL)
                     .info("Core")
                     .line("CRITICAL ERROR OCCURED - PROGRAM WILL CRASH")
                     .object("error", error)
@@ -99,7 +99,7 @@ export default class Core implements IExtension {
             process.on("unhandledRejection", (reason, promise) => {
                 LogBuilder
                     .start()
-                    .level("CRITICAL")
+                    .level(LogBuilder.LogLevel.CRITICAL)
                     .info("Core")
                     .line("UNHANDLED REJECTION OCCURED - PROGRAM WILL CRASH")
                     .object("reason", reason)

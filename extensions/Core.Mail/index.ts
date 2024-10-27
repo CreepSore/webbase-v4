@@ -87,7 +87,7 @@ export default class CoreMail implements IExtension {
 
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.Mail")
             .line(`Added Mail-Transporter [${name}]@][${config.username}]`)
             .done();
@@ -104,7 +104,7 @@ export default class CoreMail implements IExtension {
         if(!mailer) {
             LogBuilder
                 .start()
-                .level("WARN")
+                .level(LogBuilder.LogLevel.WARN)
                 .info("Core.Mail")
                 .line(`Mailer with name [${mailerName}] does not exist`)
                 .done();
@@ -117,7 +117,7 @@ export default class CoreMail implements IExtension {
 
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.Mail")
             .line(`Sending mail to [${mail.to}] from [${mail.from}]`)
             .done();
@@ -127,7 +127,7 @@ export default class CoreMail implements IExtension {
 
             LogBuilder
                 .start()
-                .level("INFO")
+                .level(LogBuilder.LogLevel.INFO)
                 .info("Core.Mail")
                 .line(`Sent mail to [${mail.to}] from [${mail.from}]`)
                 .done();
@@ -135,7 +135,7 @@ export default class CoreMail implements IExtension {
         catch(err) {
             LogBuilder
                 .start()
-                .level("INFO")
+                .level(LogBuilder.LogLevel.INFO)
                 .info("Core.Mail")
                 .line(`Failed to send mail to [${mail.to}] from [${mail.from}]: ${err.message}`)
                 .debugObject("error", err)

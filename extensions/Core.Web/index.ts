@@ -110,7 +110,7 @@ export default class CoreWeb implements IExtension {
 
             LogBuilder
                 .start()
-                .level("NOTE")
+                .level("WEBINFO")
                 .info("Core.Web")
                 .info(req.method)
                 .line(`${req.headers["x-forwarded-for"] || req.socket.remoteAddress} requested [${req.url}]`)
@@ -140,7 +140,7 @@ export default class CoreWeb implements IExtension {
 
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.Web")
             .line("Started Web-Server")
             .object("config", this.config)
@@ -196,7 +196,7 @@ export default class CoreWeb implements IExtension {
 
         LogBuilder
             .start()
-            .level("NOTE")
+            .level(LogBuilder.LogLevel.NOTE)
             .info("Core.Web")
             .line("Added new script to registry")
             .object("script", {
@@ -238,7 +238,7 @@ export default class CoreWeb implements IExtension {
         catch(err) {
             LogBuilder
                 .start()
-                .level("ERROR")
+                .level(LogBuilder.LogLevel.ERROR)
                 .info("Core.Web")
                 .line("Failed to load chunks")
                 .object("error", err)

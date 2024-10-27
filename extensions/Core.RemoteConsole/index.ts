@@ -73,7 +73,7 @@ export default class CoreRemoteConsole implements IExtension {
         if(!this.config.secret) {
             LogBuilder
                 .start()
-                .level("WARN")
+                .level(LogBuilder.LogLevel.WARN)
                 .info("Core.RemoteConsole")
                 .line("No secret set. Remote Console will not be enabled.")
                 .done();
@@ -82,7 +82,7 @@ export default class CoreRemoteConsole implements IExtension {
 
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.RemoteConsole")
             .line("Starting Remote Console")
             .debugObject("config", this.config)

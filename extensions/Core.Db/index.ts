@@ -44,7 +44,7 @@ export default class CoreDb implements IExtension {
 
         LogBuilder
             .start()
-            .level("INFO")
+            .level(LogBuilder.LogLevel.INFO)
             .info("Core.Db")
             .line("Initialized Connection to the Database")
             .debugObject("config", this.config.connection)

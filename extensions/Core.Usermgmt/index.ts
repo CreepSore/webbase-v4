@@ -86,7 +86,7 @@ export default class CoreUsermgmt implements IExtension {
 
             LogBuilder
                 .start()
-                .level("WARN")
+                .level(LogBuilder.LogLevel.WARN)
                 .info("Core.Usermgmt")
                 .line(`Root user created. One-Time-Key: [${onceKey}]`)
                 .done();

@@ -40,7 +40,7 @@ export default class CoreNotifications implements IExtension {
             catch {
                 LogBuilder
                     .start()
-                    .level("ERROR")
+                    .level(LogBuilder.LogLevel.ERROR)
                     .info(this.metadata.name)
                     .line(`Failed to send notification using provider of type ${notificationProvider.type}`)
                     .done();
@@ -53,7 +53,7 @@ export default class CoreNotifications implements IExtension {
             LogBuilder
                 .start()
                 .info(this.metadata.name)
-                .level("WARN")
+                .level(LogBuilder.LogLevel.WARN)
                 .line(`Provider of type ${provider.type} is already registered.`)
                 .done();
 
@@ -91,7 +91,7 @@ export default class CoreNotifications implements IExtension {
                 LogBuilder
                     .start()
                     .info(this.metadata.name)
-                    .level("ERROR")
+                    .level(LogBuilder.LogLevel.ERROR)
                     .line(`Failed to send notification using provider of type ${provider.type}`)
                     .done();
             }
@@ -128,7 +128,7 @@ export default class CoreNotifications implements IExtension {
                 catch {
                     LogBuilder
                         .start()
-                        .level("ERROR")
+                        .level(LogBuilder.LogLevel.ERROR)
                         .info(this.metadata.name)
                         .line(`Failed to start notification provider of type ${notificationProvider.type}`)
                         .done();
