@@ -10,14 +10,14 @@ class CacheConfig {
 
 }
 
-interface CacheEntryConfig<T> {
+export interface CacheEntryConfig<T> {
     key: string;
     updateCallback: () => Promise<T> | T;
     defaultValue?: T;
     updateEveryMs?: number;
 }
 
-class CacheEntry<T> {
+export class CacheEntry<T> {
     key: string;
     currentValue: T;
     defaultValue?: T;
@@ -117,10 +117,10 @@ export default class CoreCache implements IExtension {
         return this.cache.get(key) as CacheEntry<T>;
     }
 
-    getCachedInstance<T>(key: string, config: CacheEntryConfig<T>): CacheEntry<T> {
+    getCachedInstance<T>(key: string, config: Omit<CacheEntryConfig<T>, "key">): CacheEntry<T> {
         if(this.cache.has(key)) return this.getCacheEntry(key);
 
-        return this.createCacheEntry(config);
+        return this.createCacheEntry({...config, key});
     }
 
     getCachedValue<T>(key: string, defaultValue: T): T {
