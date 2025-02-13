@@ -35,7 +35,11 @@ export default class CoreDb implements IExtension {
     }
 
     async start(executionContext: IExecutionContext): Promise<void> {
-        if(executionContext.contextType !== "app" && executionContext.contextType !== "test") {
+        if(
+            executionContext.contextType !== "app"
+            && executionContext.contextType !== "test"
+            && executionContext.contextType !== "child-app"
+        ) {
             return;
         }
         this.checkConfig();
