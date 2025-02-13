@@ -159,7 +159,7 @@ export default class ChildApplication implements IApplication {
                         .level(LogBuilder.LogLevel.INFO)
                         .info("ChildApplication.ts", childAppType, childProcessId)
                         .line("Got handshake from ChildApplication.")
-                        .done();
+                        .debugDone();
                 }
             };
             forkedProcess.on("message", listenForHandshake);
@@ -170,7 +170,7 @@ export default class ChildApplication implements IApplication {
                     .level(LogBuilder.LogLevel.INFO)
                     .info("ChildApplication.ts", childAppType, childProcessId, String(code))
                     .line("Child Application exited.")
-                    .done();
+                    .debugDone();
             });
 
             this.childProcesses.push({
@@ -256,8 +256,8 @@ export default class ChildApplication implements IApplication {
             const receiveCallback = (packet: any): void => {
                 if(packet?.sender === extensionName) {
                     res(packet.message);
-                    process.removeListener("message", receiveCallback);
-                }                target.removeListener("message", receiveCallback);
+                    target.removeListener("message", receiveCallback);
+                }
             };
 
             target.on("message", receiveCallback);
