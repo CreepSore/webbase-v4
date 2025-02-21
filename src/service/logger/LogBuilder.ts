@@ -43,7 +43,7 @@ export default class LogBuilder {
 
                 const builder = LogBuilder
                     .start()
-                    .LogBuilder.LogLevel.INFO;
+                    .level(LogBuilder.LogLevel.INFO);
 
                 if(infos.length > 0) {
                     builder.info(...infos);
@@ -97,7 +97,7 @@ export default class LogBuilder {
 
                 const builder = LogBuilder
                     .start()
-                    .LogBuilder.LogLevel.INFO;
+                    .level(LogBuilder.LogLevel.INFO);
 
                 if(infos.length > 0) {
                     builder.info(...infos);
