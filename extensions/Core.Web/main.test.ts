@@ -31,6 +31,7 @@ describe("assertStructure tests", () => {
                     d: "string",
                     e: true,
                     f: new Date(),
+                    g: "HELLO",
                 },
             },
         };
@@ -42,6 +43,7 @@ describe("assertStructure tests", () => {
                     d: String,
                     e: Boolean,
                     f: Date,
+                    g: (v: string) => v === "HELLO",
                 },
             },
         };

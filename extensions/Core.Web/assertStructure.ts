@@ -1,6 +1,14 @@
-type StructureAssertionBase = String | Number | Boolean | Date | string | number | boolean | object | null | undefined;
+type StructureAssertionBase = String | Number | Boolean | Date | string | number | boolean | object | null | undefined | ((value: any) => boolean);
 type StructureAssertionLayer = StructureAssertionBase | { [key: string]: StructureAssertionLayer };
 type StructureAssertion = StructureAssertionLayer;
+
+export function tryAssertStructure<T>(is: T, expected: StructureAssertion): T {
+    if (!assertStructure(is, expected)) {
+        return null;
+    }
+
+    return is;
+}
 
 export default function assertStructure(is: any, expected: StructureAssertion): boolean {
     if (is === expected) {
@@ -37,7 +45,17 @@ export default function assertStructure(is: any, expected: StructureAssertion): 
                 continue;
             }
 
-            if (!assertStructure(is[key], expected[key as keyof typeof expected])) {
+            const check = expected[key as keyof typeof expected];
+
+            if(typeof check === "function" && check !== String && check !== Number && check !== Boolean && check !== Date) {
+                if (!(check as (value: any) => boolean)(is[key])) {
+                    return false;
+                }
+
+                continue;
+            }
+
+            if (!assertStructure(is[key], check)) {
                 return false;
             }
         }
