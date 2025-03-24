@@ -1,5 +1,5 @@
 type StructureAssertionBase = String | Number | Boolean | Date | string | number | boolean | object | null | undefined | ((value: any) => boolean);
-type StructureAssertionLayer = StructureAssertionBase | { [key: string]: StructureAssertionLayer };
+type StructureAssertionLayer = StructureAssertionBase | { [key: string]: StructureAssertionLayer } | [StructureAssertionBase];
 type StructureAssertion = StructureAssertionLayer;
 
 export function tryAssertStructure<T>(is: T, expected: StructureAssertion): T {
@@ -12,6 +12,28 @@ export function tryAssertStructure<T>(is: T, expected: StructureAssertion): T {
 
 export default function assertStructure(is: any, expected: StructureAssertion): boolean {
     if (is === expected) {
+        return true;
+    }
+
+    const preCheck = expected;
+
+    if(typeof preCheck === "function" && preCheck !== String && preCheck !== Number && preCheck !== Boolean && preCheck !== Date) {
+        if (!(preCheck as (value: any) => boolean)(is)) {
+            return false;
+        }
+    }
+
+    if(Array.isArray(is)) {
+        if(!Array.isArray(expected)) {
+            return false;
+        }
+
+        for(let i = 0; i < is.length; i++) {
+            if(!assertStructure(is[i], expected[0])) {
+                return false;
+            }
+        }
+
         return true;
     }
 

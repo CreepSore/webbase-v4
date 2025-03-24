@@ -63,4 +63,62 @@ describe("assertStructure tests", () => {
         expect(assertStructure(test, expectedCtor)).toBe(true);
         expect(assertStructure(test, failTest)).toBe(false);
     });
+
+    it("should assert structures with arrays", () => {
+        const test = {
+            a: [
+                {
+                    b: 0,
+                    c: "string",
+                    d: true,
+                    e: new Date(),
+                    f: "HELLO",
+                },
+                {
+                    b: 1,
+                    c: "string",
+                    d: true,
+                    e: new Date(),
+                    f: "HELLO",
+                },
+            ],
+        };
+
+        const expectedCtor = {
+            a: [
+                {
+                    b: Number,
+                    c: String,
+                    d: Boolean,
+                    e: Date,
+                    f: (v: string) => v === "HELLO",
+                },
+            ],
+        };
+
+        const failTest = {
+            a: [
+                {
+                    b: String,
+                    c: String,
+                    d: Boolean,
+                    e: Date,
+                    f: (v: string) => v === "HELLO",
+                },
+            ],
+        };
+
+        const failTest2 = {
+            a: [
+                () => {
+                    return false;
+                },
+            ],
+        };
+
+        expect(assertStructure(test, expectedCtor)).toBe(true);
+        expect(assertStructure(test, expectedCtor)).toBe(true);
+        expect(assertStructure(test, failTest)).toBe(false);
+        expect(assertStructure(test, failTest2)).toBe(false);
+    });
 });
