@@ -32,21 +32,25 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
     const [availableGroups] = useFetchApi(
         () => UsermgmtWebApi.getPermissionGroups(),
         [{name: "...", description: "...", permissions: []}],
-        (groups) => {
-            if(!user.groups) {
-                const anonGroup = groups.find(g => g.name === "Anonymous");
-                if(anonGroup) {
-                    mergeUserProperties({groups: [anonGroup]});
+        {
+            onDataUpdated: (groups) => {
+                if(!user.groups) {
+                    const anonGroup = groups.find(g => g.name === "Anonymous");
+                    if(anonGroup) {
+                        mergeUserProperties({groups: [anonGroup]});
+                    }
                 }
-            }
+            },
         },
     );
 
     const [availableAuthTypes] = useFetchApi(
         () => UsermgmtWebApi.getAuthenticationTypes(),
         [],
-        (types) => {
-            setSelectedAuthType(types[0]);
+        {
+            onDataUpdated: (types) => {
+                setSelectedAuthType(types[0]);
+            },
         },
     );
 
@@ -92,9 +96,11 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
             {authTypeDialogType && <EditAuthTypeDialog
                 type={authTypeDialogMode}
                 authenticationType={authTypeDialogType}
-                onCreated={finishedAuthType => mergeUserProperties({
-                    authentication: [...(user.authentication || []), finishedAuthType],
-                })}
+                onCreated={finishedAuthType => {
+                    mergeUserProperties({
+                        authentication: [...(user.authentication || []), finishedAuthType],
+                    });
+                }}
                 onEdited={finishedAuthType => {
                     mergeUserProperties({
                         authentication: [...(user.authentication || []).filter(x => x !== authTypeDialogType), finishedAuthType],
@@ -179,7 +185,7 @@ export default function EditUserDialog(props: EditUserDialogProperties): JSX.Ele
                     </div>
 
                     <div className="grid grid-cols-2 overflow-y-auto max-h-32">
-                        {(user.authentication || []).map((auth, i) => <React.Fragment key={i}>
+                        {(user.authentication || []).filter(Boolean).map((auth, i) => <React.Fragment key={i}>
                             <div>{auth.type}</div>
                             <div className="flex justify-end">
                                 <Button

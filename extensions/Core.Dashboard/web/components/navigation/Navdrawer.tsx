@@ -9,7 +9,30 @@ import CloseIcon from "@mui/icons-material/Close";
 import NavigatorContext from "@extensions/Core.React/Navigator/NavigatorContext";
 import PermissionCheck from "@extensions/Core.Usermgmt.Web/web/components/PermissionCheck";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
+import { House, Person, Security } from "@mui/icons-material";
 
+type NavigatorButtonProperties = {
+    navKey: string;
+    navArgs?: any;
+
+    label: string;
+
+    startIcon?: React.ReactNode;
+    endIcon?: React.ReactNode;
+};
+
+function NavigationButton({label, navKey, navArgs, startIcon, endIcon}: NavigatorButtonProperties): React.ReactElement {
+    const navigator = React.useContext(NavigatorContext);
+
+    return <Button
+        className="!text-left"
+        size="large"
+        onClick={() => navigator.doNavigationRequest(navKey, navArgs)}
+        startIcon={startIcon}
+        endIcon={endIcon}
+        disabled={navigator.currentPage === navKey}
+    >{label}</Button>;
+}
 
 interface NavdrawerProperties {
     open: boolean;
@@ -17,8 +40,6 @@ interface NavdrawerProperties {
 }
 
 export default function Navdrawer(props: NavdrawerProperties): JSX.Element {
-    const navigator = React.useContext(NavigatorContext);
-
     return <Drawer
         anchor="left"
         open={props.open}
@@ -28,20 +49,27 @@ export default function Navdrawer(props: NavdrawerProperties): JSX.Element {
             <IconButton onClick={() => props.onClose()}><CloseIcon /></IconButton>
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col !min-w-[250px]">
+            <NavigationButton
+                label="Home"
+                navKey="home"
+                startIcon={<House />}
+            />
+
             <PermissionCheck permissions={[Permissions.USERS.VIEW]}>
-                <Button
-                    className="!w-[250px]"
-                    size="large"
-                    onClick={() => navigator.doNavigationRequest("users", {})}
-                >Users</Button>
+                <NavigationButton
+                    label="Users"
+                    navKey="users"
+                    startIcon={<Person />}
+                />
             </PermissionCheck>
 
             <PermissionCheck permissions={[Permissions.PERMISSIONS.VIEW]}>
-                <Button
-                    size="large"
-                    onClick={() => navigator.doNavigationRequest("permissions", {})}
-                >Permissions</Button>
+                <NavigationButton
+                    label="Permissions"
+                    navKey="permissions"
+                    startIcon={<Security />}
+                />
             </PermissionCheck>
         </div>
     </Drawer>;

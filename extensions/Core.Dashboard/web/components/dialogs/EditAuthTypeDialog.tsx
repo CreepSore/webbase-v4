@@ -43,6 +43,12 @@ export default function EditAuthTypeDialog<AuthType extends AuthenticationType>(
                 wasEdited: true,
             } as unknown as AuthType & {wasEdited: boolean};
 
+            case "totp": return {
+                type: "totp",
+                secret: totpKey,
+                wasEdited: true,
+            } as unknown as AuthType & {wasEdited: boolean};
+
             case "permanent_key": return {
                 type: "permanent_key",
                 keys,
