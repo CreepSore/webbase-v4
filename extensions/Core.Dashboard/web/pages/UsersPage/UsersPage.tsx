@@ -38,7 +38,9 @@ export default function UsersPage(): JSX.Element {
 
     const me = React.useContext(MeContext);
     const [rowRefs, setRowRefs] = React.useState<Map<IUser, HTMLElement>>(new Map());
-    const [users, usersLoading, updateUsers] = useFetchApi(() => controller.current.getUsers(), [], () => setRowRefs(new Map()));
+    const [users, usersLoading, updateUsers] = useFetchApi(() => controller.current.getUsers(), [], {
+        onDataUpdated: () => setRowRefs(new Map()),
+    });
     const [userToDelete, setUserToDelete] = React.useState<IUser>(null);
     const [editDialogMode, setEditDialogMode] = React.useState<"edit"|"create">(null);
     const [editDialogUser, setEditDialogUser] = React.useState<IUser>(null);
@@ -125,7 +127,7 @@ export default function UsersPage(): JSX.Element {
                                 anchorEl={rowRefs.get(u)}
                                 onClose={() => setOpenMenu(null)}
                             >
-                                {me.hasPermission(Permissions.USERS.EDIT.name) &&
+                                <PermissionCheck permissions={[Permissions.USERS.EDIT.name]}>
                                     <MenuItem onClick={() => {
                                         setOpenMenu(null);
                                         setEditDialogMode("edit");
@@ -134,9 +136,9 @@ export default function UsersPage(): JSX.Element {
                                         <ListItemIcon><Search /></ListItemIcon>
                                         <ListItemText>Edit</ListItemText>
                                     </MenuItem>
-                                }
+                                </PermissionCheck>
 
-                                {me.hasPermission(Permissions.USERS.IMPERSONATE.name) &&
+                                <PermissionCheck permissions={[Permissions.USERS.IMPERSONATE.name]}>
                                     <MenuItem onClick={() => {
                                         setOpenMenu(null);
                                         controller.current
@@ -145,7 +147,7 @@ export default function UsersPage(): JSX.Element {
                                     }}>
                                         <ListItemText>Impersonate</ListItemText>
                                     </MenuItem>
-                                }
+                                </PermissionCheck>
                             </Menu>
                         </PermissionCheck>
                     </TableCell>

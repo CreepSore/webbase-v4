@@ -22,6 +22,7 @@ import AddIcon from "@mui/icons-material/Add";
 import MeContext from "@extensions/Core.Usermgmt.Web/web/components/me-provider/MeContext";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
 import PermissionsPageController from "../../controllers/PermissionsPageController";
+import PermissionCheck from "../../../../Core.Usermgmt.Web/web/components/PermissionCheck";
 
 type PermissionsRow = IPermission & {
     id: string,
@@ -145,9 +146,9 @@ export default function PermissionsPage(): JSX.Element {
         }}>
             {(showNoneEntry || loadingPermissionGroups) && <MenuItem value="None">None</MenuItem>}
 
-            {me.hasPermission(Permissions.PERMISSIONS.EDIT) &&
+            <PermissionCheck permissions={[Permissions.PERMISSIONS.EDIT]}>
                 <MenuItem value="Create"><AddIcon /> Create</MenuItem>
-            }
+            </PermissionCheck>
 
             {(permissionGroups || []).map(pg => <MenuItem
                 key={pg.name}
