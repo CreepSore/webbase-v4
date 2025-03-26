@@ -1,9 +1,12 @@
 import * as React from "react";
 import BasePage from "../BasePage/BasePage";
-import { Card, Container, PaletteColor, Paper, Theme, Typography, useTheme } from "@mui/material";
+import { Card, Container, PaletteColor, Paper, Typography, useTheme } from "@mui/material";
 import { Person, Security } from "@mui/icons-material";
 import NavigatorContext from "../../../../Core.React/Navigator/NavigatorContext";
 import { twMerge } from "tailwind-merge";
+import PermissionCheck from "../../../../Core.Usermgmt.Web/web/components/PermissionCheck";
+import Permissions from "@extensions/Core.Usermgmt/permissions";
+
 
 type ResponsiveCardProperties = {
     icon: React.ReactElement;
@@ -59,19 +62,23 @@ export default function HomePage(): JSX.Element {
         <Container>
             <Paper className="mt-2 p-4" elevation={3}>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <ResponsiveCard
-                        label="Users"
-                        icon={<Person style={{fontSize: "3.5em"}} />}
-                        onClick={() => navigator.doNavigationRequest("users", {})}
-                        color="success"
-                    />
+                    <PermissionCheck permissions={[Permissions.USERS.VIEW]}>
+                        <ResponsiveCard
+                            label="Users"
+                            icon={<Person style={{fontSize: "3.5em"}} />}
+                            onClick={() => navigator.doNavigationRequest("users", {})}
+                            color="success"
+                        />
+                    </PermissionCheck>
 
-                    <ResponsiveCard
-                        label="Permissions"
-                        icon={<Security style={{fontSize: "3em"}} />}
-                        onClick={() => navigator.doNavigationRequest("permissions", {})}
-                        color="warning"
-                    />
+                    <PermissionCheck permissions={[Permissions.PERMISSIONS.VIEW]}>
+                        <ResponsiveCard
+                            label="Permissions"
+                            icon={<Security style={{fontSize: "3em"}} />}
+                            onClick={() => navigator.doNavigationRequest("permissions", {})}
+                            color="warning"
+                        />
+                    </PermissionCheck>
                 </div>
             </Paper>
         </Container>
