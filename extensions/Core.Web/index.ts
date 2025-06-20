@@ -274,7 +274,7 @@ export default class CoreWeb implements IExtension {
         <link rel="icon" type="image/png" href="/favicon.png" sizes="32x32">
         <link rel="icon" type="image/png" href="/favicon.png" sizes="96x96">
         <title>Webbase v4</title>
-        ${toLoad.map(s => `<script src="${s.url}"${s.type !== "normal" ? `type="${s.type}"` : ""}></script>`).join("\n")}
+        ${toLoad.map(s => `<script src="${s.url}"${s.type !== "normal" ? ` type="${s.type}"` : ""}></script>`).join("\n")}
         <style>
             html, body, main {
                 min-height: 100vh;
