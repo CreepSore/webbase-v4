@@ -24,7 +24,7 @@ export type SetProxyActionResult<T = any> = BaseProxyAction & {
 
 export type ErrorProxyActionResult<T = any> = BaseProxyAction & {
     type: "error";
-    error: Error;
+    error: Error | string;
 };
 
 export type ProxyActionResultThreadMessagePayload<TResult> =

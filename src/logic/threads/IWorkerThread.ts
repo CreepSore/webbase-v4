@@ -11,4 +11,5 @@ export default interface IWorkerThread extends IThreadMessageSender, IThreadMess
 
     registerProxy<T>(proxyType: string, object: T, proxyId: string): Promise<string>;
     getProxy<T>(proxyId: string, templateObject: {prototype: T}): T;
+    getStaticProxy<T>(proxyId: string, templateObject: {prototype: T}): T;
 }

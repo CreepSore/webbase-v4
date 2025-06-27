@@ -70,7 +70,7 @@ export default class ThreadReceivingObjectProxyConnection<TObject extends Object
                     await this.sender.sendThreadMessage(new ProxyActionResultThreadMessage({
                         actionId: p.actionId,
                         type: "error",
-                        error: err,
+                        error: String(err),
                     }));
                 }
 
@@ -92,7 +92,7 @@ export default class ThreadReceivingObjectProxyConnection<TObject extends Object
                     await this.sender.sendThreadMessage(new ProxyActionResultThreadMessage({
                         actionId: actionMessage.payload.actionId,
                         type: "error",
-                        error: err,
+                        error: String(err),
                     }));
                 }
 
@@ -114,7 +114,7 @@ export default class ThreadReceivingObjectProxyConnection<TObject extends Object
                     await this.sender.sendThreadMessage(new ProxyActionResultThreadMessage({
                         actionId: actionMessage.payload.actionId,
                         type: "error",
-                        error: err,
+                        error: String(err),
                     }));
                 }
 
@@ -125,7 +125,7 @@ export default class ThreadReceivingObjectProxyConnection<TObject extends Object
                 await this.sender.sendThreadMessage(new ProxyActionResultThreadMessage({
                     actionId: actionMessage.payload.actionId,
                     type: "error",
-                    error: new Error("Invalid action target specified."),
+                    error: "Invalid action target specified.",
                 }));
 
                 break;

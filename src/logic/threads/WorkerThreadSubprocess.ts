@@ -13,11 +13,18 @@ import ProxyBroadcastThreadMessage from "./thread-messages/ProxyBroadcastThreadM
 import ObjectProxyFactory from "./object-proxy/ObjectProxyFactory";
 import ProxyActionThreadMessage from "./thread-messages/ProxyActionThreadMessage";
 import WorkerThread from "./WorkerThread";
+import User from "../../../extensions/Core.Usermgmt/models/User";
+import ProxyActionResultThreadMessage from "./thread-messages/ProxyActionResultThreadMessage";
+import ThreadSendingObjectProxyConnection from "./object-proxy/ThreadSendingObjectProxyConnection";
+import ExtensionService from "../../service/extensions/ExtensionService";
+import ThreadApplication from "../../application/ThreadApplication";
 
 export default class WorkerThreadSubprocess implements IWorkerThread {
     private _id: string;
     private _isStarted: boolean;
     private _proxyHandlers: Map<string, ThreadReceivingObjectProxyConnection<any>> = new Map();
+    private _registeredProxies: Map<string, ThreadSendingObjectProxyConnection> = new Map();
+    private _threadApplication: ThreadApplication = new ThreadApplication(this);
 
     get id(): string {
         return this._id;
@@ -36,7 +43,11 @@ export default class WorkerThreadSubprocess implements IWorkerThread {
 
         this.initializeLogging();
         this.initializeGlobalErrorHandler();
+
+        await this._threadApplication.start();
+
         this.startListening();
+        await this.initializeProxies();
     }
 
     async stop(): Promise<void> {
@@ -49,17 +60,28 @@ export default class WorkerThreadSubprocess implements IWorkerThread {
         this.stopListening();
     }
 
-    registerProxy<T>(proxyType: string, object: T, proxyId: string = null): Promise<string> {
+    async registerProxy<T>(proxyType: string, object: T, proxyId: string = null): Promise<string> {
         const proxyIdToUse = proxyId ?? uuid.v4();
         this._proxyHandlers.set(proxyIdToUse, new ThreadReceivingObjectProxyConnection<T>(object, this));
 
-        this.sendThreadMessage(new ProxyBroadcastThreadMessage(proxyType, proxyIdToUse, "auto"));
-
-        return Promise.resolve(proxyIdToUse);
+        await this.sendThreadMessage(new ProxyBroadcastThreadMessage(proxyType, proxyIdToUse, "auto"));
+        return proxyIdToUse;
     }
 
     getProxy<T>(proxyId: string, templateObject: {prototype: T}): T {
-        return ObjectProxyFactory.createSendProxy(proxyId, templateObject, this);
+        const proxy = ObjectProxyFactory.createSendProxy(proxyId, templateObject, this);
+        this._registeredProxies.set(proxyId, proxy.connection);
+        return proxy.proxy;
+    }
+
+    getStaticProxy<T>(proxyId: string, templateObject: {prototype: T}): T {
+        const proxy = ObjectProxyFactory.createStaticSendProxy(proxyId, templateObject, this);
+        this._registeredProxies.set(proxyId, proxy.connection);
+        return proxy.proxy;
+    }
+
+    private async initializeProxies(): Promise<void> {
+        await this.registerProxy("ThreadApplication", this._threadApplication, "ThreadApplication");
     }
 
     private startListening(): void {
@@ -113,17 +135,36 @@ export default class WorkerThreadSubprocess implements IWorkerThread {
     }
 
     async receiveThreadMessage<TPayload = any>(message: ThreadMessage<TPayload>): Promise<void> {
-        if(message.type === ProxyActionThreadMessage.type) {
-            const parsed = message as ProxyActionThreadMessage;
-            const proxy = this._proxyHandlers.get(parsed.payload.proxyId);
+        switch(message.type) {
+            case ProxyActionThreadMessage.type: {
+                const parsed = message as ProxyActionThreadMessage;
+                const proxy = this._proxyHandlers.get(parsed.payload.proxyId);
 
-            if(!proxy) {
-                return;
+                if(!proxy) {
+                    return;
+                }
+
+                await proxy.receiveThreadMessage(parsed);
+                break;
             }
 
-            await proxy.receiveThreadMessage(parsed);
+            case ProxyActionResultThreadMessage.type: {
+                for(const proxy of this._registeredProxies.values()) {
+                    proxy.receiveThreadMessage(message);
+                }
+                break;
+            }
 
-            return;
+            case ProxyBroadcastThreadMessage.type: {
+                const parsed = message as ProxyBroadcastThreadMessage;
+
+                const UserProxy = this.getStaticProxy<typeof User>(parsed.payload.proxyId, User);
+
+                const users = await UserProxy.find();
+
+                debugger;
+                break;
+            }
         }
     }
 }

@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import LogBuilder from "@service/logger/LogBuilder";
-import IExecutionContext, { IAppExecutionContext, IChildExecutionContext, ICliExecutionContext, ITestExecutionContext } from "./IExecutionContext";
+import IExecutionContext, { IAppExecutionContext, IChildExecutionContext, ICliExecutionContext, IThreadExecutionContext, ITestExecutionContext } from "./IExecutionContext";
 import IExtension, { IExtensionConstructor } from "./IExtension";
 
 export default class ExtensionService {
@@ -21,7 +21,7 @@ export default class ExtensionService {
      * Sets the current {@link IAppExecutionContext}
      * @param info
      */
-    setContextInfo(info: IAppExecutionContext|ICliExecutionContext|ITestExecutionContext|IChildExecutionContext): void {
+    setContextInfo(info: IExecutionContext): void {
         this.executionContext = info;
         this.executionContext.extensionService = this;
     }

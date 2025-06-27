@@ -1,5 +1,8 @@
 import * as uuid from "uuid";
+
 import * as workerThreads from "worker_threads";
+import * as events from "events";
+
 import IWorkerThread from "./IWorkerThread";
 import ThreadMessage from "./ThreadMessage";
 import LoggerService from "../../service/logger/LoggerService";
@@ -11,15 +14,17 @@ import ObjectProxyFactory from "./object-proxy/ObjectProxyFactory";
 import ProxyBroadcastThreadMessage from "./thread-messages/ProxyBroadcastThreadMessage";
 import ProxyActionResultThreadMessage from "./thread-messages/ProxyActionResultThreadMessage";
 import ProxyActionThreadMessage from "./thread-messages/ProxyActionThreadMessage";
+import ThreadSendingObjectProxyConnection from "./object-proxy/ThreadSendingObjectProxyConnection";
 
 export type WorkerThreadErrorHandler = (error: Error) => (Promise<void> | void);
 
-export default class WorkerThread implements IWorkerThread {
+export default class WorkerThread extends events.EventEmitter implements IWorkerThread {
     private _id: string;
     private _isStarted: boolean;
     private _worker: workerThreads.Worker;
     private _errorHandlers: Array<WorkerThreadErrorHandler> = [];
     private _proxyHandlers: Map<string, ThreadReceivingObjectProxyConnection<any>> = new Map();
+    private _registeredProxies: Map<string, ThreadSendingObjectProxyConnection> = new Map();
 
     get id() {
         return this._id;
@@ -34,6 +39,7 @@ export default class WorkerThread implements IWorkerThread {
     }
 
     constructor(id: string = null) {
+        super();
         this._id = id ?? uuid.v4();
     }
 
@@ -47,7 +53,15 @@ export default class WorkerThread implements IWorkerThread {
     }
 
     getProxy<T>(proxyId: string, templateObject: {prototype: T}): T {
-        return ObjectProxyFactory.createSendProxy(proxyId, templateObject, this);
+        const proxy = ObjectProxyFactory.createSendProxy(proxyId, templateObject, this);
+        this._registeredProxies.set(proxyId, proxy.connection);
+        return proxy.proxy;
+    }
+
+    getStaticProxy<T>(proxyId: string, templateObject: {prototype: T}): T {
+        const proxy = ObjectProxyFactory.createStaticSendProxy(proxyId, templateObject, this);
+        this._registeredProxies.set(proxyId, proxy.connection);
+        return proxy.proxy;
     }
 
     start(): Promise<void> {
@@ -121,26 +135,36 @@ export default class WorkerThread implements IWorkerThread {
     }
 
     async receiveThreadMessage<TPayload = any>(message: ThreadMessage<TPayload>): Promise<void> {
-        if(message.type === "log") {
-            const parsed = message as ThreadMessage<ILogEntry>;
-            parsed.payload.infos.unshift(`Thread '${this._id}'`);
+        this.emit("message", message);
 
-            await LoggerService.log(parsed.payload);
-            LoggerService.logSync(parsed.payload);
-            return;
-        }
+        switch(message.type) {
+            case "log": {
+                const parsed = message as ThreadMessage<ILogEntry>;
+                parsed.payload.infos.unshift(`Thread '${this._id}'`);
 
-        if(message.type === ProxyActionThreadMessage.type) {
-            const parsed = message as ProxyActionThreadMessage;
-            const proxy = this._proxyHandlers.get(parsed.payload.proxyId);
-
-            if(!proxy) {
-                return;
+                await LoggerService.log(parsed.payload);
+                LoggerService.logSync(parsed.payload);
+                break;
             }
 
-            await proxy.receiveThreadMessage(parsed);
+            case ProxyActionThreadMessage.type: {
+                const parsed = message as ProxyActionThreadMessage;
+                const proxy = this._proxyHandlers.get(parsed.payload.proxyId);
 
-            return;
+                if(!proxy) {
+                    return;
+                }
+
+                await proxy.receiveThreadMessage(parsed);
+                break;
+            }
+
+            case ProxyActionResultThreadMessage.type: {
+                for(const proxy of this._registeredProxies.values()) {
+                    proxy.receiveThreadMessage(message);
+                }
+                break;
+            }
         }
     }
 
@@ -161,5 +185,38 @@ export default class WorkerThread implements IWorkerThread {
 
     toString(): string {
         return `Thread '${this._id}'`;
+    }
+    
+    waitForMessage<TMessage extends ThreadMessage<any>>(filter: (message: TMessage) => boolean): Promise<TMessage> {
+        return new Promise(res => {
+            const callback = (message: TMessage) => {
+                if(filter(message)) {
+                    res(message);
+                    this.removeListener("message", callback);
+                }
+            };
+
+            this.on("message", callback);
+        });
+    }
+
+    async waitForProxyRegistered(proxyType: string): Promise<void> {
+        await this.waitForMessage<ProxyBroadcastThreadMessage>(t => t.payload.proxyType === proxyType);
+    }
+
+    override addListener(eventName: "message", listener: (message: ThreadMessage<any>) => void): this {
+        return super.addListener(eventName, listener);
+    }
+
+    override on(eventName: "message", listener: (message: ThreadMessage<any>) => void): this {
+        return super.on(eventName, listener);
+    }
+
+    override once(eventName: "message", listener: (message: ThreadMessage<any>) => void): this {
+        return super.once(eventName, listener);
+    }
+
+    override removeListener(eventName: "message", listener: (message: ThreadMessage<any>) => void): this {
+        return super.removeListener(eventName, listener);
     }
 }

@@ -9,7 +9,7 @@ import IObjectProxyConnection from "./IObjectProxyConnection";
 
 type ReceiveCallback<TMessageType extends ThreadMessage<any>> = (message: TMessageType) => Promise<void> | void;
 
-export default class ThreadSendingObjectProxyConnection<TObject extends Object> implements IObjectProxyConnection, IThreadMessageReceiver {
+export default class ThreadSendingObjectProxyConnection implements IObjectProxyConnection, IThreadMessageReceiver {
     private sender: IThreadMessageSender;
     private proxyObjectId: string;
     private receiveCallbacks: Map<string, ReceiveCallback<any>> = new Map();
@@ -92,7 +92,7 @@ export default class ThreadSendingObjectProxyConnection<TObject extends Object> 
             return;
         }
 
-        const p = (message.payload as ProxyActionResultThreadMessage).payload;
+        const p = (message as ProxyActionResultThreadMessage).payload;
 
         const callback = this.receiveCallbacks.get(p.actionId);
 

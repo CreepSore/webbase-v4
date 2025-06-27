@@ -3,11 +3,12 @@ import CliApplication from "@app/CliApplication";
 import TestApplication from "@app/TestApplication";
 import ExtensionService from "./ExtensionService";
 import ChildApplication from "@app/ChildApplication";
+import WorkerThreadSubprocess from "../../logic/threads/WorkerThreadSubprocess";
 
 /**
  * Base ExecutionContext
  */
-type IExecutionContext = (IAppExecutionContext|ICliExecutionContext|ITestExecutionContext|IChildExecutionContext);
+type IExecutionContext = (IAppExecutionContext|ICliExecutionContext|ITestExecutionContext|IChildExecutionContext|IThreadExecutionContext);
 
 export default IExecutionContext;
 
@@ -38,4 +39,10 @@ export interface IChildExecutionContext {
     extensionService: ExtensionService;
 
     childType: string;
+}
+
+export interface IThreadExecutionContext {
+    contextType: "thread";
+    application: WorkerThreadSubprocess;
+    extensionService: ExtensionService;
 }
