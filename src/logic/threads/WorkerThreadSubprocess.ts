@@ -125,12 +125,5 @@ export default class WorkerThreadSubprocess implements IWorkerThread {
 
             return;
         }
-
-        if(message.type === ProxyBroadcastThreadMessage.type) {
-            const ok = message as ProxyBroadcastThreadMessage;
-            const worker = this.getProxy(ok.payload.proxyId, WorkerThread);
-
-            await worker.stop();;
-        }
     }
 }
