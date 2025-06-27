@@ -29,6 +29,7 @@ const buildAppConfig = (env, argv) => {
     return webpackMerge([{
         entry: {
             "app": path.resolve(__dirname, "src", "app.ts"),
+            "WorkerThreadBootstrap": path.resolve(__dirname, "src", "logic", "threads", "WorkerThreadBootstrap.ts")
         },
         output: {
             path: path.resolve(__dirname, "out"),
