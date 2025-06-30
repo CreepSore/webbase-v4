@@ -33,7 +33,7 @@ export default class TotpHandler {
         interval = 30,
     ): boolean {
         for(let i = -1; i < 1; i++) {
-            const offsettedDate = Date.now() - (interval * 1000 * i);
+            const offsettedDate = timestamp - (interval * 1000 * i);
             if(this.getTotp(secret, offsettedDate, digits, interval) === input) {
                 return true;
             }
