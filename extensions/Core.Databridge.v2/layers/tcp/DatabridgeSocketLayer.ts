@@ -1,7 +1,7 @@
 import * as net from "net";
 
-import IDatabridge from "../IDatabridge";
-import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "./IDatabridgeLayer";
+import IDatabridge from "../../IDatabridge";
+import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabridgeLayer";
 
 export default class DatabridgeSocketLayer implements IDatabridgeLayer<Buffer, Buffer> {
     private _socket: net.Socket;
@@ -11,11 +11,8 @@ export default class DatabridgeSocketLayer implements IDatabridgeLayer<Buffer, B
         this._socket = socket;
     }
 
-    async process(data: Buffer<ArrayBufferLike>, metadata: DatabridgeDefaultPipelineMetadata): Promise<Buffer<ArrayBufferLike>> {
-        if(metadata.direction === "outbound") {
-            await new Promise<void>(res => this._socket.write(data, () => res()));
-        }
-
+    async processOutbound(data: Buffer<ArrayBufferLike>, metadata: DatabridgeDefaultPipelineMetadata): Promise<Buffer> {
+        await new Promise<void>(res => this._socket.write(data, () => res()));
         return data;
     }
 

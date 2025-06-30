@@ -1,7 +1,7 @@
-import IDatabridge from "../IDatabridge";
-import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "./IDatabridgeLayer";
+import IDatabridge from "../../IDatabridge";
+import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabridgeLayer";
 
-export default class DatabridgeLocalOutboundLayer<T> implements IDatabridgeLayer<T, T> {
+export default class DatabridgeLocalOutboundLayer<T> implements IDatabridgeLayer<T, T, T, T> {
     private _databridge: IDatabridge;
     private _onPacketSent: (packet: T) => Promise<void> | void;
 
@@ -13,7 +13,7 @@ export default class DatabridgeLocalOutboundLayer<T> implements IDatabridgeLayer
         await this._databridge.handleOutboundPacket(packet);
     }
 
-    async process(data: T, metadata: DatabridgeDefaultPipelineMetadata): Promise<T> {
+    async processOutbound(data: T, metadata: DatabridgeDefaultPipelineMetadata): Promise<T> {
         if(metadata.direction === "outbound") {
             await this._onPacketSent?.(data);
             return data;

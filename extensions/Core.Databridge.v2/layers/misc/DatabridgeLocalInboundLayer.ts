@@ -1,14 +1,14 @@
-import IDatabridge from "../IDatabridge";
-import IDatabridgeLayer from "./IDatabridgeLayer";
+import IDatabridge from "../../IDatabridge";
+import IDatabridgeLayer from "../IDatabridgeLayer";
 
-export default class DatabridgeLocalInboundLayer<T> implements IDatabridgeLayer<T, T> {
+export default class DatabridgeLocalInboundLayer<T> implements IDatabridgeLayer<T, T, T, T> {
     private _databridge: IDatabridge;
 
     async receivePacket(packet: T): Promise<void> {
         await this._databridge.handleInboundPacket(packet);
     }
 
-    process(data: T): Promise<T> {
+    processInbound(data: T): Promise<T> {
         return Promise.resolve(data);
     }
 

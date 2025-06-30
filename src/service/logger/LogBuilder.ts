@@ -257,7 +257,7 @@ export default class LogBuilder {
      * @returns {LogBuilder} The instance of LogBuilder for chaining, although typically this should be the final operation.
      */
     done(): LogBuilder {
-        LogBuilder.onDone(this.logEntry);
+        LogBuilder.onDone?.(this.logEntry);
         return this;
     }
 }

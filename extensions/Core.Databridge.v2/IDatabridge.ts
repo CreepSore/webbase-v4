@@ -1,8 +1,10 @@
+import IDatabridgeInboundLayer from "./layers/IDatabridgeInboundLayer";
 import IDatabridgeLayer from "./layers/IDatabridgeLayer";
+import IDatabridgeOutboundLayer from "./layers/IDatabridgeOutboundLayer";
 
 export default interface IDatabridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut = any> {
-    get inboundLayer(): IDatabridgeLayer<TInIn, TInOut>;
-    get outboundLayer(): IDatabridgeLayer<TOutIn, TOutOut>;
+    get inboundLayer(): IDatabridgeInboundLayer<TInIn, TInOut>;
+    get outboundLayer(): IDatabridgeOutboundLayer<TOutIn, TOutOut>;
 
     start(): Promise<void>;
     stop(): Promise<void>;

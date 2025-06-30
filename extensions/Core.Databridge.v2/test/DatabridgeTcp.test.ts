@@ -1,14 +1,12 @@
 import Databridge from "../Databridge";
 import IDatabridge from "../IDatabridge";
-import DatabridgeFromBufferLayer from "../layers/DatabridgeFromBufferLayer";
-import DatabridgeJsonLayer from "../layers/DatabridgeJsonLayer";
-import DatabridgeLambdaLayer from "../layers/DatabridgeLambdaLayer";
-import DatabridgeLocalInboundLayer from "../layers/DatabridgeLocalInboundLayer";
-import DatabridgeLocalOutboundLayer from "../layers/DatabridgeLocalOutboundLayer";
+import DatabridgeBufferLayer from "../layers/converters/DatabridgeBufferLayer";
+import DatabridgeJsonLayer from "../layers/converters/DatabridgeJsonLayer";
 import DatabridgeMultiLayer from "../layers/DatabridgeMultiLayer";
-import DatabridgeTcpClientLayer from "../layers/DatabridgeTcpClientLayer";
-import DatabridgeTcpServerLayer from "../layers/DatabridgeTcpServerLayer";
-import DatabridgeToBufferLayer from "../layers/DatabridgeToBufferLayer";
+import DatabridgeLambdaLayer from "../layers/misc/DatabridgeLambdaLayer";
+import DatabridgeLocalOutboundLayer from "../layers/misc/DatabridgeLocalOutboundLayer";
+import DatabridgeTcpClientLayer from "../layers/tcp/DatabridgeTcpClientLayer";
+import DatabridgeTcpServerLayer from "../layers/tcp/DatabridgeTcpServerLayer";
 
 describe("Databridge TCP Tests", () => {
     let db1: IDatabridge;
@@ -38,33 +36,33 @@ describe("Databridge TCP Tests", () => {
 
         db1 = new Databridge(
             new DatabridgeMultiLayer()
-                .attachLayer(clientLayer)
-                .attachLayer(new DatabridgeFromBufferLayer())
-                .attachLayer(new DatabridgeJsonLayer<string, {hello: string}>("deserialize"))
-                .attachLayer(new DatabridgeLambdaLayer({
-                    process: clientReceivedCallback
+                .attachInboundLayer(clientLayer)
+                .attachInboundLayer(new DatabridgeBufferLayer())
+                .attachInboundLayer(new DatabridgeJsonLayer<string, {hello: string}>("deserialize"))
+                .attachInboundLayer(new DatabridgeLambdaLayer({
+                    processInbound: clientReceivedCallback
                 })),
             new DatabridgeMultiLayer()
-                .attachLayer(clientOutbound)
-                .attachLayer(new DatabridgeJsonLayer("serialize"))
-                .attachLayer(new DatabridgeToBufferLayer())
-                .attachLayer(clientLayer)
+                .attachOutboundLayer(clientOutbound)
+                .attachOutboundLayer(new DatabridgeJsonLayer<any, string>("serialize"))
+                .attachOutboundLayer(new DatabridgeBufferLayer())
+                .attachOutboundLayer(clientLayer)
         );
 
         const serverLayer = new DatabridgeTcpServerLayer({port: 9090, bindAddress: "127.0.0.1"});
         db2 = new Databridge(
             new DatabridgeMultiLayer()
-                .attachLayer(serverLayer)
-                .attachLayer(new DatabridgeFromBufferLayer())
-                .attachLayer(new DatabridgeJsonLayer("deserialize"))
-                .attachLayer(new DatabridgeLambdaLayer({
-                    process: serverReceivedCallback
+                .attachInboundLayer(serverLayer)
+                .attachInboundLayer(new DatabridgeBufferLayer())
+                .attachInboundLayer(new DatabridgeJsonLayer("deserialize"))
+                .attachInboundLayer(new DatabridgeLambdaLayer({
+                    processInbound: serverReceivedCallback
                 })),
             new DatabridgeMultiLayer()
-                .attachLayer(serverOutbound)
-                .attachLayer(new DatabridgeJsonLayer("serialize"))
-                .attachLayer(new DatabridgeToBufferLayer())
-                .attachLayer(serverLayer)
+                .attachOutboundLayer(serverOutbound)
+                .attachOutboundLayer(new DatabridgeJsonLayer("serialize"))
+                .attachOutboundLayer(new DatabridgeBufferLayer())
+                .attachOutboundLayer(serverLayer)
         );
 
         await db2.start();

@@ -1,30 +1,28 @@
 import * as net from "net";
+import * as events from "events";
 
 import * as uuid from "uuid";
 
-import IDatabridge from "../IDatabridge";
-import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "./IDatabridgeLayer";
+import IDatabridge from "../../IDatabridge";
+import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabridgeLayer";
 
 export type DatabridgeTcpServerLayerOptions = {
     bindAddress?: string;
     port: number;
 }
 
-export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer, Buffer, DatabridgeDefaultPipelineMetadata & {socket: net.Socket, id: string}> {
+export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer, Buffer, Buffer, Buffer, DatabridgeDefaultPipelineMetadata & {socket: net.Socket, id: string}> {
+    private _options: DatabridgeTcpServerLayerOptions;
     private _server: net.Server;
     private _clients: Set<net.Socket> = new Set();
     private _idClientMapping: Map<string, net.Socket> = new Map();
-    private _options: DatabridgeTcpServerLayerOptions;
+    private _emitter: events.EventEmitter = new events.EventEmitter();
 
     constructor(options: DatabridgeTcpServerLayerOptions) {
         this._options = options;
     }
 
-    async process(data: Buffer<ArrayBufferLike>, metadata: DatabridgeDefaultPipelineMetadata & {socket: net.Socket, id: string}): Promise<Buffer<ArrayBufferLike>> {
-        if(metadata.direction === "inbound") {
-            return data;
-        }
-
+    async processOutbound(data: Buffer<ArrayBufferLike>, metadata: DatabridgeDefaultPipelineMetadata & {socket: net.Socket, id: string}): Promise<Buffer<ArrayBufferLike>> {
         if(metadata.socket) {
             await this.sendToSocket(metadata.socket, data);
             return data;
@@ -42,7 +40,7 @@ export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer
         const toAwait: Promise<any>[] = [];
         const iterator = this._clients.values();
         let current: IteratorResult<net.Socket>;
-        
+
         while(!(current = iterator.next()).done) {
             toAwait.push(this.sendToSocket(current.value, data));
         }
@@ -72,12 +70,22 @@ export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer
         return Promise.resolve();
     }
 
+    on(eventName: "client-connected", listener: (args: {socket: net.Socket, id: string}) => void | Promise<void>): this;
+    on(eventName: "client-disconnected", listener: (args: {socket: net.Socket, id: string}) => void | Promise<void>): this;
+    on(eventName: string, listener: (args: any) => void | Promise<void>): this {
+        this._emitter.on(eventName, listener);
+        return this;
+    }
+
     private async handleClientConnect(socket: net.Socket, databridge: IDatabridge): Promise<void> {
         const id = uuid.v4();
         this._clients.add(socket);
         this._idClientMapping.set(id, socket);
 
+        this._emitter.emit("client-connected", {socket, id});
+
         socket.once("close", () => {
+            this._emitter.emit("client-disconnected", {socket, id});
             this._clients.delete(socket);
             this._idClientMapping.delete(id);
         });

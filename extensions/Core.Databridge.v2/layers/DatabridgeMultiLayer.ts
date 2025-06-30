@@ -1,13 +1,13 @@
 import IDatabridge from "../IDatabridge";
+import IDatabridgeInboundLayer from "./IDatabridgeInboundLayer";
 import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "./IDatabridgeLayer";
+import IDatabridgeOutboundLayer from "./IDatabridgeOutboundLayer";
 
-type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N;
-
-export default class DatabridgeMultiLayer<TIn, TOut, TMetadata = DatabridgeDefaultPipelineMetadata> implements IDatabridgeLayer<TIn, TOut, TMetadata> {
+export default class DatabridgeMultiLayer<TIn, TOut, TMetadata extends DatabridgeDefaultPipelineMetadata> implements IDatabridgeLayer<TIn, TOut, TIn, TOut, TMetadata> {
     private _layers: IDatabridgeLayer<any, any, any>[] = [];
     private _databridge: IDatabridge;
 
-    get layers(): Readonly<DatabridgeMultiLayer<any, any, DatabridgeDefaultPipelineMetadata>["_layers"]> {
+    get layers(): Readonly<IDatabridgeLayer<any, any, any, any>[]> {
         return this._layers;
     }
 
@@ -25,11 +25,15 @@ export default class DatabridgeMultiLayer<TIn, TOut, TMetadata = DatabridgeDefau
         }
     }
 
-    async process(data: TIn, metadata: TMetadata): Promise<TOut> {
+    async processInbound(data: TIn, metadata: DatabridgeDefaultPipelineMetadata): Promise<TOut> {
         let result = data;
 
         for(const layer of this._layers) {
-            result = await layer.process(result, metadata);
+            if(!layer.processInbound) {
+                continue;
+            }
+
+            result = await layer.processInbound(result, metadata as any);
 
             if(!result) {
                 break;
@@ -39,8 +43,35 @@ export default class DatabridgeMultiLayer<TIn, TOut, TMetadata = DatabridgeDefau
         return result as unknown as TOut;
     }
 
-    attachLayer<TNextOut, TNextMetadata>(layer: IDatabridgeLayer<TOut, TNextOut, TNextMetadata>): DatabridgeMultiLayer<TIn, TNextOut, TMetadata & TNextMetadata> {
+    async processOutbound(data: TIn, metadata: DatabridgeDefaultPipelineMetadata): Promise<TOut> {
+        let result = data;
+
+        for(const layer of this._layers) {
+            if(!layer.processOutbound) {
+                continue;
+            }
+
+            result = await layer.processOutbound(result, metadata as any);
+
+            if(!result) {
+                break;
+            }
+        }
+
+        return result as unknown as TOut;
+    }
+
+    attachOutboundLayer<TNewIn, TNewMetadata>(layer: IDatabridgeOutboundLayer<TIn, TNewIn, TMetadata & TNewMetadata>): DatabridgeMultiLayer<TNewIn, TOut, TMetadata & TNewMetadata> {
+        this.attachLayer(layer);
+        return this as unknown as DatabridgeMultiLayer<TNewIn, TOut, TMetadata & TNewMetadata>;
+    }
+
+    attachInboundLayer<TNewIn, TNewMetadata>(layer: IDatabridgeInboundLayer<TIn, TNewIn, TMetadata & TNewMetadata>): DatabridgeMultiLayer<TNewIn, TOut, TMetadata & TNewMetadata> {
+        this.attachLayer(layer);
+        return this as unknown as DatabridgeMultiLayer<TNewIn, TOut, TMetadata & TNewMetadata>;
+    }
+
+    private attachLayer(layer: IDatabridgeLayer<any, any, any>): void {
         this._layers.push(layer);
-        return this as unknown as DatabridgeMultiLayer<TIn, TNextOut, TMetadata & TNextMetadata>;
     }
 }

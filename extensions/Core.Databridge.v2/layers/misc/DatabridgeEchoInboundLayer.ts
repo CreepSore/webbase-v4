@@ -1,10 +1,10 @@
-import IDatabridge from "../IDatabridge";
-import IDatabridgeLayer from "./IDatabridgeLayer";
+import IDatabridge from "../../IDatabridge";
+import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabridgeLayer";
 
-export default class DatabridgeEchoInboundLayer implements IDatabridgeLayer<any, any> {
+export default class DatabridgeEchoInboundLayer implements IDatabridgeLayer<any, any, any, any> {
     private _databridge: IDatabridge;
 
-    async process(data: any): Promise<any> {
+    async processInbound(data: any, metadata: DatabridgeDefaultPipelineMetadata): Promise<any> {
         await this._databridge.handleOutboundPacket(data);
         return data;
     }

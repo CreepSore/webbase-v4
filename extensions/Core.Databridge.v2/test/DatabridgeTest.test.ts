@@ -1,11 +1,9 @@
 import Databridge from "../Databridge";
-import DatabridgeEchoInboundLayer from "../layers/DatabridgeEchoInboundLayer";
-import DatabridgeFromBufferLayer from "../layers/DatabridgeFromBufferLayer";
-import DatabridgeJsonLayer from "../layers/DatabridgeJsonLayer";
-import DatabridgeLocalInboundLayer from "../layers/DatabridgeLocalInboundLayer";
-import DatabridgeLocalOutboundLayer from "../layers/DatabridgeLocalOutboundLayer";
+import DatabridgeEchoInboundLayer from "../layers/misc/DatabridgeEchoInboundLayer";
+import DatabridgeBufferLayer from "../layers/converters/DatabridgeBufferLayer";
+import DatabridgeJsonLayer from "../layers/converters/DatabridgeJsonLayer";
+import DatabridgeLocalOutboundLayer from "../layers/misc/DatabridgeLocalOutboundLayer";
 import DatabridgeMultiLayer from "../layers/DatabridgeMultiLayer";
-import DatabridgeToBufferLayer from "../layers/DatabridgeToBufferLayer";
 
 describe("Databridge Tests", () => {
     it("should communicate successfully", async() => {
@@ -21,13 +19,13 @@ describe("Databridge Tests", () => {
 
         const databridge = new Databridge(
             new DatabridgeMultiLayer()
-                .attachLayer(new DatabridgeFromBufferLayer("utf-8"))
-                .attachLayer(new DatabridgeJsonLayer("deserialize"))
-                .attachLayer(new DatabridgeEchoInboundLayer()),
+                .attachInboundLayer(new DatabridgeBufferLayer("utf-8"))
+                .attachInboundLayer(new DatabridgeJsonLayer("deserialize"))
+                .attachInboundLayer(new DatabridgeEchoInboundLayer()),
             new DatabridgeMultiLayer()
-                .attachLayer(new DatabridgeJsonLayer("serialize"))
-                .attachLayer(new DatabridgeToBufferLayer())
-                .attachLayer(new DatabridgeLocalOutboundLayer<Buffer>(packetCallbackFn))
+                .attachOutboundLayer(new DatabridgeJsonLayer("serialize"))
+                .attachOutboundLayer(new DatabridgeBufferLayer())
+                .attachOutboundLayer(new DatabridgeLocalOutboundLayer<Buffer>(packetCallbackFn))
         );
 
         await databridge.start();

@@ -1,20 +1,22 @@
 import LogBuilder from "../../src/service/logger/LogBuilder";
 import IDatabridge from "./IDatabridge";
+import IDatabridgeInboundLayer from "./layers/IDatabridgeInboundLayer";
 import IDatabridgeLayer from "./layers/IDatabridgeLayer";
+import IDatabridgeOutboundLayer from "./layers/IDatabridgeOutboundLayer";
 
 export default class Databridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut = any> implements IDatabridge<TInIn, TInOut, TOutIn, TOutOut> {
-    private _inboundLayer: IDatabridgeLayer<TInIn, TInOut>;
-    private _outboundLayer: IDatabridgeLayer<TOutIn, TOutOut>;
+    private _inboundLayer: IDatabridgeInboundLayer<TInIn, TInOut>;
+    private _outboundLayer: IDatabridgeOutboundLayer<TOutIn, TOutOut>;
 
     get inboundLayer(): IDatabridgeLayer<TInIn, TInOut> {
         return this._inboundLayer;
     }
 
-    get outboundLayer(): IDatabridgeLayer<TOutIn, TOutOut> {
+    get outboundLayer(): IDatabridgeLayer<any, any, TOutIn, TOutOut> {
         return this._outboundLayer;
     }
 
-    constructor(inboundLayer: IDatabridgeLayer<TInIn, TInOut>, outboundLayer: IDatabridgeLayer<TOutIn, TOutOut>) {
+    constructor(inboundLayer: IDatabridgeLayer<TInIn, TInOut>, outboundLayer: IDatabridgeLayer<any, any, TOutIn, TOutOut>) {
         this._inboundLayer = inboundLayer;
         this._outboundLayer = outboundLayer;
     }
@@ -31,12 +33,12 @@ export default class Databridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut
 
     async handleInboundPacket(packet: TInIn, metadata: any = {}): Promise<void> {
         metadata.direction = "inbound";
-        await this._inboundLayer.process(packet, metadata);
+        await this._inboundLayer.processInbound?.(packet, metadata);
     }
 
     async handleOutboundPacket(packet: TOutIn, metadata: any = {}): Promise<void> {
         metadata.direction = "outbound";
-        await this._outboundLayer.process(packet, metadata);
+        await this._outboundLayer.processOutbound?.(packet, metadata);
     }
 
     handleError(err: Error, layer?: IDatabridgeLayer<any, any>): Promise<void> {

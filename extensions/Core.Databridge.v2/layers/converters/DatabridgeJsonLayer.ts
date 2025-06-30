@@ -1,5 +1,5 @@
-import IDatabridge from "../IDatabridge";
-import IDatabridgeLayer from "./IDatabridgeLayer";
+import IDatabridge from "../../IDatabridge";
+import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabridgeLayer";
 
 
 export default class DatabridgeJsonLayer<TIn extends string | any, TOut extends (TIn extends string ? any : string)> implements IDatabridgeLayer<TIn, TOut> {
@@ -12,10 +12,18 @@ export default class DatabridgeJsonLayer<TIn extends string | any, TOut extends 
         this.defaultValue = defaultValue;
     }
 
-    process(data: TIn): Promise<TOut> {
+    private async process(data: TIn): Promise<TOut> {
         return this.mode === "serialize"
             ? this.processSerialize(data)
             : this.processDeserialize(data);
+    }
+
+    processInbound(data: TIn, metadata: DatabridgeDefaultPipelineMetadata): Promise<TOut> {
+        return this.process(data);
+    }
+
+    processOutbound(data: TOut, metadata: DatabridgeDefaultPipelineMetadata): Promise<TIn> {
+        return this.process(data);
     }
 
     start(databridge: IDatabridge): Promise<void> {
