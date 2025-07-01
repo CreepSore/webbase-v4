@@ -1,8 +1,8 @@
 import IDatabridgeInboundLayer from "./layers/IDatabridgeInboundLayer";
-import IDatabridgeLayer from "./layers/IDatabridgeLayer";
+import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "./layers/IDatabridgeLayer";
 import IDatabridgeOutboundLayer from "./layers/IDatabridgeOutboundLayer";
 
-export default interface IDatabridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut = any> {
+export default interface IDatabridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut = any, TMetadata extends DatabridgeDefaultPipelineMetadata = DatabridgeDefaultPipelineMetadata> {
     get inboundLayer(): IDatabridgeInboundLayer<TInIn, TInOut>;
     get outboundLayer(): IDatabridgeOutboundLayer<TOutIn, TOutOut>;
 
@@ -10,9 +10,9 @@ export default interface IDatabridge<TInIn = any, TInOut = any, TOutIn = any, TO
     stop(): Promise<void>;
 
     handleInboundPacket(packet: TInIn): Promise<void>;
-    handleInboundPacket(packet: TInIn, metadata: any): Promise<void>;
+    handleInboundPacket(packet: TInIn, metadata: TMetadata): Promise<void>;
     handleOutboundPacket(packet: TOutIn): Promise<void>;
-    handleOutboundPacket(packet: TOutIn, metadata: any): Promise<void>;
+    handleOutboundPacket(packet: TOutIn, metadata: TMetadata): Promise<void>;
 
     handleError(err: Error, layer?: IDatabridgeLayer<any, any>): Promise<any>;
 }

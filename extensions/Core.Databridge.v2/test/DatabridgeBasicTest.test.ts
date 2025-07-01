@@ -5,7 +5,7 @@ import DatabridgeJsonLayer from "../layers/converters/DatabridgeJsonLayer";
 import DatabridgeLocalOutboundLayer from "../layers/misc/DatabridgeLocalOutboundLayer";
 import DatabridgeMultiLayer from "../layers/DatabridgeMultiLayer";
 
-describe("Databridge Tests", () => {
+describe("Databridge Basic Test", () => {
     it("should communicate successfully", async() => {
         const payload = {
             test: "hello"

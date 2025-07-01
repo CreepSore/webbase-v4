@@ -1,10 +1,10 @@
 import LogBuilder from "../../src/service/logger/LogBuilder";
 import IDatabridge from "./IDatabridge";
 import IDatabridgeInboundLayer from "./layers/IDatabridgeInboundLayer";
-import IDatabridgeLayer from "./layers/IDatabridgeLayer";
+import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "./layers/IDatabridgeLayer";
 import IDatabridgeOutboundLayer from "./layers/IDatabridgeOutboundLayer";
 
-export default class Databridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut = any> implements IDatabridge<TInIn, TInOut, TOutIn, TOutOut> {
+export default class Databridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut = any, TMetadata extends DatabridgeDefaultPipelineMetadata = DatabridgeDefaultPipelineMetadata> implements IDatabridge<TInIn, TInOut, TOutIn, TOutOut, TMetadata> {
     private _inboundLayer: IDatabridgeInboundLayer<TInIn, TInOut>;
     private _outboundLayer: IDatabridgeOutboundLayer<TOutIn, TOutOut>;
 
@@ -31,12 +31,16 @@ export default class Databridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut
         await this._outboundLayer.stop?.(this);
     }
 
-    async handleInboundPacket(packet: TInIn, metadata: any = {}): Promise<void> {
+    async handleInboundPacket(packet: TInIn, metadata: TMetadata = null): Promise<void> {
+        // @ts-ignore
+        metadata ??= {};
         metadata.direction = "inbound";
         await this._inboundLayer.processInbound?.(packet, metadata);
     }
 
-    async handleOutboundPacket(packet: TOutIn, metadata: any = {}): Promise<void> {
+    async handleOutboundPacket(packet: TOutIn, metadata: TMetadata = null): Promise<void> {
+        // @ts-ignore
+        metadata ??= {};
         metadata.direction = "outbound";
         await this._outboundLayer.processOutbound?.(packet, metadata);
     }

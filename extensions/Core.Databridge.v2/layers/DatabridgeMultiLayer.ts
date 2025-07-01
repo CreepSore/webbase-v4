@@ -3,7 +3,7 @@ import IDatabridgeInboundLayer from "./IDatabridgeInboundLayer";
 import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "./IDatabridgeLayer";
 import IDatabridgeOutboundLayer from "./IDatabridgeOutboundLayer";
 
-export default class DatabridgeMultiLayer<TIn, TOut, TMetadata extends DatabridgeDefaultPipelineMetadata> implements IDatabridgeLayer<TIn, TOut, TIn, TOut, TMetadata> {
+export default class DatabridgeMultiLayer<TIn, TLayerIn = TIn, TOut = any, TMetadata extends DatabridgeDefaultPipelineMetadata = DatabridgeDefaultPipelineMetadata> implements IDatabridgeLayer<TIn, TOut, TIn, TOut, TMetadata> {
     private _layers: IDatabridgeLayer<any, any, any>[] = [];
     private _databridge: IDatabridge;
 
@@ -61,14 +61,14 @@ export default class DatabridgeMultiLayer<TIn, TOut, TMetadata extends Databridg
         return result as unknown as TOut;
     }
 
-    attachOutboundLayer<TNewIn, TNewMetadata>(layer: IDatabridgeOutboundLayer<TIn, TNewIn, TMetadata & TNewMetadata>): DatabridgeMultiLayer<TNewIn, TOut, TMetadata & TNewMetadata> {
+    attachOutboundLayer<TNewIn, TNewMetadata>(layer: IDatabridgeOutboundLayer<TLayerIn, TNewIn, TMetadata & TNewMetadata>): DatabridgeMultiLayer<TIn, TNewIn, TOut, TMetadata & TNewMetadata> {
         this.attachLayer(layer);
-        return this as unknown as DatabridgeMultiLayer<TNewIn, TOut, TMetadata & TNewMetadata>;
+        return this as any;
     }
 
-    attachInboundLayer<TNewIn, TNewMetadata>(layer: IDatabridgeInboundLayer<TIn, TNewIn, TMetadata & TNewMetadata>): DatabridgeMultiLayer<TNewIn, TOut, TMetadata & TNewMetadata> {
+    attachInboundLayer<TNewIn, TNewMetadata>(layer: IDatabridgeInboundLayer<TLayerIn, TNewIn, TMetadata & TNewMetadata>): DatabridgeMultiLayer<TIn, TNewIn, TOut, TMetadata & TNewMetadata> {
         this.attachLayer(layer);
-        return this as unknown as DatabridgeMultiLayer<TNewIn, TOut, TMetadata & TNewMetadata>;
+        return this as any;
     }
 
     private attachLayer(layer: IDatabridgeLayer<any, any, any>): void {
