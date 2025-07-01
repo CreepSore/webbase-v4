@@ -64,6 +64,11 @@ export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer
     stop?(databridge: IDatabridge): Promise<void> {
         if(this._server) {
             this._server.close();
+            
+            for(const client of this._clients) {
+                client.destroy();
+            }
+
             this._server = null;
         }
 

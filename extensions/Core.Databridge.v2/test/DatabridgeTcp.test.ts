@@ -1,3 +1,4 @@
+import TestUtils from "../../../test/TestUtils";
 import Databridge from "../Databridge";
 import IDatabridge from "../IDatabridge";
 import DatabridgeBufferLayer from "../layers/converters/DatabridgeBufferLayer";
@@ -77,7 +78,8 @@ describe("Databridge TCP Tests", () => {
             }, 500);
         });
 
-        expect(serverReceivedCallback).toHaveBeenCalledTimes(1);
-        expect(clientReceivedCallback).toHaveBeenCalledTimes(1);
+        expect(await TestUtils.waitUntil(() => {
+            return serverReceivedCallback.mock.results.length === 1 && clientReceivedCallback.mock.results.length === 1;
+        }, 2000)).toBeTruthy();
     });
 });

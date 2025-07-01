@@ -63,6 +63,7 @@ export default class DatabridgeTcpClientLayer implements IDatabridgeLayer<Buffer
 
             this._socket.once("connect", () => {
                 this._isConnected = true;
+                this._connectingPromise = null;
                 this._emitter.emit("connected", {socket: this._socket});
                 res();
             });
@@ -74,6 +75,7 @@ export default class DatabridgeTcpClientLayer implements IDatabridgeLayer<Buffer
             });
 
             this._socket.on("error", (err) => {
+                this._connectingPromise = null;
                 databridge.handleError(err);
             });
 
