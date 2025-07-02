@@ -16,10 +16,20 @@ export default class LogBuilder {
         CRITICAL: "CRITICAL",
     } as const;
 
-    logEntry: ILogEntry;
-    static onDone: (log: ILogEntry) => void;
+    static onDone: LogBuilder["onDone"];
 
-    constructor() {
+    logEntry: ILogEntry;
+    onDone: (log: ILogEntry) => void;
+
+    constructor(onDone: LogBuilder["onDone"] = LogBuilder.onDone) {
+        this.onDone = onDone;
+        this.logEntry = {
+            id: uuid.v4(),
+            date: new Date(),
+            infos: [],
+            lines: [],
+            objects: {},
+        };
     }
 
     /**
@@ -257,7 +267,7 @@ export default class LogBuilder {
      * @returns {LogBuilder} The instance of LogBuilder for chaining, although typically this should be the final operation.
      */
     done(): LogBuilder {
-        LogBuilder.onDone?.(this.logEntry);
+        this.onDone?.(this.logEntry);
         return this;
     }
 }

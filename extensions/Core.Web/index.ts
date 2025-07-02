@@ -226,7 +226,7 @@ export default class CoreWeb implements IExtension {
             const chunkDir = path.resolve(__dirname, "chunks");
             const files = fs.readdirSync(chunkDir).filter(f => f.endsWith(".js"));
             const expressRouter: express.Router = this.app._router;
-            expressRouter.stack = expressRouter.stack.filter((e: {path: string}) => !(e.path || "").startsWith("/chunks/"));
+            expressRouter.stack = expressRouter.stack.filter((e: { path?: string }) => !(e.path || "").startsWith("/chunks/"));
 
             for(const file of files) {
                 const scriptPath = `chunks/${file}`;
