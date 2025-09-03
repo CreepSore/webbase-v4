@@ -24,7 +24,7 @@ export interface ExtensionMetadata {
      * @example ["Core", "Core.Web"]
      * [Core, CoreWeb]
      */
-    dependencies: Array<string>|Array<Function & { prototype: IExtension }>;
+    dependencies: Array<string | Function & { prototype: IExtension }>;
     /**
      * The dependencies of the extension that have to be installed by npm.
      */

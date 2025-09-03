@@ -11,8 +11,15 @@ export default class MainAppliation implements IApplication {
     events: EventEmitter = new EventEmitter();
     extensionService: ExtensionService = new ExtensionService();
     cmdHandler: CommandHandler = new CommandHandler();
+    started: boolean = false;
 
     async start(): Promise<void> {
+        if(this.started) {
+            return;
+        }
+        
+        this.started = true;
+
         this.events = new EventEmitter();
         const config = this.loadConfig();
         this.events.emit("config-loaded", config);
@@ -30,7 +37,15 @@ export default class MainAppliation implements IApplication {
     }
 
     async stop(): Promise<void> {
+        if(!this.started) {
+            return;
+        }
+
+        this.started = false;
+
         await this.extensionService.stopExtensions();
+
+        console.log("INFO", "MainApplication.ts", "Main Application Stop successful.");
     }
 
     loadConfig(): ConfigModel {

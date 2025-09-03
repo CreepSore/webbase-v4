@@ -24,9 +24,9 @@ export default class LoggerService {
      * @param {...any[]} args
      */
     static async log(log: ILogEntry): Promise<void> {
-        await Promise.all(this.loggers.map(async(logger) => {
+        await Promise.all(this.loggers.map((logger) => {
             if(logger.log) {
-                await logger.log(log);
+                return logger.log(log);
             }
 
             return null;
@@ -53,7 +53,7 @@ export default class LoggerService {
         this.oldLog = console.log;
         LogBuilder.onDone = entry => {
             this.logSync(entry);
-            this.log(entry);
+            return this.log(entry);
         };
 
         console.log = (level: string, ...args: any[]) => {

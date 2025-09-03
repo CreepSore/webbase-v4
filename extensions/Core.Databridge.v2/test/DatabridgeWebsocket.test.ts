@@ -13,8 +13,12 @@ describe("DatabridgeWebsocket Test", () => {
     let server = app.listen(9091, "127.0.0.1");
 
     afterAll(() => {
-        server.close();
-        server.closeAllConnections();
+        return new Promise<void>(res => {
+            server.removeAllListeners();
+            server.close(() => res());
+            server.closeAllConnections();
+            server.closeIdleConnections();
+        });
     });
 
     it("should establish a connection successfully", async () => {

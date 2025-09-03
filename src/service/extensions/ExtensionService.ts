@@ -32,7 +32,7 @@ export default class ExtensionService {
         const disabled = this.getDisabledExtensions();
         const extBaseDir = fs.readdirSync(this.extensionPath);
 
-        this.extensions = (await Promise.all(
+        this.extensions = [...this.extensions, ...(await Promise.all(
             extBaseDir
                 .filter(name => !disabled.includes(name))
                 .map(async extDir => {
@@ -46,7 +46,7 @@ export default class ExtensionService {
                     extension.metadata.extensionPath = path.resolve(this.extensionPath, extDir);
                     return extension;
                 }),
-        )).filter(x => Boolean(x));
+        )).filter(x => Boolean(x))];
 
         this.loadExtensions();
 
@@ -107,8 +107,27 @@ export default class ExtensionService {
     async stopExtensions(): Promise<void> {
         if(!this.extensionsStarted) return;
 
-        for(const extension of this.extensions) {
-            await extension.stop();
+        for(let i = this.extensions.length - 1; i >= 0; i--) {
+            const extension = this.extensions[i];
+
+            try {
+                await extension.stop();
+
+                LogBuilder
+                    .start()
+                    .level(LogBuilder.LogLevel.INFO)
+                    .info("ExtensionService.ts")
+                    .line(`Stopped Extension [${extension.metadata.name}]@[${extension.metadata.version}]`)
+                    .done();
+            }
+            catch {
+                LogBuilder
+                    .start()
+                    .level(LogBuilder.LogLevel.ERROR)
+                    .info("ExtensionService.ts")
+                    .line(`Stopping Extension [${extension.metadata.name}]@[${extension.metadata.version}] failed`)
+                    .done();
+            }
         }
 
         this.extensionsStarted = false;
@@ -120,15 +139,15 @@ export default class ExtensionService {
 
     loadExtensions(): void {
         for(const extension of this.extensions) {
-            extension.metadata.resolvedDependencies = this.extensions.filter(ext =>
-                // ! I can not figure the types of this out under any circumstances
-                // ! This works however, flawlessly
-                // @ts-ignore
-                extension.metadata.dependencies.includes(ext.metadata?.name) ||
-                // @ts-ignore
-                extension.metadata.dependencies.includes(ext.constructor),
-            );
+            this.loadExtension(extension);
         }
+    }
+
+    loadExtension(extension: IExtension): void {
+        extension.metadata.resolvedDependencies = this.extensions.filter(ext =>
+            extension.metadata.dependencies.includes(ext.metadata?.name) ||
+            extension.metadata.dependencies.includes(ext.constructor),
+        );
     }
 
     /**

@@ -3,6 +3,7 @@ import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabri
 
 export default class DatabridgeWebsocketLayer implements IDatabridgeLayer<string, string> {
     private _socket: WebSocket;
+    private _started: boolean = false;
     private _connected: boolean = false;
     private _connectPromise: Promise<void>;
     private _url: string;
@@ -16,10 +17,12 @@ export default class DatabridgeWebsocketLayer implements IDatabridgeLayer<string
     }
 
     async start(databridge: IDatabridge): Promise<void> {
+        this._started = true;
         await this.connect(databridge);
     }
-    
+
     async stop(databridge: IDatabridge): Promise<void> {
+        this._started = false;
         this._socket.close();
         this._connected = false;
         this._connectPromise = null;
@@ -35,29 +38,48 @@ export default class DatabridgeWebsocketLayer implements IDatabridgeLayer<string
             return this._connectPromise;
         }
 
+        if(!this._started) {
+            return null;
+        }
+
         return this._connectPromise = new Promise((res, rej) => {
+            if(!this._started) {
+                res();
+                return;
+            }
+
+            if(this._socket) {
+                this._socket.close();
+            }
+
             this._socket = new WebSocket(this._url);
 
-            this._socket.addEventListener("open", () => {
+            if(!this._started) {
+                this._socket.close();
+                res();
+                return;
+            }
+
+            this._socket.onopen = () => {
                 this._connected = true;
                 this._connectPromise = null;
                 res();
-            });
+            };
 
-            this._socket.addEventListener("error", async() => {
+            this._socket.onerror = async() => {
                 this._connected = false;
                 this._connectPromise = null;
                 await databridge.handleError(new Error("unexpected error"), this);
-            });
+            };
 
-            this._socket.addEventListener("close", () => {
+            this._socket.onclose = () => {
                 this._connected = false;
                 this._connectPromise = null;
-            });
+            };
 
-            this._socket.addEventListener("message", event => {
+            this._socket.onmessage = event => {
                 databridge.handleInboundPacket(event.data);
-            });
+            };
         });
     }
 }

@@ -13,7 +13,8 @@
             "@app/*": ["application/*"],
             "@logic/*": ["logic/*"],
             "@service/*": ["service/*"],
-            "@extensions/*": ["../extensions/*"]
+            "@extensions/*": ["../extensions/*"],
+            "wpextensions/*": ["../extensions/*"]
         },
         "esModuleInterop": true,
         "jsx": "react",

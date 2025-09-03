@@ -19,7 +19,7 @@ export default class LogBuilder {
     static onDone: LogBuilder["onDone"];
 
     logEntry: ILogEntry;
-    onDone: (log: ILogEntry) => void;
+    onDone: (log: ILogEntry) => Promise<void>;
 
     constructor(onDone: LogBuilder["onDone"] = LogBuilder.onDone) {
         this.onDone = onDone;
