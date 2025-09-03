@@ -256,8 +256,8 @@ export default class LogBuilder {
      * Intended to be the final method called when using the builder.
      * @returns {LogBuilder} The instance of LogBuilder for chaining, although typically this should be the final operation.
      */
-    debugDone(): LogBuilder {
-        if(process.env.DEBUG !== "true") return this;
+    debugDone(): Promise<void> {
+        if(process.env.DEBUG !== "true") return Promise.resolve();
         return this.done();
     }
 
@@ -266,8 +266,7 @@ export default class LogBuilder {
      * Intended to be the final method called when using the builder.
      * @returns {LogBuilder} The instance of LogBuilder for chaining, although typically this should be the final operation.
      */
-    done(): LogBuilder {
-        this.onDone?.(this.logEntry);
-        return this;
+    done(): Promise<void> {
+        return this.onDone?.(this.logEntry);;
     }
 }
