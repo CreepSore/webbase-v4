@@ -43,10 +43,15 @@ export default class ExtensionService {
 
                     const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + extDir + "/index.ts")).default;
                     const extension: IExtension = new ImportedExtension();
+
+                    if(Array.isArray(extension.metadata.validContexts) && !extension.metadata.validContexts.includes(this.executionContext.contextType)) {
+                        return null;
+                    }
+
                     extension.metadata.extensionPath = path.resolve(this.extensionPath, extDir);
                     return extension;
                 }),
-        )).filter(x => Boolean(x))];
+        )).filter(Boolean)];
 
         this.loadExtensions();
 

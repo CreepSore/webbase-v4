@@ -4,14 +4,16 @@ import IApplication from "@app/IApplication";
 import MainApplication from "@app/MainApplication";
 
 import minimist from "minimist";
+import DeploymentApplication from "./application/DeploymentApplication";
 
 
 (async() => {
     const args = minimist(process.argv.slice(2), {
         alias: {
             cli: "c",
+            deploy: "d"
         },
-        string: ["childApp"],
+        string: ["childApp", "deploy"],
         "boolean": ["cli"],
     });
 
@@ -25,6 +27,9 @@ import minimist from "minimist";
     }
     else if(args.childApp) {
         app = new ChildApplication(args.childApp);
+    }
+    else if(args.deploy) {
+        app = new DeploymentApplication(args);
     }
     else {
         app = new MainApplication();

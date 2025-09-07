@@ -5,7 +5,6 @@ import ConfigModel from "@logic/config/ConfigModel";
 import ExtensionService from "@service/extensions/ExtensionService";
 import IExecutionContext from "@service/extensions/IExecutionContext";
 import CommandHandler from "./CommandHandler";
-import ChildApplication from "./ChildApplication";
 
 export default class MainAppliation implements IApplication {
     events: EventEmitter = new EventEmitter();
@@ -17,7 +16,7 @@ export default class MainAppliation implements IApplication {
         if(this.started) {
             return;
         }
-        
+
         this.started = true;
 
         this.events = new EventEmitter();
