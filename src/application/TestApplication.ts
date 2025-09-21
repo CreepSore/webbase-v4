@@ -29,7 +29,7 @@ export default class TestApplication implements IApplication {
 
         LoggerService.hookConsoleLog();
 
-        console.log("INFO", "Test.ts", "Main Application Startup successful.");
+        console.log("INFO", "Test.ts", "Test Application Startup successful.");
     }
 
     async stop(): Promise<void> {

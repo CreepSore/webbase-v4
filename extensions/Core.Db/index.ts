@@ -73,12 +73,14 @@ export default class CoreDb implements IExtension {
 
     private loadConfig(createDefault: boolean = false): typeof this.config {
         const [configPath, templatePath] = this.generateConfigNames();
-        return ConfigLoader.initConfigWithModel(
+        const config = ConfigLoader.initConfigWithModel(
             configPath,
             templatePath,
             new CoreDbConfig(),
             createDefault,
         );
+
+        return ConfigLoader.environmentOverride(config, "CoreDb");
     }
 
     private generateConfigNames(): string[] {
