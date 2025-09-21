@@ -133,4 +133,32 @@ export default class ConfigLoader<T> {
         const cfg = configLoader.createTemplateAndImport(defaultModel);
         return cfg as T;
     }
+
+    static environmentOverride<T>(cfg: T, baseKey: string = ""): T {
+        if(process.env.ENABLE_CONFIG_OVERRIDE !== "true") {
+            return cfg;
+        }
+
+        // ! This looks like i am insane, but we can do this since our configs are
+        // ! guaranteed to always be json only without any functions
+        let copy = JSON.parse(JSON.stringify(cfg));
+
+        Object.entries(process.env)
+            .filter(([key]) => !baseKey || key.startsWith(baseKey))
+            .forEach(([key, value]) => {
+                let parts = key.split("_");
+                if(baseKey) {
+                    parts.splice(0, 1);
+                }
+
+                let currentObj: any = copy;
+                for(let i = 0; i < parts.length - 1; i++) {
+                    currentObj = currentObj[parts[i]];
+                }
+
+                currentObj[parts[parts.length - 1]] = value;
+            });
+
+        return copy;
+    }
 }

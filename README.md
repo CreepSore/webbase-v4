@@ -166,3 +166,39 @@ See [LogBuilder.ts](https://github.com/CreepSore/webbase-v4/blob/master/src/serv
 | ----------------- | -------------------------------------------------------------------- | -------------------- |
 | CFG_PATH          | Absolute path to the config files                                    | /mnt/config          |
 | CFG_TEMPLATE_PATH | Absolute path where the template config files should be generated at | /mnt/config/template |
+
+### Overriding configuration using env-vars
+To override specific configuration values using the environment variables you have to enable overriding by setting the `ENABLE_CONFIG_OVERRIDE` variable to `true`.
+Afterwards you can override configurations which use the `ConfigLoader.environmentOverride` function.
+
+CoreDb is one of the extensions that uses this.  
+To override the db-uri you can use the env-var `CoreDb_connection_uri`.
+
+Explanation of the parts:
+  - CoreDb
+    - The `baseKey` parameter that's passed to `ConfigLoader.environmentOverride`
+  - connection
+    - the path to the final object referencing the uri value
+  - uri
+    - the final target that will be overridden
+
+#### More abstract example
+Take this configuration that uses the baseKey `ExAmPlE` while calling `ConfigLoader.environmentOverride`:
+```json
+{
+  "hello": {
+    "world": {
+      "my": {
+        "name": {
+          "is": "<PLACEHOLDER>"
+        }
+      }
+    }
+  }
+}
+```
+
+To override the placeholder with another value you can use the env-var `ExAmPlE_hello_world_my_name_is`.
+
+Currently it is not possible to override configuration entries which do not use the environmentOverride function.
+This may be subject to change in the future by making the `baseKey` the config-file-name.

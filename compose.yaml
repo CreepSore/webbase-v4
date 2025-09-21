@@ -1,0 +1,13 @@
+services:
+  mongodb:
+    image: "mongo:8.0.8"
+    volumes:
+      - ./docker/data/mongodb:/data/db
+
+  webbase:
+    build: .
+    depends_on:
+      - "mongodb"
+    environment:
+      ENABLE_CONFIG_OVERRIDE: "true"
+      CoreDb_connection_uri: "mongodb://mongodb:27017/webbase-v4"
