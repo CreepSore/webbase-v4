@@ -7,16 +7,12 @@ import IWorkerThread from "./IWorkerThread";
 import LoggerService from "../../service/logger/LoggerService";
 import ThreadLogger from "../../service/logger/ThreadLogger";
 import ThreadMessage from "./ThreadMessage";
-import IObjectProxyConnection from "./object-proxy/IObjectProxyConnection";
 import ThreadReceivingObjectProxyConnection from "./object-proxy/ThreadReceivingObjectProxyConnection";
 import ProxyBroadcastThreadMessage from "./thread-messages/ProxyBroadcastThreadMessage";
 import ObjectProxyFactory from "./object-proxy/ObjectProxyFactory";
 import ProxyActionThreadMessage from "./thread-messages/ProxyActionThreadMessage";
-import WorkerThread from "./WorkerThread";
-import User from "../../../extensions/Core.Usermgmt/models/User";
 import ProxyActionResultThreadMessage from "./thread-messages/ProxyActionResultThreadMessage";
 import ThreadSendingObjectProxyConnection from "./object-proxy/ThreadSendingObjectProxyConnection";
-import ExtensionService from "../../service/extensions/ExtensionService";
 import ThreadApplication from "../../application/ThreadApplication";
 
 export default class WorkerThreadSubprocess implements IWorkerThread {
@@ -156,15 +152,10 @@ export default class WorkerThreadSubprocess implements IWorkerThread {
             }
 
             case ProxyBroadcastThreadMessage.type: {
-                const parsed = message as ProxyBroadcastThreadMessage;
-
-                const UserProxy = this.getStaticProxy<typeof User>(parsed.payload.proxyId, User);
-
-                const users = await UserProxy.find();
-
-                debugger;
                 break;
             }
+
+            default: break;
         }
     }
 }
