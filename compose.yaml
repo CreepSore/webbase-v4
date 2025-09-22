@@ -11,3 +11,6 @@ services:
     environment:
       ENABLE_CONFIG_OVERRIDE: "true"
       CoreDb_connection_uri: "mongodb://mongodb:27017/webbase-v4"
+      CoreWeb_port: 1325
+    ports:
+      - 1326:1325

@@ -335,12 +335,14 @@ export default class CoreWeb implements IExtension {
 
     private loadConfig(createDefault: boolean = false): typeof this.config {
         const [configPath, templatePath] = this.generateConfigNames();
-        return ConfigLoader.initConfigWithModel(
+        const config = ConfigLoader.initConfigWithModel(
             configPath,
             templatePath,
             new CoreWebConfig(),
             createDefault,
         );
+
+        return ConfigLoader.environmentOverride(config, "CoreWeb");
     }
 
     private generateConfigNames(): string[] {

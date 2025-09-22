@@ -202,3 +202,36 @@ To override the placeholder with another value you can use the env-var `ExAmPlE_
 
 Currently it is not possible to override configuration entries which do not use the environmentOverride function.
 This may be subject to change in the future by making the `baseKey` the config-file-name.
+
+### .env-Files
+You can also use .env files to specify your environment variables.
+They are ignored inside .gitignore by default.
+
+There are three places you can put your .env files in:
+
+| Relative Path | Iterated recursively |
+| ------------- | -------------------- |
+| .             | No                   |
+| .env          | Yes                  |
+| env           | Yes                  |
+
+Example:
+```
+# Classic
+HELLO=World
+
+# Double-Quotes also work
+IAlsoSupport="DoubleQuotes"
+
+# And Single quotes
+Also='SingleQuotes'
+
+# Backticks also
+And=`Backticks`
+
+# Quote nesting is also possible
+NestingAlsoWorks=`"Hello'" World'` # This will result in ["Hello'" World']
+
+# You can also specify newlines and carriage-returns when using backticks:
+This=`HasA\nNewline\r\n`
+```
