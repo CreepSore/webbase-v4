@@ -105,7 +105,8 @@ export default class EnvironmentFileParser {
             {
                 token: Tokens.WHITESPACE,
                 onMatch: () => true,
-                continue: true
+                continue: true,
+                lineFinished: () => lineFinished = true
             },
             {
                 token: Tokens.QUOTE,
@@ -186,7 +187,7 @@ export default class EnvironmentFileParser {
         if(!result.value) {
             result.value = "";
         }
-        else {
+        else if(!expectEndQuoteToken) {
             result.value = result.value.trim();
         }
 
