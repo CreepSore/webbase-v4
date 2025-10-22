@@ -157,7 +157,7 @@ describe("ExtensionService Error Tests", () => {
         })
 
         await expect(extensionService.loadExtensions()).rejects.toThrow();
-        await expect(extensionService.startExtensions()).rejects.toThrow();
+        await expect(extensionService.startExtensions(false)).rejects.toThrow();
         await expect(extensionService.stopExtensions()).rejects.toThrow();
         await expect(extensionService.unloadExtensions()).rejects.toThrow();
 
