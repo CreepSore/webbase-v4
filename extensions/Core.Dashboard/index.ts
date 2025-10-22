@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreWeb from "@extensions/Core.Web";
@@ -41,7 +41,7 @@ export default class CoreDashboard implements IExtension {
         this.pages = [];
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         this.checkConfig();
         this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType !== "app") {

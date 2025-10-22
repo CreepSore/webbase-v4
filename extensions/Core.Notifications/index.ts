@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import IExecutionContext, { IAppExecutionContext, ICliExecutionContext } from "@service/extensions/IExecutionContext";
+import ExecutionContext, { AppExecutionContext, CliExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import INotificationProvider from "./logic/interfaces/INotificationProvider";
@@ -98,7 +98,7 @@ export default class CoreNotifications implements IExtension {
         }
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         this.checkConfig();
         this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
@@ -115,12 +115,12 @@ export default class CoreNotifications implements IExtension {
 
     }
 
-    private async startCli(executionContext: ICliExecutionContext): Promise<void> {
+    private async startCli(executionContext: CliExecutionContext): Promise<void> {
 
     }
 
-    private async startMain(executionContext: IAppExecutionContext): Promise<void> {
-        executionContext.extensionService.onAllExtensionsStarted(async() => {
+    private async startMain(executionContext: AppExecutionContext): Promise<void> {
+        executionContext.application.onAfterStartup(async() => {
             for(const notificationProvider of this.notificationProviders) {
                 try {
                     await notificationProvider.start();

@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import IExecutionContext, { IAppExecutionContext, ICliExecutionContext } from "@service/extensions/IExecutionContext";
+import ExecutionContext, { AppExecutionContext, CliExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import RemoteConsoleClient from "./logic/RemoteConsoleClient";
@@ -33,7 +33,7 @@ export default class CoreRemoteConsole implements IExtension {
         this.config = this.loadConfig(true);
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType === "cli") {
             await this.startCli(executionContext);
@@ -49,7 +49,7 @@ export default class CoreRemoteConsole implements IExtension {
 
     }
 
-    private async startCli(executionContext: ICliExecutionContext): Promise<void> {
+    private async startCli(executionContext: CliExecutionContext): Promise<void> {
         if(executionContext.application.cmdHandler.isInteractive) return;
         executionContext.application.cmdHandler.registerCommand({
             triggers: ["remote-console"],
@@ -65,7 +65,7 @@ export default class CoreRemoteConsole implements IExtension {
         });
     }
 
-    private async startMain(executionContext: IAppExecutionContext): Promise<void> {
+    private async startMain(executionContext: AppExecutionContext): Promise<void> {
         if(!this.config) return;
         if(!this.config.enabled) return;
         if(!this.config.host) return;

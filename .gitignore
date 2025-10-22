@@ -16,6 +16,10 @@ storage.db
 .env
 env
 
+# Stryker
+.stryker-tmp/
+reports/
+
 #############
 
 # Logs

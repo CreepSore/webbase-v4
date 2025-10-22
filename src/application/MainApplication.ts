@@ -2,38 +2,41 @@ import {EventEmitter} from "events";
 import IApplication from "./IApplication";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import ConfigModel from "@logic/config/ConfigModel";
-import ExtensionService from "@service/extensions/ExtensionService";
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext, { AppExecutionContext } from "@service/extensions/ExecutionContext";
 import CommandHandler from "./CommandHandler";
-import ChildApplication from "./ChildApplication";
+import IExtensionService from "../service/extensions/IExtensionService";
+import ExtensionServiceFactory from "../service/extensions/ExtensionServiceFactory";
 
 export default class MainAppliation implements IApplication {
     events: EventEmitter = new EventEmitter();
-    extensionService: ExtensionService = new ExtensionService();
+    extensionService: IExtensionService;
     cmdHandler: CommandHandler = new CommandHandler();
     started: boolean = false;
+    executionContext: AppExecutionContext;
 
     async start(): Promise<void> {
         if(this.started) {
             return;
         }
-        
-        this.started = true;
 
+        this.started = true;
         this.events = new EventEmitter();
         const config = this.loadConfig();
         this.events.emit("config-loaded", config);
 
-        this.extensionService.setContextInfo({
+        this.executionContext = {
             contextType: "app",
             application: this,
-            extensionService: this.extensionService,
-        });
-        await this.extensionService.loadExtensionsFromExtensionsFolder();
-        await this.extensionService.startExtensions();
+            extensionService: null,
+        };
+
+        this.extensionService = await ExtensionServiceFactory.fullCreateAndStart(
+            this.executionContext,
+            (message) => console.log("INFO", "ExtensionService", message)
+        );
 
         console.log("INFO", "MainApplication.ts", "Main Application Startup successful.");
-        this.events.emit("after-startup", this.extensionService.executionContext);
+        this.events.emit("after-startup", this.executionContext);
     }
 
     async stop(): Promise<void> {
@@ -68,7 +71,7 @@ export default class MainAppliation implements IApplication {
         return this;
     }
 
-    onAfterStartup(callback: (context: IExecutionContext) => void): MainAppliation {
+    onAfterStartup(callback: (context: ExecutionContext) => void): MainAppliation {
         this.events.on("after-startup", callback);
         return this;
     }

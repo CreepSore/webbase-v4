@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as process from "process";
 
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import LoggerService from "@service/logger/LoggerService";
 import ConsoleLogger from "@service/logger/ConsoleLogger";
@@ -41,7 +41,7 @@ export default class Core implements IExtension {
         this.config = this.loadConfig(true);
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         if(!fs.existsSync("logs")) {
             fs.mkdirSync("logs");
         }
@@ -116,7 +116,7 @@ export default class Core implements IExtension {
 
     }
 
-    private setupCli(executionContext: IExecutionContext): void {
+    private setupCli(executionContext: ExecutionContext): void {
         executionContext.application.cmdHandler.registerCommand({
             triggers: ["help", "h", "?"],
             description: "Shows the help page",

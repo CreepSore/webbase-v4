@@ -1,13 +1,11 @@
 import * as uuid from "uuid";
 import * as childProcess from "child_process";
-import * as ps from "process";
 
 import {EventEmitter} from "events";
 import IApplication from "./IApplication";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import ConfigModel from "@logic/config/ConfigModel";
-import ExtensionService from "@service/extensions/ExtensionService";
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext, { ChildExecutionContext } from "@service/extensions/ExecutionContext";
 import CommandHandler from "./CommandHandler";
 import LogBuilder from "@service/logger/LogBuilder";
 import LoggerService from "@service/logger/LoggerService";
@@ -16,12 +14,14 @@ import ChildConsoleLogger from "@service/logger/ChildConsoleLogger";
 import IExtension from "@service/extensions/IExtension";
 import { runPlatformDependent } from "@service/utils/multiplatform";
 import JsonFileLogger from "@service/logger/JsonFileLogger";
+import ExtensionServiceFactory from "../service/extensions/ExtensionServiceFactory";
+import IExtensionService from "../service/extensions/IExtensionService";
 
 export default class ChildApplication implements IApplication {
     static currentExecutablePath: string;
 
     events: EventEmitter = new EventEmitter();
-    extensionService: ExtensionService = new ExtensionService();
+    extensionService: IExtensionService;
     cmdHandler: CommandHandler = new CommandHandler();
 
     id: string;
@@ -40,24 +40,20 @@ export default class ChildApplication implements IApplication {
                 this.id = message?.id;
                 console.log("INFO", "ChildApplication.ts", `Got handshake from parent. Our id is [${this.id}]`);
 
-                this.extensionService.setContextInfo({
+                const executionContext: ChildExecutionContext = {
                     contextType: "child-app",
                     application: this,
-                    extensionService: this.extensionService,
+                    extensionService: null,
                     childType: this.childType,
+                };
+
+                ExtensionServiceFactory.fullCreateAndStart(executionContext).then((service) => {
+                    this.extensionService = service;
+                    console.log("INFO", "ChildApplication.ts", "Child Application Startup successful.");
+                    console.log("INFO", "ChildApplication.ts", `Got handshake from parent. Our id is [${this.id}]`);
+
+                    this.events.emit("after-startup", executionContext);
                 });
-
-                this.extensionService.skipLogs();
-
-                this.extensionService
-                    .loadExtensionsFromExtensionsFolder()
-                    .then(() => this.extensionService.startExtensions())
-                    .then(() => {
-                        console.log("INFO", "ChildApplication.ts", "Child Application Startup successful.");
-                        console.log("INFO", "ChildApplication.ts", `Got handshake from parent. Our id is [${this.id}]`);
-
-                        this.events.emit("after-startup", this.extensionService.executionContext);
-                    });
 
                 process.removeListener("message", listenForId);
             }
@@ -103,7 +99,7 @@ export default class ChildApplication implements IApplication {
         return this;
     }
 
-    onAfterStartup(callback: (context: IExecutionContext) => void): ChildApplication {
+    onAfterStartup(callback: (context: ExecutionContext) => void): ChildApplication {
         this.events.on("after-startup", callback);
         return this;
     }

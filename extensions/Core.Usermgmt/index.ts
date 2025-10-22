@@ -2,7 +2,7 @@ import {EventEmitter} from "events";
 
 import * as uuid from "uuid";
 
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import CoreDb from "@extensions/Core.Db";
@@ -38,7 +38,7 @@ export default class CoreUsermgmt implements IExtension {
         this.config = this.loadConfig(true);
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         this.checkConfig();
         this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType !== "app") {

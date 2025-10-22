@@ -2,18 +2,19 @@ import {EventEmitter} from "events";
 import IApplication from "./IApplication";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import ConfigModel from "@logic/config/ConfigModel";
-import ExtensionService from "@service/extensions/ExtensionService";
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext, { CliExecutionContext } from "@service/extensions/ExecutionContext";
 import CommandHandler from "./CommandHandler";
 
 import minimist from "minimist";
 
 import readline from "readline";
+import ExtensionServiceFactory from "../service/extensions/ExtensionServiceFactory";
+import IExtensionService from "../service/extensions/IExtensionService";
 
 export default class CliApplication implements IApplication {
     configLoader: ConfigLoader<ConfigModel>;
     events: EventEmitter = new EventEmitter();
-    extensionService: ExtensionService = new ExtensionService();
+    extensionService: IExtensionService = ExtensionServiceFactory.create();
     args: minimist.ParsedArgs;
     cmdHandler: CommandHandler = new CommandHandler();
 
@@ -31,29 +32,31 @@ export default class CliApplication implements IApplication {
 
         this.events.emit("config-loaded", config);
 
-        this.extensionService.setContextInfo({
+        const executionContext = {
             contextType: "cli",
             application: this,
             extensionService: this.extensionService,
-        });
-
-        this.extensionService.skipLogs();
+        } as CliExecutionContext;
+        this.extensionService.initialize(executionContext);
 
         try {
-            await this.extensionService.loadExtensionsFromExtensionsFolder();
+            for(const environment of await ExtensionServiceFactory.createDefaultEnvironments()) {
+                await environment.applyTo(this.extensionService);
+            }
         }
         catch {
             console.log("ERROR", "CliApplication.ts", "Failed to load some extensions. Please check installed npm packages");
         }
 
         try {
+            await this.extensionService.loadExtensions();
             await this.extensionService.startExtensions();
         }
         catch {
             console.log("ERROR", "CliApplication.ts", "Failed to start extensions. Please check installed npm packages");
         }
 
-        this.events.emit("after-startup", this.extensionService.executionContext);
+        this.events.emit("after-startup", executionContext);
 
         if(isInteractive) {
             await this.startInteractive();
@@ -105,7 +108,7 @@ export default class CliApplication implements IApplication {
         return this;
     }
 
-    onAfterStartup(callback: (context: IExecutionContext) => void): this {
+    onAfterStartup(callback: (context: ExecutionContext) => void): this {
         this.events.on("after-startup", callback);
         return this;
     }

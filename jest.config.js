@@ -1,6 +1,6 @@
 const fs = require("fs");
 const tsconfig = JSON.parse(fs.readFileSync("tsconfig.json").toString("utf-8"));
-const moduleNameMapper = Object.fromEntries(Object.entries(require("tsconfig-paths-jest")(tsconfig)).map(([k, v]) => [k, v.replace("<rootDir>", "<rootDir>/src")]));
+const moduleNameMapper = Object.fromEntries(Object.entries(require("tsconfig-paths-jest")(tsconfig)).map(([k, v]) => [k, v.replace("<rootDir>", "<rootDir>")]));
 
 module.exports = {
     preset: "ts-jest",

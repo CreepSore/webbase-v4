@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import LogBuilder from "@service/logger/LogBuilder";
@@ -34,7 +34,7 @@ export default class CoreDb implements IExtension {
         this.config = this.loadConfig(true);
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         if(
             executionContext.contextType !== "app"
             && executionContext.contextType !== "test"
