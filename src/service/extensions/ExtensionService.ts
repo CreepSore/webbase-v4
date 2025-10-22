@@ -1,229 +1,178 @@
-import { EventEmitter } from "events";
-import * as fs from "fs";
-import * as path from "path";
+import ExecutionContext from "./ExecutionContext";
+import IExtension from "./IExtension";
+import IExtensionService from "./IExtensionService";
+import ExtensionAlreadyRegisterdError from "./errors/ExtensionAlreadyRegisteredError";
+import NoExtensionLoaderFoundError from "./errors/NoExtensionLoaderFoundError";
+import IExtensionLoader from "./loaders/IExtensionLoader";
 
-import LogBuilder from "@service/logger/LogBuilder";
-import IExecutionContext, { IAppExecutionContext, IChildExecutionContext, ICliExecutionContext, IThreadExecutionContext, ITestExecutionContext } from "./IExecutionContext";
-import IExtension, { IExtensionConstructor } from "./IExtension";
+export default class ExtensionService implements IExtensionService {
+    private _extensions: Array<IExtension> = [];
+    private _extensionsByName: Map<string, IExtension> = new Map();
+    private _extensionLoaders: Set<IExtensionLoader> = new Set();
+    private _executionContext: ExecutionContext;
+    private _loggerFn: (message: string) => Promise<void> | void;
 
-export default class ExtensionService {
-    extensions: Array<IExtension> = [];
-    extensionsStarted: boolean = false;
-    extensionPath: string = "./extensions/";
-    executionContext: IExecutionContext;
-    emitter: EventEmitter = new EventEmitter();
-    doSkipLogs: boolean = false;
-
-    constructor() {}
-
-    // #region Public Methods
-    /**
-     * Sets the current {@link IAppExecutionContext}
-     * @param info
-     */
-    setContextInfo(info: IExecutionContext): void {
-        this.executionContext = info;
-        this.executionContext.extensionService = this;
+    initialize(executionContext: ExecutionContext): void {
+        this._executionContext = executionContext;
     }
 
-    async loadExtensionsFromExtensionsFolder(): Promise<boolean> {
-        if(this.extensionsStarted) return false;
-        if(!fs.existsSync(this.extensionPath)) return false;
-        const disabled = this.getDisabledExtensions();
-        const extBaseDir = fs.readdirSync(this.extensionPath);
-
-        this.extensions = [...this.extensions, ...(await Promise.all(
-            extBaseDir
-                .filter(name => !disabled.includes(name))
-                .map(async extDir => {
-                    if(extDir.startsWith("Custom.Template")) return null;
-
-                    if(!fs.existsSync(path.join(this.extensionPath, extDir, "index.ts"))) return null;
-                    if(this.getDisabledExtensions().includes(extDir)) return null;
-
-                    const ImportedExtension: IExtensionConstructor = (await import("wpextensions/" + extDir + "/index.ts")).default;
-                    const extension: IExtension = new ImportedExtension();
-                    extension.metadata.extensionPath = path.resolve(this.extensionPath, extDir);
-                    return extension;
-                }),
-        )).filter(x => Boolean(x))];
-
-        this.loadExtensions();
-
-        return true;
-    }
-
-    unloadExtensions(): void {
-        this.stopExtensions();
-        this.extensions = [];
-    }
-
-    async startExtensions(): Promise<void> {
-        if(this.extensionsStarted) return;
-
-        const loaded: Set<IExtension> = new Set();
-        let currentNodes = this.extensions.filter(ext => ext.metadata.dependencies.length === 0);
-
-        while(currentNodes.length > 0) {
-            for(const node of currentNodes) {
-                loaded.add(node);
-
-                try {
-                    await node.start({...this.executionContext});
-                    node.metadata.isLoaded = true;
-                    this.fireOnExtensionStarted(node.metadata.name, {...this.executionContext});
-
-                    if(!this.doSkipLogs) {
-                        LogBuilder
-                            .start()
-                            .level(LogBuilder.LogLevel.INFO)
-                            .info("ExtensionService.ts")
-                            .line(`Loaded Extension [${node.metadata.name}]@[${node.metadata.version}]`)
-                            .done();
-                    }
-                }
-                catch(err) {
-                    LogBuilder
-                        .start()
-                        .level(LogBuilder.LogLevel.ERROR)
-                        .info("ExtensionService.ts")
-                        .line(`Start of extension [${node.metadata.name}]@[${node.metadata.version}] failed`)
-                        .object("error", err)
-                        .done();
-                }
-            }
-
-            currentNodes = this.extensions.filter(e =>
-                !loaded.has(e) &&
-                e.metadata.resolvedDependencies.length === e.metadata.dependencies.length &&
-                !e.metadata.resolvedDependencies.some(d => !loaded.has(d)),
-            );
-        }
-
-        this.extensionsStarted = true;
-        this.fireAllExtensionsStarted({...this.executionContext});
-    }
-
-    async stopExtensions(): Promise<void> {
-        if(!this.extensionsStarted) return;
-
-        for(let i = this.extensions.length - 1; i >= 0; i--) {
-            const extension = this.extensions[i];
-
-            try {
-                await extension.stop();
-
-                LogBuilder
-                    .start()
-                    .level(LogBuilder.LogLevel.INFO)
-                    .info("ExtensionService.ts")
-                    .line(`Stopped Extension [${extension.metadata.name}]@[${extension.metadata.version}]`)
-                    .done();
-            }
-            catch {
-                LogBuilder
-                    .start()
-                    .level(LogBuilder.LogLevel.ERROR)
-                    .info("ExtensionService.ts")
-                    .line(`Stopping Extension [${extension.metadata.name}]@[${extension.metadata.version}] failed`)
-                    .done();
-            }
-        }
-
-        this.extensionsStarted = false;
+    setLogger(loggerFn?: (message: string) => Promise<void> | void) {
+        this._loggerFn = loggerFn;
     }
 
     registerExtension(extension: IExtension): void {
-        this.extensions.push(extension);
+        if(this.getExtensionByName(extension.metadata.name)) {
+            throw new ExtensionAlreadyRegisterdError(extension.metadata.name);
+        }
+
+        this._extensions.push(extension);
+        this._extensionsByName.set(extension.metadata.name, extension);
     }
 
-    loadExtensions(): void {
-        for(const extension of this.extensions) {
-            this.loadExtension(extension);
+    unregisterExtension(extension: IExtension): void {
+        const index = this._extensions.indexOf(extension);
+
+        this._extensions.splice(index, 1);
+        this._extensionsByName.delete(extension.metadata.name);
+    }
+
+    async startExtensions(continueOnError: boolean = true): Promise<void> {
+        for(const extension of this.iterateExtensions()) {
+            try {
+                await this.startExtension(extension);
+            }
+            catch(err) {
+                if(!continueOnError) {
+                    throw err;
+                }
+            }
         }
     }
 
-    loadExtension(extension: IExtension): void {
-        extension.metadata.resolvedDependencies = this.extensions.filter(ext =>
+    async stopExtensions(): Promise<void> {
+        for(const extension of [...this.iterateExtensions()].reverse()) {
+            await this.stopExtension(extension);
+        }
+    }
+
+    async loadExtensions(): Promise<void> {
+        for(const extension of this.iterateExtensions()) {
+            await this.loadExtension(extension);
+        }
+    }
+
+    async unloadExtensions(): Promise<void> {
+        for(const extension of [...this.iterateExtensions()].reverse()) {
+            await this.loadExtension(extension);
+        }
+    }
+
+    loadExtension(extension: IExtension): Promise<void> {
+        const extensionLoader = this.getCorrectExtensionLoader(extension);
+        if(!extensionLoader) {
+            return Promise.reject(new NoExtensionLoaderFoundError(extension.metadata.name));
+        }
+
+        extension.metadata.resolvedDependencies = this._extensions.filter(ext =>
             extension.metadata.dependencies.includes(ext.metadata?.name) ||
             extension.metadata.dependencies.includes(ext.constructor),
         );
+
+        return extensionLoader.loadExtension(extension);
     }
 
-    /**
-     * Gets an extension by its name
-     * @param name the name of the extension
-     */
-    getExtension(name: string|Function & { prototype: IExtension }): IExtension {
-        let result: IExtension;
-
-        if(typeof name === "string") {
-            result = this.extensions.find(ext => ext.metadata.name === name);
-        }
-        else if(name.prototype) {
-            result = this.extensions.find(ext => ext instanceof name);
+    unloadExtension(extension: IExtension): Promise<void> {
+        const extensionLoader = this.getCorrectExtensionLoader(extension);
+        if(!extensionLoader) {
+            return Promise.reject(new NoExtensionLoaderFoundError(extension.metadata.name));
         }
 
-        if(!result) {
-            LogBuilder
-                .start()
-                .level(LogBuilder.LogLevel.WARN)
-                .info("ExtensionService.ts")
-                .line(`Failed to get extension [${name}]`)
-                .done();
+        return extensionLoader.unloadExtension(extension);
+    }
+
+    async startExtension(extension: IExtension): Promise<void> {
+        const extensionLoader = this.getCorrectExtensionLoader(extension);
+        if(!extensionLoader) {
+            return Promise.reject(new NoExtensionLoaderFoundError(extension.metadata.name));
         }
 
-        return result || null;
+        await extensionLoader.startExtension(extension, this._executionContext);
+        this.log(`Started extension [${extension.metadata.name}]`);
     }
 
-    /**
-     * Gets multiple extensions by their names
-     */
-    getExtensions(...names: string[]): IExtension[] {
-        return names.map(name => this.getExtension(name));
-    }
-
-    skipLogs(): void {
-        this.doSkipLogs = true;
-    }
-    // #endregion
-
-    // #region Events
-    /**
-     * Gets called after all extensions have been started
-     */
-    onAllExtensionsStarted(cb: (context: IExecutionContext) => void): void {
-        this.emitter.on("all-extensions-started", cb);
-    }
-
-    private fireAllExtensionsStarted(context: IExecutionContext): void {
-        this.emitter.emit("all-extensions-started", context);
-    }
-
-    /**
-     * Gets called after the specified extension has been started
-     */
-    onExtensionStarted(extensionName: string, cb: (context: IExecutionContext) => void): void {
-        this.emitter.on(`extension-started-${extensionName}`, cb);
-    }
-
-    private fireOnExtensionStarted(extensionName: string, context: IExecutionContext): void {
-        this.emitter.emit(`extension-started-${extensionName}`, context);
-    }
-    // #endregion
-
-    // #region Private Methods
-    private getDisabledExtensions(): string[] {
-        const disabledPath = path.join(this.extensionPath, "disabled.json");
-        let disabledResult: string[] = [];
-        if(!fs.existsSync(disabledPath)) {
-            fs.writeFileSync(disabledPath, JSON.stringify(disabledResult, null, 4), "utf8");
-        }
-        else {
-            disabledResult = JSON.parse(String(fs.readFileSync(disabledPath, "utf8")));
+    async stopExtension(extension: IExtension): Promise<void> {
+        const extensionLoader = this.getCorrectExtensionLoader(extension);
+        if(!extensionLoader) {
+            return Promise.reject(new NoExtensionLoaderFoundError(extension.metadata.name));
         }
 
-        return disabledResult;
+        await extensionLoader.stopExtension(extension);
+        this.log(`Stopped extension [${extension.metadata.name}]`);
     }
-    // #endregion
+
+    registerExtensionLoader(extensionLoader: IExtensionLoader): void {
+        this._extensionLoaders.add(extensionLoader);
+    }
+
+    getExtension<T extends IExtension>(name: string | Function & { prototype: T; }): T {
+        return typeof name === "string"
+            ? this.getExtensionByName(name)
+            : this.getExtensionByConstructor(name);
+    }
+
+    getExtensionByName<T>(name: string): T {
+        return this._extensionsByName.get(name) as T;
+    }
+
+    getExtensionByConstructor<T extends IExtension>(type: Function & { prototype: T; }): T {
+        return this._extensions.find(e => e instanceof type) as T;
+    }
+
+    *iterateExtensions(): Generator<IExtension> {
+        let iterated: Set<IExtension> = new Set();
+        let queue = this._extensions.filter(e => !e.metadata.dependencies || e.metadata.dependencies.length === 0);
+
+        while(queue.length > 0) {
+            for(const extension of queue) {
+                iterated.add(extension);
+                yield extension;
+            }
+
+            queue = this._extensions.filter(e =>
+                !iterated.has(e) &&
+                !e.metadata.dependencies.some(d => !iterated.has(
+                    typeof d === "string"
+                        ? this.getExtensionByName(d)
+                        : this.getExtensionByConstructor(d)
+                )),
+            );
+        }
+    }
+
+    private getCorrectExtensionLoader(extension: IExtension): IExtensionLoader {
+        const iterator = this._extensionLoaders.values();
+        let currentEntry: IteratorResult<IExtensionLoader, IExtensionLoader> = iterator.next();
+
+        if(currentEntry.done) {
+            return null;
+        }
+
+        do {
+            if(currentEntry.value.canHandleExtension(extension)) {
+                return currentEntry.value;
+            }
+
+            currentEntry = iterator.next();
+        } while(!currentEntry.done);
+
+        return null;
+    }
+
+    private log(message: string) {
+        if(!this._loggerFn) {
+            return;
+        }
+
+        this._loggerFn(message);
+    }
 }

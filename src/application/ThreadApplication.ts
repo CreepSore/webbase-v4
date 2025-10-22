@@ -1,11 +1,10 @@
 import IApplication from "./IApplication";
-import ExtensionService from "@service/extensions/ExtensionService";
 import WorkerThreadSubprocess from "../logic/threads/WorkerThreadSubprocess";
-import EventEmitter from "events";
-import { list } from "postcss";
+import ExtensionServiceFactory from "../service/extensions/ExtensionServiceFactory";
+import IExtensionService from "../service/extensions/IExtensionService";
 
 export default class ThreadApplication implements IApplication {
-    extensionService: ExtensionService = new ExtensionService();
+    extensionService: IExtensionService;
     workerThread: WorkerThreadSubprocess;
 
     constructor(workerThread: WorkerThreadSubprocess) {
@@ -13,11 +12,11 @@ export default class ThreadApplication implements IApplication {
     }
 
     async start(): Promise<void> {
-        this.extensionService.setContextInfo({
+        this.extensionService = await ExtensionServiceFactory.fullCreateAndStart({
             contextType: "thread",
             application: this.workerThread,
-            extensionService: this.extensionService,
-        });
+            extensionService: null,
+        }, (message) => console.log("INFO", "ExtensionService", message));
 
         console.log("INFO", "ThreadApplication.ts", "Thread Application Startup successful.");
     }

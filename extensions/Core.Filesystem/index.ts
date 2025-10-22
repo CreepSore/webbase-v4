@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import IExecutionContext, { IAppExecutionContext, IChildExecutionContext as IChildAppExecutionContext, ICliExecutionContext, ITestExecutionContext } from "@service/extensions/IExecutionContext";
+import ExecutionContext, { AppExecutionContext, ChildExecutionContext as IChildAppExecutionContext, CliExecutionContext, TestExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
@@ -28,7 +28,7 @@ export default class CoreFilesystem implements IExtension {
         this.config = this.loadConfig();
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         this.checkConfig();
         this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
@@ -53,11 +53,11 @@ export default class CoreFilesystem implements IExtension {
 
     }
 
-    private async startCli(executionContext: ICliExecutionContext): Promise<void> {
+    private async startCli(executionContext: CliExecutionContext): Promise<void> {
 
     }
 
-    private async startMain(executionContext: IAppExecutionContext): Promise<void> {
+    private async startMain(executionContext: AppExecutionContext): Promise<void> {
 
     }
 
@@ -65,7 +65,7 @@ export default class CoreFilesystem implements IExtension {
 
     }
 
-    private async startTestApp(executionContext: ITestExecutionContext): Promise<void> {
+    private async startTestApp(executionContext: TestExecutionContext): Promise<void> {
 
     }
 

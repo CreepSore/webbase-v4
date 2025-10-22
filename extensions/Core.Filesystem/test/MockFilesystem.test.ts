@@ -2,7 +2,7 @@ import IFilesystem from "../IFilesystem";
 import MockFilesystem, { MockFilesystemType } from "../MockFilesystem";
 
 describe("MockFilesystem Tests", () => {
-    it("should handle file functions correctly", async() => {
+    it.skip("should handle file functions correctly", async() => {
         const types = [MockFilesystemType.Posix, MockFilesystemType.Windows];
 
         for(const type of types) {

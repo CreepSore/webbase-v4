@@ -1,4 +1,5 @@
-import IExecutionContext from "./IExecutionContext";
+import ExecutionContext from "./ExecutionContext";
+import IExtensionLoader from "./loaders/IExtensionLoader";
 
 export interface ExtensionMetadata {
     /**
@@ -44,6 +45,10 @@ export interface ExtensionMetadata {
      * @example ".../extensions/Core.Web"
      */
     extensionPath?: string;
+    /**
+     * Defines the ExtensionLoader to use to handle the lifetime of this extension
+     */
+    extensionLoader?: Function & { prototype: IExtensionLoader };
 }
 
 export interface IExtensionConstructor {
@@ -57,7 +62,8 @@ export default interface IExtension {
      * Gets called by ExtensionService.startExtensions
      * @param executionContext
      */
-    start: (executionContext: IExecutionContext) => Promise<void>;
+    start: (executionContext: ExecutionContext) => Promise<void>;
+
     /**
      * Gets called by ExtensionService.stopExtensions
      * @param executionContext

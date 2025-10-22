@@ -1,5 +1,5 @@
 import CoreWeb from "../extensions/Core.Web";
-import IExecutionContext from "../src/service/extensions/IExecutionContext";
+import ExecutionContext from "../src/service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "../src/service/extensions/IExtension";
 
 type TestExtensionOptions = {
@@ -15,7 +15,7 @@ export default class TestExtension implements IExtension {
         dependencies: [],
     };
 
-    start(executionContext: IExecutionContext): Promise<void> {
+    start(executionContext: ExecutionContext): Promise<void> {
         return Promise.resolve();
     }
 

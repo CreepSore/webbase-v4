@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import IExecutionContext, { IAppExecutionContext, ICliExecutionContext } from "@service/extensions/IExecutionContext";
+import ExecutionContext, { AppExecutionContext, CliExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
@@ -31,7 +31,7 @@ export default class CoreMailNotifications implements IExtension {
         this.config = this.loadConfig(true);
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         this.checkConfig();
         this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
         if(executionContext.contextType === "cli") {
@@ -48,11 +48,11 @@ export default class CoreMailNotifications implements IExtension {
 
     }
 
-    private async startCli(executionContext: ICliExecutionContext): Promise<void> {
+    private async startCli(executionContext: CliExecutionContext): Promise<void> {
 
     }
 
-    private async startMain(executionContext: IAppExecutionContext): Promise<void> {
+    private async startMain(executionContext: AppExecutionContext): Promise<void> {
         if(!this.config.enabled) {
             return;
         }

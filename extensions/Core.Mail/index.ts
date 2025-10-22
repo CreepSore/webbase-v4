@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 
@@ -54,7 +54,7 @@ export default class CoreMail implements IExtension {
         this.config = this.loadConfig(true);
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         this.checkConfig();
         if(executionContext.contextType !== "app") {
             return;

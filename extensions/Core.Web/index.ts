@@ -10,7 +10,7 @@ import expressSession from "express-session";
 import helmet from "helmet";
 import * as uuid from "uuid";
 
-import IExecutionContext from "@service/extensions/IExecutionContext";
+import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import LogBuilder from "@service/logger/LogBuilder";
@@ -78,7 +78,7 @@ export default class CoreWeb implements IExtension {
         this.config = this.loadConfig(true);
     }
 
-    async start(executionContext: IExecutionContext): Promise<void> {
+    async start(executionContext: ExecutionContext): Promise<void> {
         if(executionContext.contextType !== "app") return;
         this.checkConfig();
 
