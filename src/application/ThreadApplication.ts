@@ -117,7 +117,11 @@ export default class ThreadApplication implements IApplication {
         };
 
         const environments = await ExtensionServiceFactory.createDefaultEnvironments();
-        this._extensionService = ExtensionServiceFactory.create((level, message) => console.log(level, "ExtensionService", message));
+        this._extensionService = ExtensionServiceFactory.create((level, message) => {
+            if(level === LogBuilder.LogLevel.ERROR) {
+                console.log(level, "ExtensionService", message);
+            }
+        });
         this._extensionService.initialize(this._executionContext);
         await this._extensionService.loadExtensions();
         environments.applyTo(this._extensionService);

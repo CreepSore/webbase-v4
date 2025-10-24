@@ -168,7 +168,7 @@ export default class ExtensionService implements IExtensionService {
             return true;
         }
 
-        const dependents = this._extensions.filter(e => e.metadata.resolvedDependencies.includes(extension));
+        const dependents = this._extensions.filter(e => (e.metadata.resolvedDependencies || []).includes(extension));
         return dependents.some(d => this.shouldBeForceloaded(d));
     }
 
