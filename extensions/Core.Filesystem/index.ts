@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import ExecutionContext, { AppExecutionContext, ChildExecutionContext as IChildAppExecutionContext, CliExecutionContext, TestExecutionContext } from "@service/extensions/ExecutionContext";
+import ExecutionContext, { AppExecutionContext, CliExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
@@ -39,14 +39,6 @@ export default class CoreFilesystem implements IExtension {
             await this.startMain(executionContext);
             return;
         }
-        else if(executionContext.contextType === "child-app") {
-            await this.startChildApp(executionContext);
-            return;
-        }
-        else if(executionContext.contextType === "test") {
-            await this.startTestApp(executionContext);
-            return;
-        }
     }
 
     async stop(): Promise<void> {
@@ -58,14 +50,6 @@ export default class CoreFilesystem implements IExtension {
     }
 
     private async startMain(executionContext: AppExecutionContext): Promise<void> {
-
-    }
-
-    private async startChildApp(executionContext: IChildAppExecutionContext): Promise<void> {
-
-    }
-
-    private async startTestApp(executionContext: TestExecutionContext): Promise<void> {
 
     }
 

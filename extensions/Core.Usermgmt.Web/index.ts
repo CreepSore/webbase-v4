@@ -77,10 +77,6 @@ export default class CoreUsermgmtWeb implements IExtension {
             await this.startMain(executionContext);
             return;
         }
-        else if(executionContext.contextType === "child-app") {
-            await this.startChildApp(executionContext);
-            return;
-        }
     }
 
     async stop(): Promise<void> {
@@ -182,10 +178,6 @@ export default class CoreUsermgmtWeb implements IExtension {
             createPermissionRouter(),
             createUserRouter(),
         );
-    }
-
-    private async startChildApp(executionContext: IChildAppExecutionContext): Promise<void> {
-
     }
 
     private checkConfig(): void {

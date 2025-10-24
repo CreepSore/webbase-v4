@@ -10,12 +10,15 @@ export default interface IExtensionService {
 
     loadExtensions(): Promise<void>;
     loadExtension(extension: IExtension): Promise<void>;
+
     unloadExtensions(): Promise<void>;
     unloadExtension(extension: IExtension): Promise<void>;
 
     startExtensions(): Promise<void>;
     startExtensions(continueOnError: boolean): Promise<void>;
     startExtension(extension: IExtension): Promise<void>;
+    startExtension(extension: IExtension, withDependents: boolean): Promise<void>;
+
     stopExtensions(): Promise<void>;
     stopExtension(extension: IExtension): Promise<void>;
 
@@ -28,4 +31,6 @@ export default interface IExtensionService {
 
     registerExtensionLoader(extensionLoader: IExtensionLoader): void;
     iterateExtensions(): Generator<IExtension>;
+
+    shouldBeForceloaded(extension: IExtension): boolean;
 }

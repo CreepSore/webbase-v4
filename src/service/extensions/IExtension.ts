@@ -27,18 +27,9 @@ export interface ExtensionMetadata {
      */
     dependencies: Array<string | Function & { prototype: IExtension }>;
     /**
-     * The dependencies of the extension that have to be installed by npm.
-     */
-    npmDependencies?: Array<string>;
-    /**
-     * The dependencies of the extension that have to be installed by npm.
-     */
-    npmDevDependencies?: Array<string>;
-    /**
      * For internal use only.
      */
     resolvedDependencies?: Array<IExtension>;
-    isLoaded?: boolean;
     /**
      * The basePath of the index.ts extension file.
      * Gets filled by the ExtensionService when loading the extension.
@@ -49,6 +40,10 @@ export interface ExtensionMetadata {
      * Defines the ExtensionLoader to use to handle the lifetime of this extension
      */
     extensionLoader?: Function & { prototype: IExtensionLoader };
+    /**
+     * Forces this extension to be loaded and started for every thread created.
+     */
+    forceLoadInThreadContext?: boolean;
 }
 
 export interface IExtensionConstructor {

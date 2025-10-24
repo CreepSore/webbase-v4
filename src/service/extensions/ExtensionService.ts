@@ -96,7 +96,7 @@ export default class ExtensionService implements IExtensionService {
         return extensionLoader.unloadExtension(extension);
     }
 
-    async startExtension(extension: IExtension): Promise<void> {
+    async startExtension(extension: IExtension, withDependents: boolean = false): Promise<void> {
         const extensionLoader = this.getCorrectExtensionLoader(extension);
         if(!extensionLoader) {
             return Promise.reject(new NoExtensionLoaderFoundError(extension.metadata.name));
@@ -161,6 +161,15 @@ export default class ExtensionService implements IExtensionService {
                 )),
             );
         }
+    }
+
+    shouldBeForceloaded(extension: IExtension): boolean {
+        if(extension.metadata.forceLoadInThreadContext) {
+            return true;
+        }
+
+        const dependents = this._extensions.filter(e => e.metadata.resolvedDependencies.includes(extension));
+        return dependents.some(d => this.shouldBeForceloaded(d));
     }
 
     private getCorrectExtensionLoader(extension: IExtension): IExtensionLoader {

@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as process from "process";
 
-import ExecutionContext from "@service/extensions/ExecutionContext";
+import ExecutionContext, { CliExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import LoggerService from "@service/logger/LoggerService";
 import ConsoleLogger from "@service/logger/ConsoleLogger";
@@ -31,6 +31,7 @@ export default class Core implements IExtension {
         description: "Core Module",
         author: "ehdes",
         dependencies: [],
+        forceLoadInThreadContext: true,
     };
 
     metadata: ExtensionMetadata = Core.metadata;
@@ -119,7 +120,7 @@ export default class Core implements IExtension {
 
     }
 
-    private setupCli(executionContext: ExecutionContext): void {
+    private setupCli(executionContext: CliExecutionContext): void {
         executionContext.application.cmdHandler.registerCommand({
             triggers: ["help", "h", "?"],
             description: "Shows the help page",

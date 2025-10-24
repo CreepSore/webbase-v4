@@ -28,17 +28,11 @@ export default class CustomTemplate implements IExtension {
     async start(executionContext: ExecutionContext): Promise<void> {
         this.checkConfig();
         this.$ = <T extends IExtension>(name: string|Function & { prototype: T }) => executionContext.extensionService.getExtension(name) as T;
-        if(executionContext.contextType === "cli") {
-            await this.startCli(executionContext);
-            return;
-        }
-        else if(executionContext.contextType === "app") {
-            await this.startMain(executionContext);
-            return;
-        }
-        else if(executionContext.contextType === "thread") {
-            await this.startThread(executionContext);
-            return;
+
+        switch(executionContext.contextType) {
+            case "cli": return await this.startCli(executionContext as CliExecutionContext);
+            case "app": return await this.startMain(executionContext as AppExecutionContext);
+            case "thread": return await this.startThread(executionContext as ThreadExecutionContext);
         }
     }
 

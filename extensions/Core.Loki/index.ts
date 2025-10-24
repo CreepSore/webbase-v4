@@ -1,14 +1,11 @@
 import {EventEmitter} from "events";
 
-import ExecutionContext, { AppExecutionContext, ChildExecutionContext as IChildAppExecutionContext, CliExecutionContext, TestExecutionContext } from "@service/extensions/ExecutionContext";
+import ExecutionContext, { AppExecutionContext, CliExecutionContext, ThreadExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import Core from "@extensions/Core";
 import LokiClient, { LokiConfig } from "./LokiClient";
 import LoggerService from "../../src/service/logger/LoggerService";
 import LokiLogger from "./LokiLogger";
-
-
 
 class CoreLokiConfig {
     enabled: boolean = false;
@@ -30,6 +27,7 @@ export default class CoreLoki implements IExtension {
         description: "Loki Logging Module",
         author: "ehdes",
         dependencies: [],
+        forceLoadInThreadContext: true,
     };
 
     metadata: ExtensionMetadata = CoreLoki.metadata;
@@ -58,12 +56,8 @@ export default class CoreLoki implements IExtension {
             await this.startMain(executionContext);
             return;
         }
-        else if(executionContext.contextType === "child-app") {
-            await this.startChildApp(executionContext);
-            return;
-        }
-        else if(executionContext.contextType === "test") {
-            await this.startTestApp(executionContext);
+        else if(executionContext.contextType === "thread") {
+            await this.startThread(executionContext);
             return;
         }
     }
@@ -81,15 +75,11 @@ export default class CoreLoki implements IExtension {
         LoggerService.addLogger(new LokiLogger(lokiClient));
     }
 
-    private async startChildApp(executionContext: IChildAppExecutionContext): Promise<void> {
-        this.config.loki.serviceName = `${this.config.loki.serviceName}-${executionContext.childType}`;
+    private async startThread(executionContext: ThreadExecutionContext): Promise<void> {
+        this.config.loki.serviceName = `${this.config.loki.serviceName}-${executionContext.application.id}`;
 
         const lokiClient = new LokiClient(this.config.loki);
         LoggerService.addLogger(new LokiLogger(lokiClient));
-    }
-
-    private async startTestApp(executionContext: TestExecutionContext): Promise<void> {
-
     }
 
     private checkConfig(): void {
