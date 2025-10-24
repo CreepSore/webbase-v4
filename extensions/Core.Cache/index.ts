@@ -15,6 +15,7 @@ export interface CacheEntryConfig<T> {
     updateCallback: () => Promise<T> | T;
     defaultValue?: T;
     updateEveryMs?: number;
+    log?: boolean;
 }
 
 export class CacheEntry<T> {
@@ -24,6 +25,7 @@ export class CacheEntry<T> {
     refreshNextUpdate?: boolean;
     lastUpdate: Date;
     updateEveryMs?: number;
+    log: boolean;
     private updateCallback: () => Promise<T> | T;
 
     constructor(config: CacheEntryConfig<T>) {
@@ -33,6 +35,7 @@ export class CacheEntry<T> {
         this.lastUpdate = this.defaultValue ? new Date() : new Date(0);
         this.updateEveryMs = config.updateEveryMs;
         this.refreshNextUpdate = !this.defaultValue;
+        this.log = config.log ?? false;
     }
 
     async getValue(): Promise<T> {
@@ -42,22 +45,26 @@ export class CacheEntry<T> {
             this.refreshNextUpdate = false;
             this.lastUpdate = new Date();
 
-            LogBuilder
-                .start()
-                .level(LogBuilder.LogLevel.INFO)
-                .info("Core.Cache")
-                .line(`Executing update-function for cache [${this.key}]`)
-                .done();
+            if(this.log) {
+                LogBuilder
+                    .start()
+                    .level(LogBuilder.LogLevel.INFO)
+                    .info("Core.Cache")
+                    .line(`Executing update-function for cache [${this.key}]`)
+                    .done();
+            }
 
             this.currentValue = await this.updateCallback();
 
-            LogBuilder
-                .start()
-                .level(LogBuilder.LogLevel.INFO)
-                .info("Core.Cache")
-                .line(`Updated value for cache [${this.key}]`)
-                .debugObject("newValue", this.currentValue)
-                .done();
+            if(this.log) {
+                LogBuilder
+                    .start()
+                    .level(LogBuilder.LogLevel.INFO)
+                    .info("Core.Cache")
+                    .line(`Updated value for cache [${this.key}]`)
+                    .debugObject("newValue", this.currentValue)
+                    .done();
+            }
         }
 
         return this.currentValue;
