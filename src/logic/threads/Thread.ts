@@ -38,7 +38,10 @@ export default class Thread {
             argv: ["--worker"]
         });
 
-        this._thread.once("exit", code => (this._exitCode = code));
+        this._thread.once("exit", code => {
+            this._exitCode = code;
+            this._io.stop();
+        });
 
         this._io = new ThreadIO(new ThreadWorkerChannel(this._thread));
 
