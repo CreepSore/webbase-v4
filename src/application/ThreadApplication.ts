@@ -157,6 +157,8 @@ export default class ThreadApplication implements IApplication {
         const readyTelegram = this._io.messageFactory.buildReadyTelegram();
         readyTelegram.send();
         const response = await readyTelegram.waitForResponse<{id: string}>();
+        this._onMessageReceivedCallback = message => this.handleMessageReceived(message);
+        this._io.onMessageReceived(this._onMessageReceivedCallback);
         this._id = response.id;
 
         LoggerService.addLogger(
@@ -170,8 +172,5 @@ export default class ThreadApplication implements IApplication {
             .info("WorkerApplication", "setupIO")
             .line(`Handshake done, got id [${this._id}]`)
             .done();
-
-        this._onMessageReceivedCallback = message => this.handleMessageReceived(message);
-        this._io.onMessageReceived(this._onMessageReceivedCallback);
     }
 }

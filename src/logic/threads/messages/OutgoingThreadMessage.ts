@@ -23,6 +23,12 @@ export default class OutgoingThreadMessage<TPayload, TType extends string = stri
         this._io.sendMessage(this);
     }
 
+    sendAndWaitForResponse<TResponse = any>(): Promise<TResponse> {
+        const responsePromise = this._io.receiveResponse<TResponse>(this.id);
+        this.send();
+        return responsePromise;
+    }
+
     waitForResponse<TResponse = any>(): Promise<TResponse> {
         return this._io.receiveResponse(this.id);
     }
