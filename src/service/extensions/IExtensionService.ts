@@ -19,9 +19,12 @@ export default interface IExtensionService {
     stopExtensions(): Promise<void>;
     stopExtension(extension: IExtension): Promise<void>;
 
-    getExtension<T extends IExtension>(name: string | Function & { prototype: T; }): T
-    getExtensionByName<T extends IExtension>(name: string): T;
-    getExtensionByConstructor<T extends IExtension>(type: Function & { prototype: T }): T;
+    getExtensions(): Array<IExtension>;
+    getExtensionsAsSet(): Set<IExtension>;
+
+    getExtension<T extends IExtension = IExtension>(name: string | Function & { prototype: T; }): T
+    getExtensionByName<T extends IExtension = IExtension>(name: string): T;
+    getExtensionByConstructor<T extends IExtension = IExtension>(type: Function & { prototype: T }): T;
 
     registerExtensionLoader(extensionLoader: IExtensionLoader): void;
 }

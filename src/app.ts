@@ -1,4 +1,3 @@
-import ChildApplication from "@app/ChildApplication";
 import CliApplication from "@app/CliApplication";
 import IApplication from "@app/IApplication";
 import MainApplication from "@app/MainApplication";
@@ -6,6 +5,8 @@ import MainApplication from "@app/MainApplication";
 import minimist from "minimist";
 import { EnvironmentLoader } from "./service/environment/EnvironmentLoader";
 import ConsoleLogger from "./service/logger/ConsoleLogger";
+import Thread from "./logic/threads/Thread";
+import WorkerApplication from "./application/WorkerApplication";
 
 const setupEnvironment = async(log: boolean) => {
     const consoleLogger = new ConsoleLogger();
@@ -59,26 +60,26 @@ const setupEnvironment = async(log: boolean) => {
 };
 
 (async() => {
+    Thread.scriptPath = module.filename;
+
     const args = minimist(process.argv.slice(2), {
         alias: {
             cli: "c",
         },
-        string: ["childApp"],
-        "boolean": ["cli"],
+        string: [],
+        "boolean": ["cli", "worker"],
     });
 
-    // ! Keep in mind that __filename should NOT work here.
-    // ! It does work however, because we bundle to CommonJS Modules instead of ES-Modules
-    ChildApplication.initializeStaticClass(__filename);
+    Thread.scriptPath = __filename;
 
     let app: IApplication;
     if(args.cli) {
         await setupEnvironment(false);
         app = new CliApplication(args);
     }
-    else if(args.childApp) {
+    else if(args.worker) {
         await setupEnvironment(true);
-        app = new ChildApplication(args.childApp);
+        app = new WorkerApplication();
     }
     else {
         await setupEnvironment(true);

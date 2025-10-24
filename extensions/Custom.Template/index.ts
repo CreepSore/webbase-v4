@@ -1,6 +1,4 @@
-import {EventEmitter} from "events";
-
-import ExecutionContext, { AppExecutionContext, ChildExecutionContext as IChildAppExecutionContext, CliExecutionContext, TestExecutionContext } from "@service/extensions/ExecutionContext";
+import ExecutionContext, { AppExecutionContext, CliExecutionContext, WorkerExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
@@ -21,7 +19,6 @@ export default class CustomTemplate implements IExtension {
     metadata: ExtensionMetadata = CustomTemplate.metadata;
 
     config: CustomTemplateConfig = new CustomTemplateConfig();
-    events: EventEmitter = new EventEmitter();
     $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     constructor() {
@@ -39,12 +36,8 @@ export default class CustomTemplate implements IExtension {
             await this.startMain(executionContext);
             return;
         }
-        else if(executionContext.contextType === "child-app") {
-            await this.startChildApp(executionContext);
-            return;
-        }
-        else if(executionContext.contextType === "test") {
-            await this.startTestApp(executionContext);
+        else if(executionContext.contextType === "worker") {
+            await this.startWorkerApp(executionContext);
             return;
         }
     }
@@ -61,11 +54,7 @@ export default class CustomTemplate implements IExtension {
 
     }
 
-    private async startChildApp(executionContext: IChildAppExecutionContext): Promise<void> {
-
-    }
-
-    private async startTestApp(executionContext: TestExecutionContext): Promise<void> {
+    private async startWorkerApp(executionContext: WorkerExecutionContext): Promise<void> {
 
     }
 
