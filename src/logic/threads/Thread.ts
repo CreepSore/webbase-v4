@@ -14,6 +14,7 @@ export default class Thread {
     private _isStarted: boolean = false;
     private _thread: workerThreads.Worker;
     private _io: IThreadIO;
+    private _exitCode: number = null;
 
     get id() {
         return this._id;
@@ -36,6 +37,9 @@ export default class Thread {
         this._thread = new workerThreads.Worker(Thread.scriptPath, {
             argv: ["--worker"]
         });
+
+        this._thread.once("exit", code => (this._exitCode = code));
+
         this._io = new ThreadIO(new ThreadWorkerChannel(this._thread));
 
         this._io.onMessageReceived(message => {
@@ -75,5 +79,13 @@ export default class Thread {
             extensionName: name,
             action: "loadAndStart",
         }).sendAndWaitForResponse();
+    }
+
+    waitForExit(): Promise<number> {
+        if(this._exitCode !== null) {
+            return Promise.resolve(this._exitCode);
+        }
+
+        return new Promise(res => this._thread.once("exit", res));
     }
 }
