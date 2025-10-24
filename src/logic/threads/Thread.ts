@@ -5,6 +5,7 @@ import IThreadIO from "./io/IThreadIO";
 import ThreadIO from "./io/ThreadIO";
 import ThreadWorkerChannel from "./channels/ThreadWorkerChannel";
 import ExtensionControlPayload from "./message-payload-types/ExtensionControlPayload";
+import LogBuilder from "../../service/logger/LogBuilder";
 
 export default class Thread {
     static scriptPath: string = null;
@@ -36,6 +37,17 @@ export default class Thread {
             argv: ["--worker"]
         });
         this._io = new ThreadIO(new ThreadWorkerChannel(this._thread));
+
+        this._io.onMessageReceived(message => {
+            LogBuilder
+                .start()
+                .level(LogBuilder.LogLevel.INFO)
+                .info("OIDA")
+                .line("OIDA")
+                .object("message", message.toPayload())
+                .done();
+        });
+
         this._io.start();
         const ready = await this._io.receiveMessage("READY");
         ready.respond({id: this._id});
@@ -59,12 +71,9 @@ export default class Thread {
             throw new Error("Thread has to be started before loading extensions!");
         }
 
-        const packet = this._io.messageFactory.buildOutgoing<ExtensionControlPayload>("ExtensionControl", {
+        await this._io.messageFactory.buildOutgoing<ExtensionControlPayload>("ExtensionControl", {
             extensionName: name,
             action: "loadAndStart",
-        });
-
-        packet.send();
-        await packet.waitForResponse();
+        }).sendAndWaitForResponse();
     }
 }
