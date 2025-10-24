@@ -57,6 +57,7 @@ export default class DirectoryExtensionEnvironment implements IExtensionEnvironm
 
     private async getDisabledExtensionDirectoryNames(): Promise<Set<string>> {
         const result = new Set<string>();
+        result.add("Custom.Template");
 
         try {
             const disabledList: string[] = JSON.parse(await fsp.readFile(path.resolve(this._path, "disabled.json"), "utf-8"));

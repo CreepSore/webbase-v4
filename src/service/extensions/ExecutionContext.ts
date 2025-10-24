@@ -1,10 +1,9 @@
 import MainApplication from "@app/MainApplication";
 import CliApplication from "@app/CliApplication";
-import TestApplication from "@app/TestApplication";
 import IExtensionService from "./IExtensionService";
-import ChildApplication from "@app/ChildApplication";
 import WorkerThreadSubprocess from "../../logic/threads/WorkerThreadSubprocess";
 import IApplication from "../../application/IApplication";
+import WorkerApplication from "../../application/WorkerApplication";
 
 /**
  * Execution Context of the MainApplication Entrypoint
@@ -27,18 +26,10 @@ export type CliExecutionContext = {
     extensionService: IExtensionService;
 }
 
-export type TestExecutionContext = {
-    contextType: "test";
-    application: TestApplication;
+export type WorkerExecutionContext = {
+    contextType: "worker";
+    application: WorkerApplication;
     extensionService: IExtensionService;
-}
-
-export type ChildExecutionContext = {
-    contextType: "child-app";
-    application: ChildApplication;
-    extensionService: IExtensionService;
-
-    childType: string;
 }
 
 export type ThreadExecutionContext = {
@@ -50,6 +41,6 @@ export type ThreadExecutionContext = {
 /**
  * Base ExecutionContext
  */
-type ExecutionContext = (AnyExecutionContext|AppExecutionContext|CliExecutionContext|TestExecutionContext|ChildExecutionContext|ThreadExecutionContext);
+type ExecutionContext = (AnyExecutionContext|AppExecutionContext|CliExecutionContext|WorkerExecutionContext|ThreadExecutionContext);
 export default ExecutionContext;
 

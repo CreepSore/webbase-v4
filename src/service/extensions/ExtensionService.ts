@@ -1,3 +1,4 @@
+import LogBuilder from "../logger/LogBuilder";
 import ExecutionContext from "./ExecutionContext";
 import IExtension from "./IExtension";
 import IExtensionService from "./IExtensionService";
@@ -10,13 +11,13 @@ export default class ExtensionService implements IExtensionService {
     private _extensionsByName: Map<string, IExtension> = new Map();
     private _extensionLoaders: Set<IExtensionLoader> = new Set();
     private _executionContext: ExecutionContext;
-    private _loggerFn: (message: string) => Promise<void> | void;
+    private _loggerFn: (level: string, message: string) => Promise<void> | void;
 
     initialize(executionContext: ExecutionContext): void {
         this._executionContext = executionContext;
     }
 
-    setLogger(loggerFn?: (message: string) => Promise<void> | void) {
+    setLogger(loggerFn?: (level: string, message: string) => Promise<void> | void) {
         this._loggerFn = loggerFn;
     }
 
@@ -31,6 +32,9 @@ export default class ExtensionService implements IExtensionService {
 
     unregisterExtension(extension: IExtension): void {
         const index = this._extensions.indexOf(extension);
+        if(index === -1) {
+            return;
+        }
 
         this._extensions.splice(index, 1);
         this._extensionsByName.delete(extension.metadata.name);
@@ -42,6 +46,8 @@ export default class ExtensionService implements IExtensionService {
                 await this.startExtension(extension);
             }
             catch(err) {
+                this.log(LogBuilder.LogLevel.ERROR, err);
+
                 if(!continueOnError) {
                     throw err;
                 }
@@ -97,7 +103,7 @@ export default class ExtensionService implements IExtensionService {
         }
 
         await extensionLoader.startExtension(extension, this._executionContext);
-        this.log(`Started extension [${extension.metadata.name}]`);
+        this.log(LogBuilder.LogLevel.INFO, `Started extension [${extension.metadata.name}]`);
     }
 
     async stopExtension(extension: IExtension): Promise<void> {
@@ -107,24 +113,32 @@ export default class ExtensionService implements IExtensionService {
         }
 
         await extensionLoader.stopExtension(extension);
-        this.log(`Stopped extension [${extension.metadata.name}]`);
+        this.log(LogBuilder.LogLevel.INFO, `Stopped extension [${extension.metadata.name}]`);
     }
 
     registerExtensionLoader(extensionLoader: IExtensionLoader): void {
         this._extensionLoaders.add(extensionLoader);
     }
 
-    getExtension<T extends IExtension>(name: string | Function & { prototype: T; }): T {
+    getExtensions(): Array<IExtension> {
+        return [...this._extensions];
+    }
+
+    getExtensionsAsSet(): Set<IExtension> {
+        return new Set(this._extensions);
+    }
+
+    getExtension<T extends IExtension = IExtension>(name: string | Function & { prototype: T; }): T {
         return typeof name === "string"
             ? this.getExtensionByName(name)
             : this.getExtensionByConstructor(name);
     }
 
-    getExtensionByName<T>(name: string): T {
+    getExtensionByName<T extends IExtension = IExtension>(name: string): T {
         return this._extensionsByName.get(name) as T;
     }
 
-    getExtensionByConstructor<T extends IExtension>(type: Function & { prototype: T; }): T {
+    getExtensionByConstructor<T extends IExtension = IExtension>(type: Function & { prototype: T; }): T {
         return this._extensions.find(e => e instanceof type) as T;
     }
 
@@ -168,11 +182,11 @@ export default class ExtensionService implements IExtensionService {
         return null;
     }
 
-    private log(message: string) {
+    private log(level: string, message: string) {
         if(!this._loggerFn) {
             return;
         }
 
-        this._loggerFn(message);
+        this._loggerFn(level, message);
     }
 }

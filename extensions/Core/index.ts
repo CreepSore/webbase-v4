@@ -36,6 +36,7 @@ export default class Core implements IExtension {
     metadata: ExtensionMetadata = Core.metadata;
 
     config: CoreConfig;
+    hookedExceptions: boolean;
 
     constructor() {
         this.config = this.loadConfig(true);
@@ -46,8 +47,8 @@ export default class Core implements IExtension {
             fs.mkdirSync("logs");
         }
 
-        if(executionContext.contextType === "child-app") {
-            // ChildApp logging is set up inside ChildApplication.ts
+        if(executionContext.contextType === "thread") {
+            // ChildApp logging is set up inside WorkerApplication.ts
             return;
         }
 
@@ -81,7 +82,9 @@ export default class Core implements IExtension {
                 ));
         }
 
-        if(process) {
+        if(process && !this.hookedExceptions) {
+            this.hookedExceptions = true;
+
             process.on("uncaughtException", (error, origin) => {
                 LogBuilder
                     .start()
