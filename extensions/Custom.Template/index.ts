@@ -33,6 +33,7 @@ export default class CustomTemplate implements IExtension {
             case "cli": return await this.startCli(executionContext as CliExecutionContext);
             case "app": return await this.startMain(executionContext as AppExecutionContext);
             case "thread": return await this.startThread(executionContext as ThreadExecutionContext);
+            default: return;
         }
     }
 
