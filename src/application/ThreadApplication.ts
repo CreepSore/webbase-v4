@@ -137,10 +137,8 @@ export default class ThreadApplication implements IApplication {
 
     private setupLogging(): void {
         LoggerService.addLogger(
-            new MultiLogger()
-                .addLogger(new ConsoleLogger(true))
-                .addLogger(new FileLogger(`logs/out_thread_${this._id}_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`)),
-            "ThreadMultiLogger"
+            new ConsoleLogger(true),
+            "ThreadMultiLogger/Console"
         );
 
         LoggerService.hookConsoleLog();
@@ -160,6 +158,11 @@ export default class ThreadApplication implements IApplication {
         readyTelegram.send();
         const response = await readyTelegram.waitForResponse<{id: string}>();
         this._id = response.id;
+
+        LoggerService.addLogger(
+            new FileLogger(`logs/out_thread_${this._id}_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`),
+            "ThreadMultiLogger/File"
+        );
 
         await LogBuilder
             .start()
