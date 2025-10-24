@@ -48,7 +48,7 @@ export default class Core implements IExtension {
         }
 
         if(executionContext.contextType === "thread") {
-            // ChildApp logging is set up inside WorkerApplication.ts
+            // ChildApp logging is set up inside ThreadApplication.ts
             return;
         }
 

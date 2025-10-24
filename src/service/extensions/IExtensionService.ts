@@ -27,4 +27,5 @@ export default interface IExtensionService {
     getExtensionByConstructor<T extends IExtension = IExtension>(type: Function & { prototype: T }): T;
 
     registerExtensionLoader(extensionLoader: IExtensionLoader): void;
+    iterateExtensions(): Generator<IExtension>;
 }

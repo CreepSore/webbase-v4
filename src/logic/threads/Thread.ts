@@ -4,6 +4,7 @@ import * as uuid from "uuid";
 import IThreadIO from "./io/IThreadIO";
 import ThreadIO from "./io/ThreadIO";
 import ThreadWorkerChannel from "./channels/ThreadWorkerChannel";
+import ExtensionControlPayload from "./message-payload-types/ExtensionControlPayload";
 
 export default class Thread {
     static scriptPath: string = null;
@@ -51,5 +52,19 @@ export default class Thread {
 
         this._io.stop();
         return this._thread.terminate();
+    }
+
+    async loadAndStartExtension(name: string): Promise<void> {
+        if(!this._isStarted) {
+            throw new Error("Thread has to be started before loading extensions!");
+        }
+
+        const packet = this._io.messageFactory.buildOutgoing<ExtensionControlPayload>("ExtensionControl", {
+            extensionName: name,
+            action: "loadAndStart",
+        });
+
+        packet.send();
+        await packet.waitForResponse();
     }
 }

@@ -6,7 +6,7 @@ import minimist from "minimist";
 import { EnvironmentLoader } from "./service/environment/EnvironmentLoader";
 import ConsoleLogger from "./service/logger/ConsoleLogger";
 import Thread from "./logic/threads/Thread";
-import WorkerApplication from "./application/WorkerApplication";
+import ThreadApplication from "./application/ThreadApplication";
 
 const setupEnvironment = async(log: boolean) => {
     const consoleLogger = new ConsoleLogger();
@@ -79,7 +79,7 @@ const setupEnvironment = async(log: boolean) => {
     }
     else if(args.worker) {
         await setupEnvironment(true);
-        app = new WorkerApplication();
+        app = new ThreadApplication();
     }
     else {
         await setupEnvironment(true);

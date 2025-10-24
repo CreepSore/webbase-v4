@@ -1,5 +1,5 @@
 import * as workerThreads from "node:worker_threads";
-import WorkerApplication from "../src/application/WorkerApplication";
+import ThreadApplication from "../src/application/ThreadApplication";
 import ThreadMockChannel from "../src/logic/threads/channels/ThreadMockChannel";
 import OutgoingThreadMessage from "../src/logic/threads/messages/OutgoingThreadMessage";
 import ThreadMessageFactory from "../src/logic/threads/messages/ThreadMessageFactory";
@@ -9,7 +9,7 @@ import ThreadIO from "../src/logic/threads/io/ThreadIO";
 
 describe("Multithreading Test", () => {
     it("should communicate successfully using the full WorkerApplication", async() => {
-        const workerApp = new WorkerApplication();
+        const workerApp = new ThreadApplication();
         const mockChannel = new ThreadMockChannel();
 
         let receivedTelegrams = [

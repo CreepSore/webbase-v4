@@ -1,4 +1,4 @@
-import ExecutionContext, { AppExecutionContext, CliExecutionContext, WorkerExecutionContext } from "@service/extensions/ExecutionContext";
+import ExecutionContext, { AppExecutionContext, CliExecutionContext, ThreadExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
@@ -36,8 +36,8 @@ export default class CustomTemplate implements IExtension {
             await this.startMain(executionContext);
             return;
         }
-        else if(executionContext.contextType === "worker") {
-            await this.startWorkerApp(executionContext);
+        else if(executionContext.contextType === "thread") {
+            await this.startThread(executionContext);
             return;
         }
     }
@@ -54,7 +54,7 @@ export default class CustomTemplate implements IExtension {
 
     }
 
-    private async startWorkerApp(executionContext: WorkerExecutionContext): Promise<void> {
+    private async startThread(executionContext: ThreadExecutionContext): Promise<void> {
 
     }
 

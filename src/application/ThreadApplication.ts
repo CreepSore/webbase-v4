@@ -1,6 +1,6 @@
 import * as workerThreads from "node:worker_threads";
 
-import { WorkerExecutionContext } from "../service/extensions/ExecutionContext";
+import { ThreadExecutionContext } from "../service/extensions/ExecutionContext";
 import ExtensionServiceFactory from "../service/extensions/ExtensionServiceFactory";
 import IExtensionService from "../service/extensions/IExtensionService";
 import IApplication from "./IApplication";
@@ -17,8 +17,8 @@ import MultiLogger from "../service/logger/MultiLogger";
 import ConsoleLogger from "../service/logger/ConsoleLogger";
 import FileLogger from "../service/logger/FileLogger";
 
-export default class WorkerApplication implements IApplication {
-    private _executionContext: WorkerExecutionContext;
+export default class ThreadApplication implements IApplication {
+    private _executionContext: ThreadExecutionContext;
     private _extensionService: IExtensionService;
     private _io: IThreadIO;
     private _onMessageReceivedCallback: (message: IncomingThreadMessage<any, any>) => any;
@@ -32,7 +32,7 @@ export default class WorkerApplication implements IApplication {
         return this._io;
     }
 
-    get executionContext(): WorkerExecutionContext {
+    get executionContext(): ThreadExecutionContext {
         return this._executionContext;
     }
 
@@ -69,22 +69,25 @@ export default class WorkerApplication implements IApplication {
 
         for(const extension of targettedExtensions) {
             const dependencies = this.getLoadOrder(extension).reverse();
-            for(const dependency of dependencies) {
+
+            for(const toLoad of this._extensionService.iterateExtensions()) {
+                if(dependencies.indexOf(toLoad) === -1) {
+                    continue;
+                }
+
                 if(message.payload.action === "load" || message.payload.action === "loadAndStart") {
-                    await this._extensionService.loadExtension(dependency);
+                    await this._extensionService.loadExtension(toLoad);
+                }
+            }
+
+            for(const toLoad of this._extensionService.iterateExtensions()) {
+                if(dependencies.indexOf(toLoad) === -1) {
+                    continue;
                 }
 
                 if(message.payload.action === "start" || message.payload.action === "loadAndStart") {
-                    await this._extensionService.startExtension(dependency);
+                    await this._extensionService.startExtension(toLoad);
                 }
-            }
-
-            if(message.payload.action === "load" || message.payload.action === "loadAndStart") {
-                await this._extensionService.loadExtension(extension);
-            }
-
-            if(message.payload.action === "start" || message.payload.action === "loadAndStart") {
-                await this._extensionService.startExtension(extension);
             }
         }
 
@@ -92,11 +95,15 @@ export default class WorkerApplication implements IApplication {
     }
 
     private getLoadOrder(extension: IExtension): Array<IExtension> {
-        const result = [];
+        const result = [extension];
 
         for(const dependency of extension.metadata.dependencies) {
             const resolvedDependency = this._extensionService.getExtension<IExtension>(dependency);
-            result.push(...this.getLoadOrder(resolvedDependency));
+            for(const dep of this.getLoadOrder(resolvedDependency)) {
+                if(result.indexOf(dep) === -1) {
+                    result.push(dep);
+                }
+            }
         }
 
         return result;
@@ -104,7 +111,7 @@ export default class WorkerApplication implements IApplication {
 
     private async initializeEventService(): Promise<void> {
         this._executionContext = {
-            contextType: "worker",
+            contextType: "thread",
             application: this,
             extensionService: null
         };
