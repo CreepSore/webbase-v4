@@ -148,28 +148,6 @@ export default class Core implements IExtension {
         });
     }
 
-    /**
-     * @template T
-     * @return {T}
-     * @memberof Core
-     * @deprecated Use multiplatform.ts instead of this.
-     */
-    runPlatformDependent<T>(callbacks: {
-        aix?: (platform: string) => T,
-        android?: (platform: string) => T,
-        darwin?: (platform: string) => T,
-        freebsd?: (platform: string) => T,
-        haiku?: (platform: string) => T,
-        linux?: (platform: string) => T,
-        openbsd?: (platform: string) => T,
-        sunos?: (platform: string) => T,
-        win32?: (platform: string) => T,
-        cygwin?: (platform: string) => T,
-        netbsd?: (platform: string) => T
-    }): T {
-        return runPlatformDependent(callbacks);
-    }
-
     private loadConfig(createDefault: boolean = false): typeof this.config {
         const [configPath, templatePath] = this.generateConfigNames();
         return ConfigLoader.initConfigWithModel(
