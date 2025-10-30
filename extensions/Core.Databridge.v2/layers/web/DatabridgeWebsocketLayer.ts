@@ -2,7 +2,7 @@ import IDatabridge from "../../IDatabridge";
 import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabridgeLayer";
 
 export default class DatabridgeWebsocketLayer implements IDatabridgeLayer<string, string> {
-    private _socket: WebSocket;
+    socket: WebSocket;
     private _started: boolean = false;
     private _connected: boolean = false;
     private _connectPromise: Promise<void>;
@@ -23,13 +23,13 @@ export default class DatabridgeWebsocketLayer implements IDatabridgeLayer<string
 
     async stop(databridge: IDatabridge): Promise<void> {
         this._started = false;
-        this._socket.close();
+        this.socket.close();
         this._connected = false;
         this._connectPromise = null;
     }
 
     processOutbound(data: any, metadata: DatabridgeDefaultPipelineMetadata): Promise<any> {
-        this._socket.send(data);
+        this.socket.send(data);
         return Promise.resolve();
     }
 
@@ -48,36 +48,36 @@ export default class DatabridgeWebsocketLayer implements IDatabridgeLayer<string
                 return;
             }
 
-            if(this._socket) {
-                this._socket.close();
+            if(this.socket) {
+                this.socket.close();
             }
 
-            this._socket = new WebSocket(this._url);
+            this.socket = new WebSocket(this._url);
 
             if(!this._started) {
-                this._socket.close();
+                this.socket.close();
                 res();
                 return;
             }
 
-            this._socket.onopen = () => {
+            this.socket.onopen = () => {
                 this._connected = true;
                 this._connectPromise = null;
                 res();
             };
 
-            this._socket.onerror = async() => {
+            this.socket.onerror = async() => {
                 this._connected = false;
                 this._connectPromise = null;
                 await databridge.handleError(new Error("unexpected error"), this);
             };
 
-            this._socket.onclose = () => {
+            this.socket.onclose = () => {
                 this._connected = false;
                 this._connectPromise = null;
             };
 
-            this._socket.onmessage = event => {
+            this.socket.onmessage = event => {
                 databridge.handleInboundPacket(event.data);
             };
         });

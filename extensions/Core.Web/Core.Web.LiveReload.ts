@@ -1,18 +1,32 @@
-import DatabridgePacket from "@extensions/Core.Databridge/DatabridgePacket";
-import DatabridgeWebsocketClient from "@extensions/Core.Databridge/protocols/client/DatabridgeWebsocketClient";
+import DatabridgeBuilder from "../Core.Databridge.v2/DatabridgeBuilder";
+import DatabridgeMultiLayer from "../Core.Databridge.v2/layers/DatabridgeMultiLayer";
+import DatabridgeLambdaLayer from "../Core.Databridge.v2/layers/misc/DatabridgeLambdaLayer";
+import DatabridgeWebsocketLayer from "../Core.Databridge.v2/layers/web/DatabridgeWebsocketLayer";
 
 window.addEventListener("load", async() => {
-    const databridge = new DatabridgeWebsocketClient("/Core.Web/LiveReload");
+    const websocketLayer = new DatabridgeWebsocketLayer("/Core.Web/LiveReload");
+
+    const databridge = new DatabridgeBuilder()
+        .setInboundLayer(
+            new DatabridgeMultiLayer()
+                .attachInboundLayer<any, any>(websocketLayer)
+                .attachInboundLayer(new DatabridgeLambdaLayer({
+                    processInbound: () => {
+                        location.reload();
+                        return Promise.resolve();
+                    }
+                }))
+        )
+        .setOutboundLayer(websocketLayer)
+        .finish();
 
     const pingInterval = setInterval(() => {
-        databridge.sendPacket(new DatabridgePacket("PING", {}, {}));
+        databridge.handleOutboundPacket({type: "PING"});
     }, 10000);
 
-    databridge.onPacketReceived(() => {
-        location.reload();
-    });
+    await databridge.start();
 
-    databridge.onDisconnected(() => {
+    websocketLayer.socket.addEventListener("close", () => {
         clearInterval(pingInterval);
         console.log("Connection lost");
 
@@ -30,6 +44,4 @@ window.addEventListener("load", async() => {
 
         document.querySelector("body").appendChild(banner);
     });
-
-    databridge.connect();
 });

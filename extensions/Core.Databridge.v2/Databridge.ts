@@ -46,19 +46,6 @@ export default class Databridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut
     }
 
     handleError(err: Error, layer?: IDatabridgeLayer<any, any>): Promise<void> {
-        const log = LogBuilder
-            .start()
-            .level(LogBuilder.LogLevel.ERROR)
-            .info("Databridge")
-            .line("Error occured")
-            .object("error", err);
-
-        if(layer) {
-            log.object("layer", layer);
-        }
-
-        log.done();
-
         throw err;
     }
 }
