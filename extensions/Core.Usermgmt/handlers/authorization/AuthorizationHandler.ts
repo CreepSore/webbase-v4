@@ -1,14 +1,14 @@
 import * as express from "express";
 import mongoose, { FilterQuery, HydratedDocument } from "mongoose";
-import IUser from "../types/IUser";
-import User from "../models/User";
-import IPermission from "../types/IPermission";
+import IUser from "../../types/IUser";
+import User from "../../models/User";
+import IPermission from "../../types/IPermission";
 import LogBuilder from "@service/logger/LogBuilder";
-import Permissions, { PermissionEntry, PermissionLayer } from "../permissions";
-import Permission from "../models/Permission";
-import AuthenticationHandler from "./AuthenticationHandler";
-import IPermissionGroup from "../types/IPermissionGroup";
-import PermissionGroup from "../models/PermissionGroup";
+import Permissions, { PermissionEntry, PermissionLayer } from "../../permissions";
+import Permission from "../../models/Permission";
+import AuthenticationHandler from "../authentication/AuthenticationHandler";
+import IPermissionGroup from "../../types/IPermissionGroup";
+import PermissionGroup from "../../models/PermissionGroup";
 
 /**
  * Only use one of the options

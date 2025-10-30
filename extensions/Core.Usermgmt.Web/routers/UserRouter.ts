@@ -1,8 +1,8 @@
 import * as express from "express";
 import Urls from "../urls";
-import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
+import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/authorization/AuthorizationHandler";
 import User from "@extensions/Core.Usermgmt/models/User";
-import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
+import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/authentication/AuthenticationHandler";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
 import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
 

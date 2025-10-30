@@ -10,17 +10,17 @@ type TotpAuthenticationType = BasicAuthenticationType<"totp"> & {
     secret: string;
 };
 
+type PasswordTotpAuthenticationType = BasicAuthenticationType<"password_totp"> & {
+    password: string;
+    secret: string;
+};
+
 type PermanentKeyAuthenticationType = BasicAuthenticationType<"permanent_key"> & {
     keys: string[];
 };
 
 type OnceKeyAuthenticationType = BasicAuthenticationType<"once_key"> & {
     keys: string[];
-};
-
-type PasswordTotpAuthenticationType = BasicAuthenticationType<"password_totp"> & {
-    password: string;
-    secret: string;
 };
 
 type AuthenticationType = (
@@ -32,6 +32,7 @@ type AuthenticationType = (
 );
 
 export type {
+    BasicAuthenticationType,
     PasswordAuthenticationType,
     TotpAuthenticationType,
     PasswordTotpAuthenticationType,

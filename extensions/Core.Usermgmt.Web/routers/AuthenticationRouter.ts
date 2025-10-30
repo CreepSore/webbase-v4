@@ -1,16 +1,17 @@
 import * as express from "express";
 import Urls from "../urls";
-import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/AuthenticationHandler";
-import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
+import AuthenticationHandler from "@extensions/Core.Usermgmt/handlers/authentication/AuthenticationHandler";
+import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/authorization/AuthorizationHandler";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
 import AuthenticationType from "@extensions/Core.Usermgmt/types/AuthenticationTypes";
+import AuthenticatorRegistry from "../../Core.Usermgmt/handlers/authentication/authenticators/AuthenticatorRegistry";
 
-export default function createAuthenticationRouter(): express.Router {
+export default function createAuthenticationRouter(authenticatorRegistry: AuthenticatorRegistry): express.Router {
     // eslint-disable-next-line new-cap
     const router = express.Router();
 
     router.get(Urls.auth.getAuthType, async(req, res) => {
-        const authHandler = await AuthenticationHandler.fromUsername(req.params.username);
+        const authHandler = await AuthenticationHandler.fromUsername(req.params.username, authenticatorRegistry);
         res.json(authHandler.getAuthenticationTypes());
     });
 
@@ -20,7 +21,7 @@ export default function createAuthenticationRouter(): express.Router {
     });
 
     router.post(Urls.auth.login, async(req, res) => {
-        const authHandler = await AuthenticationHandler.fromUsername(req.body.username);
+        const authHandler = await AuthenticationHandler.fromUsername(req.body.username, authenticatorRegistry);
         const authResult = await authHandler.authenticate(req.body);
 
         if(authResult.success && authResult.userId) {

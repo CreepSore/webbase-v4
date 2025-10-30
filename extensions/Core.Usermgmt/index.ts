@@ -10,9 +10,15 @@ import mongoose from "mongoose";
 import User from "./models/User";
 import PermissionGroup from "./models/PermissionGroup";
 import Permissions from "./permissions";
-import AuthenticationHandler from "./handlers/AuthenticationHandler";
-import AuthorizationHandler from "./handlers/AuthorizationHandler";
+import AuthenticationHandler from "./handlers/authentication/AuthenticationHandler";
+import AuthorizationHandler from "./handlers/authorization/AuthorizationHandler";
 import LogBuilder from "@service/logger/LogBuilder";
+import AuthenticatorRegistry from "./handlers/authentication/authenticators/AuthenticatorRegistry";
+import PasswordAuthenticator from "./handlers/authentication/authenticators/PasswordAuthenticator";
+import TotpAuthenticator from "./handlers/authentication/authenticators/TotpAuthenticator";
+import PasswordTotpAuthentication from "./handlers/authentication/authenticators/PasswordTotpAuthentication";
+import PermanentKeyAuthenticator from "./handlers/authentication/authenticators/PermanentKeyAuthenticator";
+import OnceKeyAuthenticator from "./handlers/authentication/authenticators/OnceKeyAuthenticator";
 
 class CoreUsermgmtConfig {
 
@@ -34,6 +40,8 @@ export default class CoreUsermgmt implements IExtension {
     db: typeof mongoose;
     $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
+    authenticationRegistry: AuthenticatorRegistry;
+
     constructor() {
         this.config = this.loadConfig(true);
     }
@@ -49,6 +57,14 @@ export default class CoreUsermgmt implements IExtension {
         this.db = coreDb.db;
 
         await this.setupSchema();
+
+        this.authenticationRegistry = new AuthenticatorRegistry();
+        this.authenticationRegistry
+            .registerBuilder("password", () => new PasswordAuthenticator())
+            .registerBuilder("totp", () => new TotpAuthenticator())
+            .registerBuilder("password_totp", () => new PasswordTotpAuthentication())
+            .registerBuilder("permanent_key", (user) => new PermanentKeyAuthenticator(user))
+            .registerBuilder("once_key", (user) => new OnceKeyAuthenticator(user));
     }
 
     async stop(): Promise<void> {

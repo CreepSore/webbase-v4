@@ -1,6 +1,6 @@
 import * as express from "express";
 import Urls from "../urls";
-import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
+import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/authorization/AuthorizationHandler";
 import Permissions from "@extensions/Core.Usermgmt/permissions";
 import PermissionGroup from "@extensions/Core.Usermgmt/models/PermissionGroup";
 import Permission from "@extensions/Core.Usermgmt/models/Permission";
