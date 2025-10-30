@@ -60,24 +60,24 @@ export default class ObjectPool<T> {
     async get(): Promise<T> {
         await this.ensureMinimum();
 
-        let thread: T = this._free.values().next().value;
+        let instance: T = this._free.values().next().value;
 
-        if(!thread) {
+        if(!instance) {
             if(this._free.size === 0 && this._used.size >= this._options.max) {
                 return new Promise<T>(res => {
-                    this._waitingGets.push((thread) => {
-                        res(thread);
+                    this._waitingGets.push((instance) => {
+                        res(instance);
                     });
                 });
             }
 
-            thread = await this._options.builder();
+            instance = await this._options.builder();
         }
 
-        this._free.delete(thread);
-        this._used.add(thread);
+        this._free.delete(instance);
+        this._used.add(instance);
 
-        return thread;
+        return instance;
     }
 
     free(instance: T): this {
