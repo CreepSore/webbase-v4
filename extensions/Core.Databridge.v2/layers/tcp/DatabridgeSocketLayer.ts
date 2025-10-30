@@ -11,7 +11,7 @@ export default class DatabridgeSocketLayer implements IDatabridgeLayer<Buffer, B
         this._socket = socket;
     }
 
-    async processOutbound(data: Buffer<ArrayBufferLike>, metadata: DatabridgeDefaultPipelineMetadata): Promise<Buffer> {
+    async processOutbound(data: Buffer, metadata: DatabridgeDefaultPipelineMetadata): Promise<Buffer> {
         await new Promise<void>(res => this._socket.write(data, () => res()));
         return data;
     }
@@ -26,7 +26,7 @@ export default class DatabridgeSocketLayer implements IDatabridgeLayer<Buffer, B
         };
 
         const errorCallback = (err: Error) => {
-            databridge.handleError(err);
+            databridge.handleError(err, this);
         }
 
         this._callbacks.set("close", closeCallback);
