@@ -1,7 +1,7 @@
-import DatabridgeBuilder from "../Core.Databridge.v2/DatabridgeBuilder";
-import DatabridgeMultiLayer from "../Core.Databridge.v2/layers/DatabridgeMultiLayer";
-import DatabridgeLambdaLayer from "../Core.Databridge.v2/layers/misc/DatabridgeLambdaLayer";
-import DatabridgeWebsocketLayer from "../Core.Databridge.v2/layers/web/DatabridgeWebsocketLayer";
+import DatabridgeBuilder from "../Core.Databridge/DatabridgeBuilder";
+import DatabridgeMultiLayer from "../Core.Databridge/layers/DatabridgeMultiLayer";
+import DatabridgeLambdaLayer from "../Core.Databridge/layers/misc/DatabridgeLambdaLayer";
+import DatabridgeWebsocketLayer from "../Core.Databridge/layers/web/DatabridgeWebsocketLayer";
 
 window.addEventListener("load", async() => {
     const websocketLayer = new DatabridgeWebsocketLayer("/Core.Web/LiveReload");
