@@ -87,6 +87,10 @@ export default class CoreLoki implements IExtension {
             throw new Error(`Config could not be found at [${this.generateConfigNames()[0]}]`);
         }
 
+        if(!this.config.enabled) {
+            return;
+        }
+
         if(this.config.loki.serviceName == "<PLACEHOLDER>") {
             throw new Error("Please specify a valid loki service name!");
         }
