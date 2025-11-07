@@ -10,6 +10,4 @@ export default interface ICacheEntry<T> {
 
     invalidate(): this;
     invalidateAndUpdate(): Promise<T>;
-
-    setLogger(logBuilder: LogBuilder): this;
 }
