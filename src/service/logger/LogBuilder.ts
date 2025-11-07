@@ -279,6 +279,7 @@ export default class LogBuilder {
         this.logEntry = {
             id: this.defaultValues?.id || uuid.v4(),
             date: this.defaultValues?.date || new Date(),
+            level: this.defaultValues?.level,
             infos: [...(this.defaultValues?.infos || [])],
             lines: [...(this.defaultValues?.lines || [])],
             objects: {...(this.defaultValues?.objects || {})},
