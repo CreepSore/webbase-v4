@@ -3,11 +3,12 @@ import {EventEmitter} from "events";
 import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import LogBuilder from "@service/logger/LogBuilder";
 import Core from "@extensions/Core";
-import Cache from "./Cache";
+import ICacheEntry from "./ICacheEntry";
 import CacheEntryConfig from "./CacheEntryConfig";
-import CacheEntry from "./CacheEntry";
+import Cache from "./Cache";
+import CallbackCacheEntry from "./CallbackCacheEntry";
+import LogBuilder from "../../src/service/logger/LogBuilder";
 
 class CacheConfig {
 
@@ -43,32 +44,52 @@ export default class CoreCache implements IExtension {
 
     }
 
-    createCacheEntry<T>(config: CacheEntryConfig<T>): CacheEntry<T> {
-        return this.cache.createCacheEntry<T>(config);
+    createCacheEntry<T>(config: CacheEntryConfig<T>): ICacheEntry<T> {
+        return this.cache.getOrCreateCacheEntry(config.key, () => new CallbackCacheEntry(config.key, config.defaultValue)
+            .setLogger(new LogBuilder({
+                infos: ["Core.Cache"]
+            }))
+            .setLifetimeMs(config.updateEveryMs)
+            .setUpdateCallback(config.updateCallback));
     }
 
     cacheEntryExists(key: string): boolean {
         return this.cache.cacheEntryExists(key);
     }
 
-    getCacheEntry<T>(key: string): CacheEntry<T> {
+    getCacheEntry<T>(key: string): ICacheEntry<T> {
         return this.cache.getCacheEntry<T>(key);
     }
 
-    getCachedInstance<T>(key: string, config: Omit<CacheEntryConfig<T>, "key">): CacheEntry<T> {
-        return this.getCachedInstance<T>(key, config);
+    getCachedInstance<T>(key: string, config: Omit<CacheEntryConfig<T>, "key">): ICacheEntry<T> {
+        return this.cache.getOrCreateCacheEntry(key, () => new CallbackCacheEntry(key, config.defaultValue)
+            .setLogger(new LogBuilder({
+                infos: ["Core.Cache"]
+            }))
+            .setLifetimeMs(config.updateEveryMs)
+            .setUpdateCallback(config.updateCallback));
     }
 
     getCachedValue<T>(key: string, defaultValue: T): T {
         return this.getCachedValue(key, defaultValue);
     }
 
-    invalidateCache(key: string, updateNow = false): void {
-        this.cache.invalidateCache(key, updateNow);
+    invalidateCache(key: string, updateNow = false): Promise<any> | any {
+        const entry = this.cache.getCacheEntry(key);
+        if(!entry) {
+            return null;
+        }
+
+        entry.invalidate();
+        if(updateNow) {
+            return entry.getValue();
+        }
+
+        return null;
     }
 
     clearCache(): void {
-        this.cache.clearCache();
+        this.cache.deleteAll();
     }
 
     private checkConfig(): void {

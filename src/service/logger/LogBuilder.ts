@@ -21,15 +21,15 @@ export default class LogBuilder {
     logEntry: ILogEntry;
     onDone: (log: ILogEntry) => Promise<void>;
 
-    constructor(onDone: LogBuilder["onDone"] = LogBuilder.onDone) {
+    defaultValues: Partial<ILogEntry>;
+
+    constructor(
+        defaultValues: Partial<ILogEntry> = null,
+        onDone: LogBuilder["onDone"] = LogBuilder.onDone,
+    ) {
         this.onDone = onDone;
-        this.logEntry = {
-            id: uuid.v4(),
-            date: new Date(),
-            infos: [],
-            lines: [],
-            objects: {},
-        };
+        this.defaultValues = defaultValues;
+        this.resetLogEntry();
     }
 
     /**
@@ -268,5 +268,15 @@ export default class LogBuilder {
      */
     done(): Promise<void> {
         return this.onDone?.(this.logEntry);;
+    }
+
+    resetLogEntry(): void {
+        this.logEntry = {
+            id: this.defaultValues?.id || uuid.v4(),
+            date: this.defaultValues?.date || new Date(),
+            infos: [...(this.defaultValues?.infos || [])],
+            lines: [...(this.defaultValues?.lines || [])],
+            objects: {...(this.defaultValues?.objects || {})},
+        };
     }
 }

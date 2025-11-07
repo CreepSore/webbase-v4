@@ -1,41 +1,38 @@
-import CacheEntry from "./CacheEntry";
-import CacheEntryConfig from "./CacheEntryConfig";
+import ICache, { CacheEntryBuilderCallback } from "./ICache";
+import ICacheEntry from "./ICacheEntry";
 
-export default class Cache {
-    private cache: Map<string, CacheEntry<any>> = new Map();
-
-    createCacheEntry<T>(config: CacheEntryConfig<T>): CacheEntry<T> {
-        const entry = new CacheEntry<T>(config);
-        this.cache.set(entry.key, entry);
-        return entry;
-    }
+export default class Cache implements ICache {
+    private _entries: Map<string, ICacheEntry<any>> = new Map();
 
     cacheEntryExists(key: string): boolean {
-        return this.cache.has(key);
+        return this._entries.has(key);
     }
 
-    getCacheEntry<T>(key: string): CacheEntry<T> {
-        return this.cache.get(key) as CacheEntry<T>;
+    deleteCacheEntry(key: string): boolean {
+        return this._entries.delete(key);
     }
 
-    getCachedInstance<T>(key: string, config: Omit<CacheEntryConfig<T>, "key">): CacheEntry<T> {
-        if(this.cache.has(key)) return this.getCacheEntry(key);
-
-        return this.createCacheEntry({...config, key});
+    getCacheEntry<T>(key: string): ICacheEntry<T> {
+        return this._entries.get(key);
     }
 
-    getCachedValue<T>(key: string, defaultValue: T): T {
-        return (this.getCacheEntry(key)?.currentValue || defaultValue) as T;
-    }
-
-    invalidateCache(key: string, updateNow = false): void {
-        const entry = this.cache.get(key);
-        if(entry) {
-            entry.invalidate(updateNow);
+    getOrCreateCacheEntry<T>(key: string, builder: CacheEntryBuilderCallback<T>): ICacheEntry<T> {
+        let cacheEntry = this.getCacheEntry<T>(key);
+        if(!cacheEntry) {
+            cacheEntry = builder();
+            this._entries.set(key, cacheEntry);
         }
+
+        return cacheEntry;
     }
 
-    clearCache(): void {
-        this.cache.clear();
+    deleteAll(): void {
+        this._entries.clear();
+    }
+
+    invalidateAll(): void {
+        for(const entry of this._entries.values()) {
+            entry.invalidate();
+        }
     }
 }
