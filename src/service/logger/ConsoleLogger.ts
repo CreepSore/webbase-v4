@@ -57,8 +57,8 @@ export default class ConsoleLogger implements ILogger {
     // For now we only support linux
     prettyPrint: boolean = process.platform === "linux";
 
-    constructor(prettyPrint: boolean = false) {
-        this.prettyPrint = prettyPrint ? process.platform === "linux" : false;
+    constructor(prettyPrint: boolean = null) {
+        this.prettyPrint = prettyPrint ?? false;
     }
 
     logSync(log: ILogEntry): void {

@@ -1,3 +1,4 @@
+import LogBuilder from "../logger/LogBuilder";
 import ExecutionContext from "./ExecutionContext";
 import ExtensionService from "./ExtensionService";
 import IExtensionService from "./IExtensionService";
@@ -21,7 +22,7 @@ export default class ExtensionServiceFactory {
 
         extensionService.initialize(executionContext);
 
-        for(const environment of await this.createDefaultEnvironments()) {
+        for(const environment of await this.createDefaultEnvironments((name, error) => loggerFn?.(LogBuilder.LogLevel.WARN, `Failed to load extension '${name}': ${error.message}`))) {
             await environment.applyTo(extensionService);
         }
 
@@ -31,8 +32,9 @@ export default class ExtensionServiceFactory {
         return extensionService;
     }
 
-    static async createDefaultEnvironments(): Promise<ExtensionEnvironmentCollection> {
+    static async createDefaultEnvironments(onLoadError: (name: string, error: Error) => any = null): Promise<ExtensionEnvironmentCollection> {
         const directoryEnvironment = new DirectoryExtensionEnvironment("extensions");
+        directoryEnvironment.onLoadError = onLoadError;
         await directoryEnvironment.initialize();
 
         return new ExtensionEnvironmentCollection(directoryEnvironment);
