@@ -163,13 +163,7 @@ export default class LogBuilder {
      * @returns {LogBuilder} The instance of LogBuilder for method chaining.
      */
     start(): LogBuilder {
-        this.logEntry = {
-            id: uuid.v4(),
-            date: new Date(),
-            infos: [],
-            lines: [],
-            objects: {},
-        };
+        this.resetLogEntry();
         return this;
     }
 
@@ -268,6 +262,17 @@ export default class LogBuilder {
      */
     done(): Promise<void> {
         return this.onDone?.(this.logEntry);;
+    }
+
+    clone(): LogBuilder {
+        return new LogBuilder({
+            id: this.defaultValues.id,
+            date: this.defaultValues.date,
+            level: this.defaultValues.level,
+            infos: [...(this.defaultValues.infos || [])],
+            lines: [...(this.defaultValues.lines || [])],
+            objects: {...(this.defaultValues.objects || {})},
+        }, this.onDone);
     }
 
     resetLogEntry(): void {
