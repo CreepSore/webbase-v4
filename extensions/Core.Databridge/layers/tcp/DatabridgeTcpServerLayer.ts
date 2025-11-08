@@ -9,9 +9,14 @@ import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabri
 export type DatabridgeTcpServerLayerOptions = {
     bindAddress?: string;
     port: number;
-}
+};
 
-export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer, Buffer, Buffer, Buffer, DatabridgeDefaultPipelineMetadata & {socket: net.Socket, id: string}> {
+export type DatabridgeTcpServerLayerMetadata = {
+    socket: net.Socket;
+    id: string;
+};
+
+export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer, Buffer, Buffer, Buffer, DatabridgeDefaultPipelineMetadata & DatabridgeTcpServerLayerMetadata> {
     private _options: DatabridgeTcpServerLayerOptions;
     private _server: net.Server;
     private _clients: Set<net.Socket> = new Set();
@@ -22,7 +27,7 @@ export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer
         this._options = options;
     }
 
-    async processOutbound(data: Buffer<ArrayBufferLike>, metadata: DatabridgeDefaultPipelineMetadata & {socket: net.Socket, id: string}): Promise<Buffer<ArrayBufferLike>> {
+    async processOutbound(data: Buffer<ArrayBufferLike>, metadata: DatabridgeDefaultPipelineMetadata & DatabridgeTcpServerLayerMetadata): Promise<Buffer<ArrayBufferLike>> {
         if(metadata.socket) {
             await this.sendToSocket(metadata.socket, data);
             return data;
@@ -62,9 +67,11 @@ export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer
     }
 
     stop?(databridge: IDatabridge): Promise<void> {
+        this._emitter.removeAllListeners();
+
         if(this._server) {
             this._server.close();
-            
+
             for(const client of this._clients) {
                 client.destroy();
             }
@@ -75,8 +82,8 @@ export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer
         return Promise.resolve();
     }
 
-    on(eventName: "client-connected", listener: (args: {socket: net.Socket, id: string}) => void | Promise<void>): this;
-    on(eventName: "client-disconnected", listener: (args: {socket: net.Socket, id: string}) => void | Promise<void>): this;
+    on(eventName: "client-connected", listener: (args: DatabridgeTcpServerLayerMetadata) => void | Promise<void>): this;
+    on(eventName: "client-disconnected", listener: (args: DatabridgeTcpServerLayerMetadata) => void | Promise<void>): this;
     on(eventName: string, listener: (args: any) => void | Promise<void>): this {
         this._emitter.on(eventName, listener);
         return this;

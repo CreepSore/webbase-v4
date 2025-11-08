@@ -28,7 +28,11 @@ export default class LogBuilder {
         onDone: LogBuilder["onDone"] = LogBuilder.onDone,
     ) {
         this.onDone = onDone;
-        this.defaultValues = defaultValues;
+        this.defaultValues = defaultValues || {
+            infos: [],
+            objects: {},
+            lines: [],
+        };
         this.resetLogEntry();
     }
 
