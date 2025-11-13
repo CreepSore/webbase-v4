@@ -30,12 +30,18 @@ export default class Databridge<TInIn = any, TInOut = any, TOutIn = any, TOutOut
 
     async start(): Promise<void> {
         await this._inboundLayer.start?.(this);
-        await this._outboundLayer.start?.(this);
+
+        if(this._outboundLayer !== this._inboundLayer) {
+            await this._outboundLayer.start?.(this);
+        }
     }
 
     async stop(): Promise<void> {
         await this._inboundLayer.stop?.(this);
-        await this._outboundLayer.stop?.(this);
+
+        if(this._outboundLayer !== this._inboundLayer) {
+            await this._outboundLayer.stop?.(this);
+        }
     }
 
     async handleInboundPacket(packet: TInIn, metadata: TMetadata = null): Promise<void> {
