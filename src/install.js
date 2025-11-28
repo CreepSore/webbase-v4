@@ -278,13 +278,12 @@ const generateNpmCommand = () => {
         resultDev += (Object.entries(extensionConfig.devDependencies) || []).map(e => formatNpmDefinition(e[0], e[1])).join(" ") + " ";
     }
 
+    console.log(result);
+    console.log(resultDev);
+
     if(argv.run) {
         child_process.execSync(result, {stdio: "inherit"});
         child_process.execSync(resultDev, {stdio: "inherit"});
-    }
-    else {
-        console.log(result);
-        console.log(resultDev);
     }
 }
 
