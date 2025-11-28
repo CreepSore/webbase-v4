@@ -33,7 +33,7 @@ export default function createUserRouter(): express.Router {
     });
 
     router.get(Urls.users.get, AuthorizationHandler.middleware([Permissions.USERS.VIEW]), async(req, res) => {
-        res.status(200).json(await User.find(null, null, {
+        res.status(200).json(await User.find({}, null, {
             populate: [
                 {
                     path: "groups",

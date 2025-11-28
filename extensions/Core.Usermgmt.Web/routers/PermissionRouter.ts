@@ -14,7 +14,7 @@ export default function createPermissionRouter(): express.Router {
     });
 
     router.get(Urls.permissions.groups.get, AuthorizationHandler.middleware([Permissions.PERMISSIONS.VIEW]), async(req, res) => {
-        res.status(200).json(await PermissionGroup.find(null, null, {populate: "permissions"}));
+        res.status(200).json(await PermissionGroup.find({}, null, {populate: "permissions"}));
     });
 
     router.put(Urls.permissions.groups.create, AuthorizationHandler.middleware([Permissions.PERMISSIONS.EDIT]), async(req, res) => {
