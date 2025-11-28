@@ -1,9 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer components {
-    #dashboard {
+    dashboard {
         @apply w-full h-screen min-h-screen flex;
 
         & > .background {

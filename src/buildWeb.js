@@ -4,8 +4,7 @@ const fs = require("fs");
 const minimist = require("minimist");
 const perf_hooks = require("perf_hooks");
 
-const tailwindcss = require("tailwindcss");
-const tailwindNesting = require("tailwindcss/nesting");
+const tailwindcss = require("@tailwindcss/postcss");
 const postcss = require("postcss");
 
 const { default: sassPlugin } = require("esbuild-sass-plugin");
@@ -50,7 +49,6 @@ const buildWebApp = async function() {
             async transform(source, resolveDir) {
                 // @ts-ignore
                 const {css} = await postcss([
-                    tailwindNesting,
                     tailwindcss
                 ]).process(source);
 

@@ -114,7 +114,7 @@ export default class CoreWeb implements IExtension {
                 .info("Core.Web")
                 .info(req.method)
                 .line(`${req.headers["x-forwarded-for"] || req.socket.remoteAddress} requested [${req.url}]`)
-                .debugObject("body", Object.values(req.body).length > 0 ? req.body : null)
+                .debugObject("body", Object.values(req.body || {}).length > 0 ? req.body : null)
                 .done();
 
             return next();
@@ -157,6 +157,13 @@ export default class CoreWeb implements IExtension {
     }
 
     addAppRoute(routeUrl: string, scriptUrl: string): void {
+        LogBuilder
+            .start()
+            .level(LogBuilder.LogLevel.NOTE)
+            .info("Core.Web")
+            .line(`Added new App-Route: Url=[${routeUrl}] ScriptUrl=[${scriptUrl}]`)
+            .done();
+
         this.app.get(routeUrl, (req, res) => {
             const script = Object.values(this.scripts).find(s => s.url === scriptUrl);
             res.send(this.generateReactPage(script)).end();
@@ -225,7 +232,7 @@ export default class CoreWeb implements IExtension {
         try {
             const chunkDir = path.resolve(__dirname, "chunks");
             const files = fs.readdirSync(chunkDir).filter(f => f.endsWith(".js"));
-            const expressRouter: express.Router = this.app._router;
+            const expressRouter: express.Router = this.app.router;
             expressRouter.stack = expressRouter.stack.filter((e: { path?: string }) => !(e.path || "").startsWith("/chunks/"));
 
             for(const file of files) {
