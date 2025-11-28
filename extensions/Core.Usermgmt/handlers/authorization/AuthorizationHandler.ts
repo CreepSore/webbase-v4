@@ -1,5 +1,5 @@
 import * as express from "express";
-import mongoose, { FilterQuery, HydratedDocument } from "mongoose";
+import mongoose, { HydratedDocument, QueryFilter } from "mongoose";
 import IUser from "../../types/IUser";
 import User from "../../models/User";
 import IPermission from "../../types/IPermission";
@@ -203,7 +203,7 @@ export default class AuthorizationHandler {
         await _anonymousGroup.save();
     }
 
-    private static async fetchUser(filter: FilterQuery<IUser>): Promise<HydratedDocument<IUser>> {
+    private static async fetchUser(filter: QueryFilter<IUser>): Promise<HydratedDocument<IUser>> {
         const user = await User.findOne(filter);
 
         if(!user) return null;

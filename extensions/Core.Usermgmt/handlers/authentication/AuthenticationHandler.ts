@@ -61,7 +61,7 @@ export default class AuthenticationHandler {
 
         const authenticationResult = await authenticator.authenticate(authenticationType, parameter);
         if(authenticationResult.success === true) {
-            authenticationResult.userId = this.user.id.toString();
+            authenticationResult.userId = this.user._id.toString();
         }
 
         return authenticationResult;
