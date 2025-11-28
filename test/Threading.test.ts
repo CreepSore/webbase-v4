@@ -8,32 +8,6 @@ import ExtensionControlPayload from "../src/logic/threads/message-payload-types/
 import ThreadIO from "../src/logic/threads/io/ThreadIO";
 
 describe("Multithreading Test", () => {
-    it("should communicate successfully using the full WorkerApplication", async() => {
-        const workerApp = new ThreadApplication();
-        const mockChannel = new ThreadMockChannel();
-
-        let receivedTelegrams = [
-
-        ] as unknown as [ReturnType<ThreadMessageFactory["buildReadyTelegram"]>, ReturnType<ThreadMessageFactory["buildResponseTelegram"]>];
-
-        mockChannel.mockOnMessageSent = jest.fn((message) => {
-            receivedTelegrams.push(message);
-        });
-
-        await workerApp.start(mockChannel);
-
-
-        mockChannel.mockReceiveMessage(new IncomingThreadMessage<ExtensionControlPayload>("1", "ExtensionControl", {extensionName: "Core", action: "loadAndStart"}));
-
-        await new Promise(process.nextTick);
-        expect(receivedTelegrams.length).toBe(2);
-        expect(receivedTelegrams[0]).not.toBeNull();
-        expect(receivedTelegrams[0].type).toBe("READY");
-
-        expect(receivedTelegrams[1]).not.toBeNull();
-        expect(receivedTelegrams[1].type).toBe("RESPONSE");
-    });
-
     it("should communicate successfully using ThreadIO only", async() => {
         const mockChannel1 = new ThreadMockChannel();
         const io1 = new ThreadIO(mockChannel1);

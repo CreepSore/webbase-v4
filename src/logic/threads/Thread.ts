@@ -38,21 +38,14 @@ export default class Thread {
             argv: ["--worker"]
         });
 
-        this._thread.once("exit", code => (this._exitCode = code));
-
-        this._io = new ThreadIO(new ThreadWorkerChannel(this._thread));
-
-        this._io.onMessageReceived(message => {
-            LogBuilder
-                .start()
-                .level(LogBuilder.LogLevel.INFO)
-                .info("OIDA")
-                .line("OIDA")
-                .object("message", message.toPayload())
-                .done();
+        this._thread.once("exit", code => {
+            this._exitCode = code;
+            this._io.stop();
         });
 
+        this._io = new ThreadIO(new ThreadWorkerChannel(this._thread));
         this._io.start();
+
         const ready = await this._io.receiveMessage("READY");
         ready.respond({id: this._id});
 

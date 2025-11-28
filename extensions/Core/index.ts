@@ -41,6 +41,10 @@ export default class Core implements IExtension {
 
     constructor() {
         this.config = this.loadConfig(true);
+
+        LoggerService
+            .addLogger(new ConsoleLogger(this.config.logger.consoleLogger.prettyPrint), "console")
+            .hookConsoleLog();
     }
 
     async start(executionContext: ExecutionContext): Promise<void> {
@@ -52,11 +56,6 @@ export default class Core implements IExtension {
             // ChildApp logging is set up inside ThreadApplication.ts
             return;
         }
-
-        LoggerService
-            .addLogger(new ConsoleLogger(this.config.logger.consoleLogger.prettyPrint), "console")
-            .hookConsoleLog();
-
 
         if(executionContext.contextType === "cli") {
             this.setupCli(executionContext);
@@ -146,28 +145,6 @@ export default class Core implements IExtension {
                 log(executionContext.application.cmdHandler.getHelpString(command));
             },
         });
-    }
-
-    /**
-     * @template T
-     * @return {T}
-     * @memberof Core
-     * @deprecated Use multiplatform.ts instead of this.
-     */
-    runPlatformDependent<T>(callbacks: {
-        aix?: (platform: string) => T,
-        android?: (platform: string) => T,
-        darwin?: (platform: string) => T,
-        freebsd?: (platform: string) => T,
-        haiku?: (platform: string) => T,
-        linux?: (platform: string) => T,
-        openbsd?: (platform: string) => T,
-        sunos?: (platform: string) => T,
-        win32?: (platform: string) => T,
-        cygwin?: (platform: string) => T,
-        netbsd?: (platform: string) => T
-    }): T {
-        return runPlatformDependent(callbacks);
     }
 
     private loadConfig(createDefault: boolean = false): typeof this.config {

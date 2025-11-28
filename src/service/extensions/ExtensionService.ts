@@ -46,7 +46,7 @@ export default class ExtensionService implements IExtensionService {
                 await this.startExtension(extension);
             }
             catch(err) {
-                this.log(LogBuilder.LogLevel.ERROR, err);
+                this.log(LogBuilder.LogLevel.ERROR, `${err}${err.stack ? `:\n${err.stack}` : ""}`);
 
                 if(!continueOnError) {
                     throw err;

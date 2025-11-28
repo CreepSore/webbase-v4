@@ -66,8 +66,8 @@ const setupEnvironment = async(log: boolean) => {
         alias: {
             cli: "c",
         },
-        string: [],
-        "boolean": ["cli", "worker"],
+        string: ["cli"],
+        "boolean": ["worker"],
     });
 
     Thread.scriptPath = __filename;

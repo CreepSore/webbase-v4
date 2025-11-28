@@ -23,6 +23,13 @@ extensionConfigs = [...extensionConfigs, ...fs.readdirSync(extPath)
         return data || {};
     }).filter(Boolean)];
 
+const nodeModules = {};
+fs.readdirSync('node_modules')
+    .filter(x => !['.bin'].includes(x))
+    .forEach(mod => {
+        nodeModules[mod] = 'commonjs ' + mod;
+    });
+
 const buildAppConfig = (env, argv) => {
     extensionConfigs = extensionConfigs.map(cfg => cfg.appBuildConfig).filter(Boolean);
 
@@ -45,7 +52,7 @@ const buildAppConfig = (env, argv) => {
             modules: ["node_modules"],
             symlinks: false,
         },
-        externals: {},
+        externals: nodeModules,
         module: {
             rules: [
                 {

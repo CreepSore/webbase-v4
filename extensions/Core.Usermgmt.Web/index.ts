@@ -1,7 +1,7 @@
 import * as dns from "dns/promises";
 import {EventEmitter} from "events";
 
-import ExecutionContext, { AppExecutionContext, ChildExecutionContext as IChildAppExecutionContext, CliExecutionContext } from "@service/extensions/ExecutionContext";
+import ExecutionContext, { AppExecutionContext, CliExecutionContext } from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
@@ -11,7 +11,7 @@ import createAuthenticationRouter from "./routers/AuthenticationRouter";
 import Urls from "./urls";
 import createPermissionRouter from "./routers/PermissionRouter";
 import createUserRouter from "./routers/UserRouter";
-import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/AuthorizationHandler";
+import AuthorizationHandler from "@extensions/Core.Usermgmt/handlers/authorization/AuthorizationHandler";
 import LogBuilder from "@service/logger/LogBuilder";
 import User from "@extensions/Core.Usermgmt/models/User";
 
@@ -107,6 +107,7 @@ export default class CoreUsermgmtWeb implements IExtension {
         }
 
         const coreWeb = this.$(CoreWeb);
+        const coreUsermgmnt = this.$(CoreUsermgmt);
 
         coreWeb.app.use(async(req, res, next) => {
             try {
@@ -174,7 +175,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                 res.set("Cache-Control", "no-store");
                 next();
             },
-            createAuthenticationRouter(),
+            createAuthenticationRouter(coreUsermgmnt.authenticationRegistry),
             createPermissionRouter(),
             createUserRouter(),
         );

@@ -207,7 +207,7 @@ This may be subject to change in the future by making the `baseKey` the config-f
 You can also use .env files to specify your environment variables.
 They are ignored inside .gitignore by default.
 
-There are three places you can put your .env files in:
+There are three folders you can put your .env files in:
 
 | Relative Path | Iterated recursively |
 | ------------- | -------------------- |

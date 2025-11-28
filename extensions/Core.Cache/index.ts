@@ -3,81 +3,15 @@ import {EventEmitter} from "events";
 import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
-import LogBuilder from "@service/logger/LogBuilder";
 import Core from "@extensions/Core";
+import ICacheEntry from "./ICacheEntry";
+import CacheEntryConfig from "./CacheEntryConfig";
+import Cache from "./Cache";
+import CallbackCacheEntry from "./CallbackCacheEntry";
+import LogBuilder from "../../src/service/logger/LogBuilder";
 
 class CacheConfig {
 
-}
-
-export interface CacheEntryConfig<T> {
-    key: string;
-    updateCallback: () => Promise<T> | T;
-    defaultValue?: T;
-    updateEveryMs?: number;
-    log?: boolean;
-}
-
-export class CacheEntry<T> {
-    key: string;
-    currentValue: T;
-    defaultValue?: T;
-    refreshNextUpdate?: boolean;
-    lastUpdate: Date;
-    updateEveryMs?: number;
-    log: boolean;
-    private updateCallback: () => Promise<T> | T;
-
-    constructor(config: CacheEntryConfig<T>) {
-        this.key = config.key;
-        this.updateCallback = config.updateCallback;
-        this.currentValue = this.defaultValue = config.defaultValue;
-        this.lastUpdate = this.defaultValue ? new Date() : new Date(0);
-        this.updateEveryMs = config.updateEveryMs;
-        this.refreshNextUpdate = !this.defaultValue;
-        this.log = config.log ?? false;
-    }
-
-    async getValue(): Promise<T> {
-        const timeoutReached = (Date.now() - Number(this.lastUpdate) > this.updateEveryMs);
-
-        if(this.refreshNextUpdate || (this.updateEveryMs > 0 && timeoutReached)) {
-            this.refreshNextUpdate = false;
-            this.lastUpdate = new Date();
-
-            if(this.log) {
-                LogBuilder
-                    .start()
-                    .level(LogBuilder.LogLevel.INFO)
-                    .info("Core.Cache")
-                    .line(`Executing update-function for cache [${this.key}]`)
-                    .done();
-            }
-
-            this.currentValue = await this.updateCallback();
-
-            if(this.log) {
-                LogBuilder
-                    .start()
-                    .level(LogBuilder.LogLevel.INFO)
-                    .info("Core.Cache")
-                    .line(`Updated value for cache [${this.key}]`)
-                    .debugObject("newValue", this.currentValue)
-                    .done();
-            }
-        }
-
-        return this.currentValue;
-    }
-
-    invalidate(updateNow = false): Promise<T> | null {
-        this.refreshNextUpdate = true;
-        if(updateNow) {
-            return this.getValue();
-        }
-        console.log("INFO", "Core.Cache", `Invalidated cache [${this.key}]`);
-        return null;
-    }
 }
 
 export default class CoreCache implements IExtension {
@@ -93,7 +27,7 @@ export default class CoreCache implements IExtension {
 
     config: CacheConfig;
     events: EventEmitter = new EventEmitter();
-    cache: Map<string, CacheEntry<any>> = new Map();
+    cache: Cache = new Cache();
 
     constructor() {
         this.config = this.loadConfig(true);
@@ -110,39 +44,52 @@ export default class CoreCache implements IExtension {
 
     }
 
-    createCacheEntry<T>(config: CacheEntryConfig<T>): CacheEntry<T> {
-        const entry = new CacheEntry<T>(config);
-        this.cache.set(entry.key, entry);
-        return entry;
+    createCacheEntry<T>(config: CacheEntryConfig<T>): ICacheEntry<T> {
+        return this.cache.getOrCreateCacheEntry(config.key, () => new CallbackCacheEntry(config.key, config.defaultValue)
+            .setLogger(new LogBuilder({
+                infos: ["Core.Cache"]
+            }))
+            .setLifetimeMs(config.updateEveryMs)
+            .setUpdateCallback(config.updateCallback));
     }
 
     cacheEntryExists(key: string): boolean {
-        return this.cache.has(key);
+        return this.cache.cacheEntryExists(key);
     }
 
-    getCacheEntry<T>(key: string): CacheEntry<T> {
-        return this.cache.get(key) as CacheEntry<T>;
+    getCacheEntry<T>(key: string): ICacheEntry<T> {
+        return this.cache.getCacheEntry<T>(key);
     }
 
-    getCachedInstance<T>(key: string, config: Omit<CacheEntryConfig<T>, "key">): CacheEntry<T> {
-        if(this.cache.has(key)) return this.getCacheEntry(key);
-
-        return this.createCacheEntry({...config, key});
+    getCachedInstance<T>(key: string, config: Omit<CacheEntryConfig<T>, "key">): ICacheEntry<T> {
+        return this.cache.getOrCreateCacheEntry(key, () => new CallbackCacheEntry(key, config.defaultValue)
+            .setLogger(new LogBuilder({
+                infos: ["Core.Cache"]
+            }))
+            .setLifetimeMs(config.updateEveryMs)
+            .setUpdateCallback(config.updateCallback));
     }
 
     getCachedValue<T>(key: string, defaultValue: T): T {
-        return (this.getCacheEntry(key)?.currentValue || defaultValue) as T;
+        return this.getCachedValue(key, defaultValue);
     }
 
-    invalidateCache(key: string, updateNow = false): void {
-        const entry = this.cache.get(key);
-        if(entry) {
-            entry.invalidate(updateNow);
+    invalidateCache(key: string, updateNow = false): Promise<any> | any {
+        const entry = this.cache.getCacheEntry(key);
+        if(!entry) {
+            return null;
         }
+
+        entry.invalidate();
+        if(updateNow) {
+            return entry.getValue();
+        }
+
+        return null;
     }
 
     clearCache(): void {
-        this.cache.clear();
+        this.cache.deleteAll();
     }
 
     private checkConfig(): void {

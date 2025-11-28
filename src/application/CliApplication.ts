@@ -62,7 +62,8 @@ export default class CliApplication implements IApplication {
             await this.startInteractive();
         }
         else {
-            await this.startCli();
+            const exitCode = await this.handleCli();
+            process.exit(exitCode);
         }
     }
 
@@ -99,8 +100,15 @@ export default class CliApplication implements IApplication {
         });
     }
 
-    private async startCli(): Promise<void> {
-        this.cmdHandler.triggerArgs(this.args);
+    private async handleCli(): Promise<number> {
+        const execResult = await this.cmdHandler.triggerArgs(this.args);
+        console.log(execResult.log);
+
+        if(execResult.result) {
+            return 1;
+        }
+
+        return 0;
     }
 
     onConfigLoaded(callback: (config: ConfigModel) => void): this {

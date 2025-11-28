@@ -21,15 +21,19 @@ export default class LogBuilder {
     logEntry: ILogEntry;
     onDone: (log: ILogEntry) => Promise<void>;
 
-    constructor(onDone: LogBuilder["onDone"] = LogBuilder.onDone) {
+    defaultValues: Partial<ILogEntry>;
+
+    constructor(
+        defaultValues: Partial<ILogEntry> = null,
+        onDone: LogBuilder["onDone"] = LogBuilder.onDone,
+    ) {
         this.onDone = onDone;
-        this.logEntry = {
-            id: uuid.v4(),
-            date: new Date(),
+        this.defaultValues = defaultValues || {
             infos: [],
-            lines: [],
             objects: {},
+            lines: [],
         };
+        this.resetLogEntry();
     }
 
     /**
@@ -163,13 +167,7 @@ export default class LogBuilder {
      * @returns {LogBuilder} The instance of LogBuilder for method chaining.
      */
     start(): LogBuilder {
-        this.logEntry = {
-            id: uuid.v4(),
-            date: new Date(),
-            infos: [],
-            lines: [],
-            objects: {},
-        };
+        this.resetLogEntry();
         return this;
     }
 
@@ -268,5 +266,27 @@ export default class LogBuilder {
      */
     done(): Promise<void> {
         return this.onDone?.(this.logEntry);;
+    }
+
+    clone(): LogBuilder {
+        return new LogBuilder({
+            id: this.defaultValues?.id,
+            date: this.defaultValues?.date,
+            level: this.defaultValues?.level,
+            infos: [...(this.defaultValues?.infos || [])],
+            lines: [...(this.defaultValues?.lines || [])],
+            objects: {...(this.defaultValues?.objects || {})},
+        }, this.onDone);
+    }
+
+    resetLogEntry(): void {
+        this.logEntry = {
+            id: this.defaultValues?.id || uuid.v4(),
+            date: this.defaultValues?.date || new Date(),
+            level: this.defaultValues?.level,
+            infos: [...(this.defaultValues?.infos || [])],
+            lines: [...(this.defaultValues?.lines || [])],
+            objects: {...(this.defaultValues?.objects || {})},
+        };
     }
 }
