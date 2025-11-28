@@ -1,11 +1,8 @@
 /**
- * @return {import("../../src/IInstallerType").default}
+ * @return {import("../../src/install").default}
  */
 function installConfig() {
-    return {
-        npmDependencies: ["uuid"],
-        npmDevDependencies: ["@types/uuid"],
-    };
+    return {};
 }
 
 module.exports = installConfig;
