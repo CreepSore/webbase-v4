@@ -1,4 +1,4 @@
-import * as uuid from "uuid";
+import * as crypto from "crypto";
 import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabridgeLayer";
 import DatabridgePartyPacket from "./DatabridgePartyPacket";
 
@@ -37,7 +37,7 @@ export default class DatabridgePartyClientLayer<TPayload> implements IDatabridge
 
     processOutbound(data: TPayload, metadata: DatabridgePartyMetadata): Promise<DatabridgePartyPacket<TPayload>> {
         return Promise.resolve({
-            id: uuid.v4(),
+            id: crypto.randomUUID(),
             fromParty: this._myParty,
             toParty: this._targetParty,
             payload: data

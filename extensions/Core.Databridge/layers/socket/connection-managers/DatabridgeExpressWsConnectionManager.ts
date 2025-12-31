@@ -1,6 +1,6 @@
 import * as events from "events";
 import * as ws from "ws";
-import * as uuid from "uuid";
+import * as crypto from "crypto";
 
 import IDatabridgeConnectionManager from "../IDatabridgeConnectionManager";
 import IDatabridgeSocket from "../IDatabridgeSocket";
@@ -61,7 +61,7 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
     }
 
     private _connectionEstablished(websocket: ws.WebSocket): void {
-        const id = uuid.v4();
+        const id = crypto.randomUUID();
         const client = {
             id,
             sendData: (data: string) => {

@@ -1,11 +1,10 @@
 import * as workerThreads from "node:worker_threads";
 
-import * as uuid from "uuid";
+import * as crypto from "crypto";
 import IThreadIO from "./io/IThreadIO";
 import ThreadIO from "./io/ThreadIO";
 import ThreadWorkerChannel from "./channels/ThreadWorkerChannel";
 import ExtensionControlPayload from "./message-payload-types/ExtensionControlPayload";
-import LogBuilder from "../../service/logger/LogBuilder";
 
 export default class Thread {
     static scriptPath: string = null;
@@ -25,7 +24,7 @@ export default class Thread {
     }
 
     constructor(id: string = null) {
-        this._id = id ?? uuid.v4();
+        this._id = id ?? crypto.randomUUID();
     }
 
     async start(): Promise<string> {

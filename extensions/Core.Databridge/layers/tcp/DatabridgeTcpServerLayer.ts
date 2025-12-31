@@ -1,7 +1,7 @@
 import * as net from "net";
 import * as events from "events";
 
-import * as uuid from "uuid";
+import * as crypto from "crypto";
 
 import IDatabridge from "../../IDatabridge";
 import IDatabridgeLayer, { DatabridgeDefaultPipelineMetadata } from "../IDatabridgeLayer";
@@ -90,7 +90,7 @@ export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer
     }
 
     private async handleClientConnect(socket: net.Socket, databridge: IDatabridge): Promise<void> {
-        const id = uuid.v4();
+        const id = crypto.randomUUID();
         this._clients.add(socket);
         this._idClientMapping.set(id, socket);
 

@@ -1,6 +1,6 @@
 import * as perfHooks from "perf_hooks";
 
-import * as uuid from "uuid";
+import * as crypto from "crypto";
 import ILogEntry from "./ILogEntry";
 
 /**
@@ -281,7 +281,7 @@ export default class LogBuilder {
 
     resetLogEntry(): void {
         this.logEntry = {
-            id: this.defaultValues?.id || uuid.v4(),
+            id: this.defaultValues?.id || crypto.randomUUID(),
             date: this.defaultValues?.date || new Date(),
             level: this.defaultValues?.level,
             infos: [...(this.defaultValues?.infos || [])],

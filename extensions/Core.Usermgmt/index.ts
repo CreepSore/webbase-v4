@@ -1,6 +1,6 @@
 import {EventEmitter} from "events";
 
-import * as uuid from "uuid";
+import * as crypto from "crypto";
 
 import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
@@ -98,7 +98,7 @@ export default class CoreUsermgmt implements IExtension {
         await AuthorizationHandler.createPermissionLayer(Permissions);
 
         if(!(await AuthenticationHandler.getRootUser())) {
-            const onceKey = uuid.v4();
+            const onceKey = crypto.randomUUID();
 
             LogBuilder
                 .start()

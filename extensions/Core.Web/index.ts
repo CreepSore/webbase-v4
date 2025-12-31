@@ -8,7 +8,6 @@ import express from "express";
 import expressWs from "express-ws";
 import expressSession from "express-session";
 import helmet from "helmet";
-import * as uuid from "uuid";
 
 import ExecutionContext from "@service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
@@ -170,7 +169,7 @@ export default class CoreWeb implements IExtension {
         });
     }
 
-    addScript(name: string, source: string | any, url: string = `/${name}/${uuid.v4()}`): string {
+    addScript(name: string, source: string | any, url: string = `/${name}/${crypto.randomUUID()}`): string {
         this.app.get(url, (req, res) => {
             res.setHeader("Cache-Control", "public, max-age=86400, must-revalidate");
 
@@ -190,7 +189,7 @@ export default class CoreWeb implements IExtension {
         /** Defaults to "module" */
         type?: "normal"|"module",
     } = {}): string {
-        const url = options.url || `/js/${name}/${uuid.v4()}`;
+        const url = options.url || `/js/${name}/${crypto.randomUUID()}`;
         const readFileEveryRequest = options.readFileEveryRequest || process.env.DEBUG === "true";
 
         const content = fs.readFileSync(__dirname + "/" + scriptPath);

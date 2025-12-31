@@ -1,5 +1,4 @@
-import * as uuid from "uuid";
-import IThreadMessage from "./IThreadMessage";
+import * as crypto from "crypto";
 import IThreadIO from "../io/IThreadIO";
 import OutgoingThreadMessage from "./OutgoingThreadMessage";
 
@@ -24,7 +23,7 @@ export default class ThreadMessageFactory {
 
     buildOutgoing<TPayload, TType extends string = string>(type: TType, payload: TPayload, id: string = null): OutgoingThreadMessage<TPayload, TType> {
         return new OutgoingThreadMessage(
-            id ?? uuid.v4(),
+            id ?? crypto.randomUUID(),
             type,
             payload,
             this._io
