@@ -69,7 +69,7 @@ describe("ConfigLoader Static Tests", () => {
 
         ConfigLoader.exportConfig(testModel, testPaths.exportPath);
 
-        expect(fs.unlinkSync).toBeCalled();
+        expect(fs.unlinkSync).toHaveBeenCalled();
     });
 
     it("should create the config path if it doesn't exist", () => {
@@ -85,6 +85,6 @@ describe("ConfigLoader Static Tests", () => {
 
         ConfigLoader.exportConfig(testModel, testPaths.exportPath);
 
-        expect(fs.mkdirSync).toBeCalled();
+        expect(fs.mkdirSync).toHaveBeenCalled();
     });
 });
