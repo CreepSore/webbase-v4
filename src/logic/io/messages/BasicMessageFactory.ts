@@ -29,14 +29,14 @@ export default class BasicMessageFactory implements IMessageFactory {
                 break;
 
             case "object":
-                result = JSON.stringify(result);
+                result = JSON.stringify(payload);
                 break;
 
             case "number":
             case "bigint":
             case "boolean":
             default:
-                result = String(result);
+                result = String(payload);
                 break;
         }
 

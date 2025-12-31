@@ -40,4 +40,30 @@ describe("BasicIO Tests", () => {
 
         await io1.stop();
     });
+
+    it("should send and receive objects correctly using a mock channel", async() => {
+        const testObject = {
+            hello: "world",
+            num: 1337,
+        };
+
+        const receiveFn = jest.fn((message: IIncomingMessage<Buffer>) => {
+            const parsed = message.transformPayload<{hello: string, num: number}>(p => JSON.parse(p.toString()));
+
+            expect(parsed.payload.hello).toBe(testObject.hello);
+            expect(parsed.payload.num).toBe(testObject.num);
+        });
+
+        const io1 = new BasicIo(new BasicMessageFactory());
+        io1.registerDuplexChannel(new EchoChannel());
+
+        io1.onMessageReceived(message => receiveFn(message));
+
+        await io1.start();
+        await io1.messageFactory.buildOutgoingMessage(testObject).send();
+
+        expect(receiveFn).toHaveBeenCalledTimes(1);
+
+        await io1.stop();
+    });
 });
