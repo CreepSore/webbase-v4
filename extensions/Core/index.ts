@@ -42,9 +42,7 @@ export default class Core implements IExtension {
     constructor() {
         this.config = this.loadConfig(true);
 
-        LoggerService
-            .addLogger(new ConsoleLogger(this.config.logger.consoleLogger.prettyPrint), "console")
-            .hookConsoleLog();
+        LoggerService.hookConsoleLog();
     }
 
     async start(executionContext: ExecutionContext): Promise<void> {
@@ -56,6 +54,8 @@ export default class Core implements IExtension {
             // ChildApp logging is set up inside ThreadApplication.ts
             return;
         }
+
+        LoggerService.addLogger(new ConsoleLogger(this.config.logger.consoleLogger.prettyPrint), "console");
 
         if(executionContext.contextType === "cli") {
             this.setupCli(executionContext);
