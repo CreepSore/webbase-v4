@@ -18,6 +18,8 @@ export default class BasicIo implements IIO {
     private _messageReceivedCallbacks: Set<(message: IIncomingMessage<Buffer>) => any> = new Set();
     private _handleMessageCallback: typeof this._handleMessageReceived = (buffer: Buffer) => this._handleMessageReceived(buffer);
 
+    private _startedChannels: Set<IInboundChannel | IOutboundChannel> = new Set();
+
     get messageFactory(): IMessageFactory {
         return this._messageFactory;
     }
@@ -33,11 +35,23 @@ export default class BasicIo implements IIO {
         }
 
         for(const channel of this._inboundChannels) {
+            if(this._startedChannels.has(channel)) {
+                continue;
+            }
+
+            this._startedChannels.add(channel);
+
             await channel.start();
             this._initializeInboundChannel(channel);
         }
 
         for(const channel of this._outboundChannels) {
+            if(this._startedChannels.has(channel)) {
+                continue;
+            }
+
+            this._startedChannels.add(channel);
+
             await channel.start();
         }
 
@@ -50,11 +64,23 @@ export default class BasicIo implements IIO {
         }
 
         for(const channel of this._inboundChannels) {
-            await channel.stop();
+            if(!this._startedChannels.has(channel)) {
+                continue;
+            }
+
+            this._startedChannels.delete(channel);
+
             channel.removeOnMessageReceived(this._handleMessageCallback);
+            await channel.stop();
         }
 
         for(const channel of this._outboundChannels) {
+            if(!this._startedChannels.has(channel)) {
+                continue;
+            }
+
+            this._startedChannels.delete(channel);
+
             await channel.stop();
         }
 

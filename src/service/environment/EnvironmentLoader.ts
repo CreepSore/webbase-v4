@@ -20,7 +20,7 @@ export class EnvironmentLoader {
 
     /**
      * Loads and parses an .env file from the given path
-     * This will throw if the file does not exist.
+     * @throws This will throw if the file does not exist.
      */
     static loadFromFileAsync(filePath: string): Promise<EnvironmentFile> {
         return fsp.readFile(filePath).then(b => EnvironmentFile.parse(b, filePath));
