@@ -95,6 +95,7 @@ export default class Core implements IExtension {
                     .object("origin", origin)
                     .appendCallStack()
                     .done()
+                    .catch(() => {})
                     .then(() => process.exit(1));
             });
 
@@ -108,6 +109,7 @@ export default class Core implements IExtension {
                     .object("promise", promise)
                     .appendCallStack()
                     .done()
+                    .catch(() => {})
                     .then(() => process.exit(1));
             });
         }
