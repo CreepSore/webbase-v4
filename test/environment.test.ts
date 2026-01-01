@@ -1,5 +1,3 @@
-import { kMaxLength } from "buffer";
-import EnvironmentFileParser from "../src/service/environment/EnvironmentFileParser";
 import EnvironmentFile from "../src/service/environment/EnvironmentFile";
 
 const exampleFile = `# I AM A COMMENT
