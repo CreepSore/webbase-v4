@@ -94,9 +94,8 @@ export default class Core implements IExtension {
                     .object("error", error)
                     .object("origin", origin)
                     .appendCallStack()
-                    .done();
-
-                process.exit(1);
+                    .done()
+                    .then(() => process.exit(1));
             });
 
             process.on("unhandledRejection", (reason, promise) => {
@@ -108,9 +107,8 @@ export default class Core implements IExtension {
                     .object("reason", reason)
                     .object("promise", promise)
                     .appendCallStack()
-                    .done();
-
-                process.exit(1);
+                    .done()
+                    .then(() => process.exit(1));
             });
         }
     }
