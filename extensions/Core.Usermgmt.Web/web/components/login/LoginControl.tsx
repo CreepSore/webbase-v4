@@ -15,6 +15,7 @@ import IUser from "@extensions/Core.Usermgmt/types/IUser";
 import useMe from "../../hooks/useMe";
 import KeyLoginControl from "./login-types/KeyLoginControl";
 import PasswordLoginControl from "./login-types/PasswordLoginControl";
+import TotpLoginControl from "./login-types/TotpLoginControl";
 
 enum LoginStep {
     INVALID_STATE = 0,
@@ -244,11 +245,9 @@ export default function LoginControl(props: LoginFormProperties) {
             onChange={value => setPassword(value)}
         />}
 
-        {step === LoginStep.DO_LOGIN_TOTP && <TotpInput
-            onFinished={(totpValue) => {
-                setTotp(totpValue);
-            }}
-            autoFocus
+        {step === LoginStep.DO_LOGIN_TOTP && <TotpLoginControl
+            value={totp}
+            onChange={value => setTotp(value)}
         />}
 
         {step === LoginStep.DO_LOGIN_KEY && <KeyLoginControl
