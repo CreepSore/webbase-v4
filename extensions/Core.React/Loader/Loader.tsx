@@ -8,7 +8,7 @@ interface LoaderProps {
 
 }
 
-export default function Loader(props: LoaderProps): JSX.Element {
+export default function Loader(props: LoaderProps): React.ReactElement {
     return <Paper className="top-0 right-0 bottom-0 left-0 fixed flex justify-center items-center z-[999]" square>
         <CircularProgress />
     </Paper>;

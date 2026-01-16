@@ -13,7 +13,7 @@ import UsermgmtWebApi from "@extensions/Core.Usermgmt.Web/web/UsermgmtWebApi";
 import Navdrawer from "./Navdrawer";
 import NavigatorContext from "@extensions/Core.React/Navigator/NavigatorContext";
 
-export default function Navbar(): JSX.Element {
+export default function Navbar(): React.ReactElement {
     const isMd = useMediaQuery("md");
     const [drawerOpen, setDrawerOpen] = React.useState(isMd);
     const me = React.useContext(MeContext);

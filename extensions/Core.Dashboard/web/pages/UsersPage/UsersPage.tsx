@@ -33,7 +33,7 @@ import PermissionCheck from "@extensions/Core.Usermgmt.Web/web/components/Permis
 import UsersPageController from "../../controllers/UsersPageController";
 import Search from "@mui/icons-material/Search";
 
-export default function UsersPage(): JSX.Element {
+export default function UsersPage(): React.ReactElement {
     const controller = React.useRef(new UsersPageController());
 
     const me = React.useContext(MeContext);

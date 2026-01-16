@@ -20,7 +20,7 @@ import PermissionsPage from "./pages/PermissionsPage/PermissionsPage";
 import DataStreamContext from "@extensions/Core.React/DataStream/DataStreamContext";
 import useDataStream from "@extensions/Core.React/hooks/useDataStream";
 
-function Main(): JSX.Element {
+function Main(): React.ReactElement {
     const navigator = useNavigationHandler<NavigationKeys>({
         defaultPage: "init",
         shouldHandleNavigationRequest: (key, args) => {

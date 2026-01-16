@@ -39,7 +39,7 @@ interface NavdrawerProperties {
     onClose: () => void;
 }
 
-export default function Navdrawer(props: NavdrawerProperties): JSX.Element {
+export default function Navdrawer(props: NavdrawerProperties): React.ReactElement {
     return <Drawer
         anchor="left"
         open={props.open}

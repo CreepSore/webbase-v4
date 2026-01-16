@@ -9,6 +9,7 @@ export default function PasswordLoginControl(props: LoginControlProperties) {
         label="Password"
         value={props.value}
         onChange={e => props.onChange(e.target.value)}
+        autoComplete="current-password"
         autoFocus
     />;
 }

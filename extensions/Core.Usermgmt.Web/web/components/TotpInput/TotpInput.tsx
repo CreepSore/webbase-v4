@@ -8,7 +8,7 @@ interface NumberInputProperties {
     autoFocus?: boolean;
 }
 
-const NumberInput = React.forwardRef((props: NumberInputProperties, ref: React.MutableRefObject<HTMLElement>): JSX.Element => {
+const NumberInput = React.forwardRef((props: NumberInputProperties, ref: React.MutableRefObject<HTMLElement>): React.ReactElement => {
     const [value, setValue] = React.useState("");
 
     return <TextField
@@ -62,7 +62,7 @@ interface TotpInputProperties {
     onFinished?: (vaue: string) => void;
 }
 
-export default function TotpInput(props: TotpInputProperties): JSX.Element {
+export default function TotpInput(props: TotpInputProperties): React.ReactElement {
     const numberAmount = props.numberAmount ?? 6;
     const refs = new Array(numberAmount).fill(null).map(() => React.useRef(null));
     const numbers = new Array(numberAmount).fill(null).map(() => React.useState(-1));

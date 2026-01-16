@@ -5,7 +5,7 @@ import "./style.scss";
 import {createTheme} from "@mui/material/styles";
 import ThemeProvider from "@mui/system/ThemeProvider";
 
-function Main(): JSX.Element {
+function Main(): React.ReactElement {
     const theme = createTheme({
         palette: {
             mode: "dark",

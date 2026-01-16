@@ -224,6 +224,7 @@ export default function LoginControl(props: LoginFormProperties) {
             size={step !== LoginStep.USER_INPUT ? "small" : "medium"}
             autoFocus={step === LoginStep.USER_INPUT}
             error={isUserError}
+            autoComplete="username"
         />}
 
         {step === LoginStep.CHOOSE_AUTH_TYPE &&

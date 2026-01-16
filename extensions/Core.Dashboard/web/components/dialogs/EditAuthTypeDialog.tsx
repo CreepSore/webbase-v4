@@ -15,7 +15,7 @@ interface EditAuthTypeDialogProperties<AuthType> {
     onClose?: () => void;
 }
 
-export default function EditAuthTypeDialog<AuthType extends AuthenticationType>(props: EditAuthTypeDialogProperties<AuthType>): JSX.Element {
+export default function EditAuthTypeDialog<AuthType extends AuthenticationType>(props: EditAuthTypeDialogProperties<AuthType>): React.ReactElement {
     const passwordEntryNeeded = (["password", "password_totp"] as AuthenticationType["type"][]).includes(props.authenticationType.type);
     const totpEntryneeded = (["totp", "password_totp"] as AuthenticationType["type"][]).includes(props.authenticationType.type);
     const keyEntryNeeded = (["permanent_key", "once_key"] as AuthenticationType["type"][]).includes(props.authenticationType.type);

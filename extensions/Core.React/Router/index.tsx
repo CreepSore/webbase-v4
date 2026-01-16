@@ -18,7 +18,7 @@ interface RouterProps {
     currentPage: string;
 }
 
-export default function Router(props: RouterProps): JSX.Element {
+export default function Router(props: RouterProps): React.ReactElement {
     // children?.find?.(x => x?.find?.(y => y.key === currentPage) || x.key === currentPage) || children.key === currentPage && children
     const result = recursiveFind(props.children, props.currentPage);
     return result;

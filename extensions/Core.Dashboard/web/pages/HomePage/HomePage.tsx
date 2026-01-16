@@ -55,7 +55,7 @@ function ResponsiveCard({icon, label, color, onClick}: ResponsiveCardProperties)
     </Card>;
 }
 
-export default function HomePage(): JSX.Element {
+export default function HomePage(): React.ReactElement {
     const navigator = React.useContext(NavigatorContext);
 
     return <BasePage>

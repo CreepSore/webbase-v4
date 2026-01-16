@@ -10,7 +10,7 @@ interface BasePageProperties {
     maxWidth?: false | Breakpoint;
 }
 
-export default function BasePage(props: React.PropsWithChildren<BasePageProperties>): JSX.Element {
+export default function BasePage(props: React.PropsWithChildren<BasePageProperties>): React.ReactElement {
     return <Paper className="min-w-[100vw] min-h-[100vh]" square>
         <Navbar />
         <Container maxWidth={props.maxWidth}>

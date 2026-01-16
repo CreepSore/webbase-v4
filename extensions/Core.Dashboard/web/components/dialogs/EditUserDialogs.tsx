@@ -28,7 +28,7 @@ interface EditUserDialogProperties {
     onClose?: () => void;
 }
 
-export default function EditUserDialog(props: EditUserDialogProperties): JSX.Element {
+export default function EditUserDialog(props: EditUserDialogProperties): React.ReactElement {
     const [availableGroups] = useFetchApi(
         () => UsermgmtWebApi.getPermissionGroups(),
         [{name: "...", description: "...", permissions: []}],

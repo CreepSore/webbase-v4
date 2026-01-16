@@ -10,7 +10,7 @@ interface PermissionCheckProperties {
 /**
  * This component has to have a MeContext for it to work.
  */
-export default function PermissionCheck(props: React.PropsWithChildren<PermissionCheckProperties>): JSX.Element {
+export default function PermissionCheck(props: React.PropsWithChildren<PermissionCheckProperties>): React.ReactElement {
     const me = useContext(MeContext);
     const hasPermissions = React.useMemo(() => {
         if(Array.isArray(props.permissions[0])) {

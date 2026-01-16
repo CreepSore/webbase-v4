@@ -29,7 +29,7 @@ type PermissionsRow = IPermission & {
     assigned: boolean,
 };
 
-export default function PermissionsPage(): JSX.Element {
+export default function PermissionsPage(): React.ReactElement {
     const controller = React.useRef(new PermissionsPageController());
 
     const me = React.useContext(MeContext);

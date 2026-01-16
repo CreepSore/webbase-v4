@@ -7,7 +7,7 @@ import ThemeProvider from "@mui/system/ThemeProvider";
 
 import LoginPage from "./pages/login/LoginPage";
 
-function Main(): JSX.Element {
+function Main(): React.ReactElement {
     const theme = createTheme({
         palette: {
             mode: "dark",

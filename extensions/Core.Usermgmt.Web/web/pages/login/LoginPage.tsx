@@ -8,7 +8,7 @@ interface LoginPageProperties {
     onLogin?: (me: IUser) => void;
 }
 
-export default function LoginPage(props: LoginPageProperties): JSX.Element {
+export default function LoginPage(props: LoginPageProperties): React.ReactElement {
     return <Paper className="w-[100vw] h-[100vh] flex justify-center items-center" square>
         <Container maxWidth="xs">
             <Paper className="p-3" elevation={3}>
