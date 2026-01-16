@@ -17,7 +17,13 @@ window.addEventListener("load", async() => {
                     }
                 }))
         )
-        .setOutboundLayer(websocketLayer)
+        .setOutboundLayer(
+            new DatabridgeMultiLayer()
+                .attachOutboundLayer(new DatabridgeLambdaLayer({
+                    processOutbound: (data) => Promise.resolve(JSON.stringify(data)),
+                }))
+                .attachOutboundLayer(websocketLayer)
+        )
         .finish();
 
     const pingInterval = setInterval(() => {

@@ -4,7 +4,13 @@ import UsermgmtWebApi from "../UsermgmtWebApi";
 import IPermission from "@extensions/Core.Usermgmt/types/IPermission";
 import Permissions, { PermissionEntry } from "@extensions/Core.Usermgmt/permissions";
 
-export default function useMe(): {me: IUser, update: () => void, hasPermission: (key: string|PermissionEntry) => boolean, isLoading: boolean} {
+export default function useMe(): {
+    me: IUser,
+    update: () => void,
+    hasPermission: (key: string|PermissionEntry) => boolean,
+    isAnonymous: () => boolean,
+    isLoading: boolean
+} {
     const [loading, setLoading] = React.useState(true);
     const [currentMe, setCurrentMe] = React.useState<IUser>(null);
 
@@ -41,9 +47,13 @@ export default function useMe(): {me: IUser, update: () => void, hasPermission: 
         return (permissions || []).some(p => p.name === (typeof name === "string" ? name : name.name));
     };
 
+    const isAnonymous = (): boolean => {
+        return loading || currentMe?.username === "Anonymous";
+    }
+
     React.useEffect(() => {
         update(true);
     }, []);
 
-    return {me: currentMe, update, hasPermission, isLoading: loading};
+    return {me: currentMe, update, hasPermission, isLoading: loading, isAnonymous};
 }
