@@ -77,7 +77,6 @@
     "express-session": "^1.18.2",
     "express-ws": "^5.0.2",
     "helmet": "^8.1.0",
-    "mime": "^4.1.0",
     "minimist": "^1.2.8",
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
