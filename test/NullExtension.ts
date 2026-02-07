@@ -9,7 +9,7 @@ export default class NullExtension implements IExtension {
     constructor(
         metadata: ExtensionMetadata,
         start?: (executionContext: ExecutionContext) => Promise<void>,
-        stop?: () => Promise<void>
+        stop?: () => Promise<void>,
     ) {
         this.metadata = metadata;
         this.start = start;

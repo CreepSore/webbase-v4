@@ -3,9 +3,8 @@ import AuthenticationResult from "../../../types/AuthenticationResult";
 import IAuthenticator from "./IAuthenticator";
 import IUser from "../../../types/IUser";
 import AuthenticationHandler from "../AuthenticationHandler";
-import User from "../../../models/User";
-import { PermanentKeyAuthenticationParameters, OnceKeyAuthenticationParameters } from "../../../types/AuthenticationParameters";
-import { PermanentKeyAuthenticationType, OnceKeyAuthenticationType } from "../../../types/AuthenticationTypes";
+import { PermanentKeyAuthenticationParameters } from "../../../types/AuthenticationParameters";
+import { PermanentKeyAuthenticationType } from "../../../types/AuthenticationTypes";
 
 export default class PermanentKeyAuthenticator implements IAuthenticator<PermanentKeyAuthenticationType, PermanentKeyAuthenticationParameters> {
     private _user: HydratedDocument<IUser>;

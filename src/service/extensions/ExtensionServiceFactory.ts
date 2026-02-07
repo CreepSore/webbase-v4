@@ -4,7 +4,6 @@ import ExtensionService from "./ExtensionService";
 import IExtensionService from "./IExtensionService";
 import DirectoryExtensionEnvironment from "./environments/DirectoryExtensionEnvironment";
 import ExtensionEnvironmentCollection from "./environments/ExtensionEnvironmentCollection";
-import IExtensionEnvironment from "./environments/IExtensionEnvironment";
 import LegacyExtensionLoader from "./loaders/LegacyExtensionLoader";
 
 export default class ExtensionServiceFactory {
@@ -32,7 +31,7 @@ export default class ExtensionServiceFactory {
         return extensionService;
     }
 
-    static async createDefaultEnvironments(onLoadError: (name: string, error: Error) => any = null): Promise<ExtensionEnvironmentCollection> {
+    static async createDefaultEnvironments(onLoadError?: (name: string, error: Error) => any): Promise<ExtensionEnvironmentCollection> {
         const directoryEnvironment = new DirectoryExtensionEnvironment("extensions");
         directoryEnvironment.onLoadError = onLoadError;
         await directoryEnvironment.initialize();

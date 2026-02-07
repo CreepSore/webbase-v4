@@ -265,7 +265,7 @@ export default class LogBuilder {
      * @returns {LogBuilder} The instance of LogBuilder for chaining, although typically this should be the final operation.
      */
     done(): Promise<void> {
-        return this.onDone?.(this.logEntry);;
+        return this.onDone?.(this.logEntry);
     }
 
     clone(): LogBuilder {

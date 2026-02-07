@@ -23,9 +23,9 @@ declare module "express-session" {
 
 // ! Disabling these rules since they're fucked up
 declare global {
-    // eslint-disable-next-line no-unused-vars
+
     namespace Express {
-        // eslint-disable-next-line no-unused-vars
+
         interface Request {
             additionalData: {authorizationHandler: AuthorizationHandler}
         }

@@ -1,4 +1,3 @@
-import CoreWeb from "../extensions/Core.Web";
 import ExecutionContext from "../src/service/extensions/ExecutionContext";
 import IExtension, { ExtensionMetadata } from "../src/service/extensions/IExtension";
 

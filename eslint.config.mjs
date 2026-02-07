@@ -23,6 +23,7 @@ export default defineConfig([globalIgnores([
     "**/webpack.config.js",
     "**/tailwind.config.js",
     "**/postcss.config.js",
+    "**/eslint.config.mjs",
     "**/*.js",
 ]), {
     extends: compat.extends(),
@@ -44,7 +45,7 @@ export default defineConfig([globalIgnores([
         sourceType: "module",
 
         parserOptions: {
-            project: "tsconfig.json",
+            project: "./tsconfig.json",
 
             ecmaFeatures: {
                 jsx: true,

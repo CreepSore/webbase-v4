@@ -3,6 +3,7 @@ import ExecutionContext from "./ExecutionContext";
 import IExtension from "./IExtension";
 import IExtensionService from "./IExtensionService";
 import ExtensionAlreadyRegisterdError from "./errors/ExtensionAlreadyRegisteredError";
+import InvalidExecutionContextError from "./errors/InvalidExecutionContextError";
 import NoExtensionLoaderFoundError from "./errors/NoExtensionLoaderFoundError";
 import IExtensionLoader from "./loaders/IExtensionLoader";
 
@@ -10,14 +11,14 @@ export default class ExtensionService implements IExtensionService {
     private _extensions: Array<IExtension> = [];
     private _extensionsByName: Map<string, IExtension> = new Map();
     private _extensionLoaders: Set<IExtensionLoader> = new Set();
-    private _executionContext: ExecutionContext;
-    private _loggerFn: (level: string, message: string) => Promise<void> | void;
+    private _executionContext?: ExecutionContext;
+    private _loggerFn?: (level: string, message: string) => Promise<void> | void;
 
     initialize(executionContext: ExecutionContext): void {
         this._executionContext = executionContext;
     }
 
-    setLogger(loggerFn?: (level: string, message: string) => Promise<void> | void) {
+    setLogger(loggerFn?: (level: string, message: string) => Promise<void> | void): void {
         this._loggerFn = loggerFn;
     }
 
@@ -45,7 +46,7 @@ export default class ExtensionService implements IExtensionService {
             try {
                 await this.startExtension(extension);
             }
-            catch(err) {
+            catch(err: any) {
                 this.log(LogBuilder.LogLevel.ERROR, `${err}${err.stack ? `:\n${err.stack}` : ""}`);
 
                 if(!continueOnError) {
@@ -97,6 +98,10 @@ export default class ExtensionService implements IExtensionService {
     }
 
     async startExtension(extension: IExtension, withDependents: boolean = false): Promise<void> {
+        if(!this._executionContext) {
+            return Promise.reject(new InvalidExecutionContextError(this._executionContext));
+        }
+
         const extensionLoader = this.getCorrectExtensionLoader(extension);
         if(!extensionLoader) {
             return Promise.reject(new NoExtensionLoaderFoundError(extension.metadata.name));
@@ -143,7 +148,7 @@ export default class ExtensionService implements IExtensionService {
     }
 
     *iterateExtensions(): Generator<IExtension> {
-        let iterated: Set<IExtension> = new Set();
+        const iterated: Set<IExtension> = new Set();
         let queue = this._extensions.filter(e => !e.metadata.dependencies || e.metadata.dependencies.length === 0);
 
         while(queue.length > 0) {
@@ -157,7 +162,7 @@ export default class ExtensionService implements IExtensionService {
                 !e.metadata.dependencies.some(d => !iterated.has(
                     typeof d === "string"
                         ? this.getExtensionByName(d)
-                        : this.getExtensionByConstructor(d)
+                        : this.getExtensionByConstructor(d),
                 )),
             );
         }
@@ -172,9 +177,9 @@ export default class ExtensionService implements IExtensionService {
         return dependents.some(d => this.shouldBeForceloaded(d));
     }
 
-    private getCorrectExtensionLoader(extension: IExtension): IExtensionLoader {
+    private getCorrectExtensionLoader(extension: IExtension): IExtensionLoader | null {
         const iterator = this._extensionLoaders.values();
-        let currentEntry: IteratorResult<IExtensionLoader, IExtensionLoader> = iterator.next();
+        let currentEntry: IteratorResult<IExtensionLoader, any> = iterator.next();
 
         if(currentEntry.done) {
             return null;
@@ -191,7 +196,7 @@ export default class ExtensionService implements IExtensionService {
         return null;
     }
 
-    private log(level: string, message: string) {
+    private log(level: string, message: string): void {
         if(!this._loggerFn) {
             return;
         }

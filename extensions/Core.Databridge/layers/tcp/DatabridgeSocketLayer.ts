@@ -16,16 +16,16 @@ export default class DatabridgeSocketLayer implements IDatabridgeLayer<Buffer, B
         return data;
     }
 
-    start?(databridge: IDatabridge): Promise<void> {
-        const closeCallback = () => {
-            this.stop(databridge);
-        };
+    start(databridge: IDatabridge): Promise<void> {
+        const closeCallback = (): void => {
+            this.stop(databridge)
+        }
 
-        const dataCallback = (data: Buffer) => {
+        const dataCallback = (data: Buffer): void => {
             databridge.handleInboundPacket(data);
         };
 
-        const errorCallback = (err: Error) => {
+        const errorCallback = (err: Error): void => {
             databridge.handleError(err, this);
         }
 
@@ -40,7 +40,7 @@ export default class DatabridgeSocketLayer implements IDatabridgeLayer<Buffer, B
         return Promise.resolve();
     }
 
-    stop?(databridge: IDatabridge): Promise<void> {
+    stop(databridge: IDatabridge): Promise<void> {
         for(const [key, fn] of [...this._callbacks]) {
             this._socket.removeListener(key, fn as any);
         }

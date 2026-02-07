@@ -141,12 +141,12 @@ export default class ConfigLoader<T> {
 
         // ! This looks like i am insane, but we can do this since our configs are
         // ! guaranteed to always be json only without any functions
-        let copy = JSON.parse(JSON.stringify(cfg));
+        const copy = JSON.parse(JSON.stringify(cfg));
 
         Object.entries(process.env)
             .filter(([key]) => !baseKey || key.startsWith(baseKey))
             .forEach(([key, value]) => {
-                let parts = key.split("_");
+                const parts = key.split("_");
                 if(baseKey) {
                     parts.splice(0, 1);
                 }

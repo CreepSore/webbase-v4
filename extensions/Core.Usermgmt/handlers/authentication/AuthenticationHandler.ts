@@ -4,7 +4,7 @@ import IUser from "../../types/IUser";
 import User from "../../models/User";
 import AuthenticationParameters from "../../types/AuthenticationParameters";
 import AuthenticationResult from "../../types/AuthenticationResult";
-import AuthenticationType, { OnceKeyAuthenticationType, PasswordAuthenticationType, PasswordTotpAuthenticationType, PermanentKeyAuthenticationType, TotpAuthenticationType } from "../../types/AuthenticationTypes";
+import AuthenticationType from "../../types/AuthenticationTypes";
 import AuthenticatorRegistry from "./authenticators/AuthenticatorRegistry";
 
 export default class AuthenticationHandler {
@@ -124,7 +124,7 @@ export default class AuthenticationHandler {
             additionalInformation: {},
             error: null,
             errorCode: null,
-            userId
+            userId,
         };
     }
 

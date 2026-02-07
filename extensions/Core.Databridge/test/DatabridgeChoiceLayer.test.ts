@@ -4,23 +4,21 @@ import DatabridgeLambdaLayer from "../layers/misc/DatabridgeLambdaLayer";
 
 describe("DatabridgeChoiceLayer test", () => {
     it("should process using chosen layers correctly", async() => {
-        let current = 0;
-
         const fn0 = jest.fn();
         const fn1 = jest.fn();
         const fn2 = jest.fn();
 
         const db = new Databridge(
             new DatabridgeChoiceLayer<number, string>({
-                chooseLayerInbound: (d) => String(d)
+                chooseLayerInbound: (d) => String(d),
             }).registerInboundLayer("0", new DatabridgeLambdaLayer({
-                processInbound: fn0
+                processInbound: fn0,
             })).registerInboundLayer("1", new DatabridgeLambdaLayer({
-                processInbound: fn1
+                processInbound: fn1,
             })).registerInboundLayer("2", new DatabridgeLambdaLayer({
-                processInbound: fn2
+                processInbound: fn2,
             })),
-            new DatabridgeLambdaLayer({})
+            new DatabridgeLambdaLayer({}),
         );
 
         await db.start();

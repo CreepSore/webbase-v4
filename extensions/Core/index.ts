@@ -10,7 +10,6 @@ import CacheLogger from "@service/logger/CacheLogger";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import JsonFileLogger from "@service/logger/JsonFileLogger";
 import LogBuilder from "@service/logger/LogBuilder";
-import { runPlatformDependent } from "@service/utils/multiplatform";
 
 class CoreConfig {
     logger = {

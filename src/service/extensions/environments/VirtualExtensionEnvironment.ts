@@ -26,7 +26,7 @@ export default class VirtualExtensionEnvironment implements IExtensionEnvironmen
 
     applyTo(extensionService: IExtensionService): Promise<void> {
         const iterator = this.extensions.values();
-        let currentEntry: IteratorResult<IExtension, IExtension>;
+        let currentEntry: IteratorResult<IExtension, any>;
 
         do {
             currentEntry = iterator.next();
@@ -42,6 +42,8 @@ export default class VirtualExtensionEnvironment implements IExtensionEnvironmen
                     throw err;
                 }
             }
+
+            /* eslint-disable no-constant-condition */
         } while(true);
     }
 }

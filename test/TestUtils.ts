@@ -8,11 +8,12 @@ export default class TestUtils {
                 return;
             }
 
-            const interval = setInterval(async () => {
+            const interval = setInterval(async() => {
                 if (await check()) {
                     clearInterval(interval);
                     resolve(true);
-                } else if (Date.now() - startTime > timeout) {
+                }
+                else if (Date.now() - startTime > timeout) {
                     clearInterval(interval);
                     resolve(false);
                 }

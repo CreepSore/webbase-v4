@@ -8,12 +8,13 @@
         "declaration": false,
         "noEmit": true,
         "isolatedModules": true,
+        "baseUrl": "./",
         "paths": {
-            "@app/*": ["./src/application/*"],
-            "@logic/*": ["./src/logic/*"],
-            "@service/*": ["./src/service/*"],
-            "@extensions/*": ["./extensions/*"],
-            "wpextensions/*": ["./extensions/*"]
+            "@app/*": ["src/application/*"],
+            "@logic/*": ["src/logic/*"],
+            "@service/*": ["src/service/*"],
+            "@extensions/*": ["extensions/*"],
+            "wpextensions/*": ["extensions/*"]
         },
         "esModuleInterop": true,
         "jsx": "react",

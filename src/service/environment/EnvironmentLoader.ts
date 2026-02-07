@@ -29,9 +29,9 @@ export class EnvironmentLoader {
     static loadFromDirectory(dirPath: string, recursive: boolean = false): LoadEnvironmentFromDirectoryResult {
         const result: LoadEnvironmentFromDirectoryResult = {
             errors: [],
-            files: new EnvironmentFiles()
+            files: new EnvironmentFiles(),
         };
-        for(let file of fs.readdirSync(dirPath)) {
+        for(const file of fs.readdirSync(dirPath)) {
             const absolutePath = path.resolve(dirPath, file);
             const stat = fs.statSync(absolutePath);
 
@@ -61,10 +61,10 @@ export class EnvironmentLoader {
     static async loadFromDirectoryAsync(dirPath: string, recursive: boolean = false): Promise<LoadEnvironmentFromDirectoryResult> {
         const result: LoadEnvironmentFromDirectoryResult = {
             errors: [],
-            files: new EnvironmentFiles()
+            files: new EnvironmentFiles(),
         };
 
-        for await(let file of await fsp.readdir(dirPath)) {
+        for await(const file of await fsp.readdir(dirPath)) {
             const absolutePath = path.resolve(dirPath, file);
             const stat = await fsp.stat(absolutePath);
 

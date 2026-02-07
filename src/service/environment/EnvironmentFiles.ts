@@ -4,7 +4,7 @@ export default class EnvironmentFiles extends Array<EnvironmentFile> {
     /**
      * Applies all EnvironmentFiles to process.env
      */
-    apply() {
+    apply(): void {
         for(const envFile of this) {
             envFile.apply();
         }

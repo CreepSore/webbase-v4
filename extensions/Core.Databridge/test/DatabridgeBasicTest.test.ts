@@ -8,7 +8,7 @@ import DatabridgeMultiLayer from "../layers/DatabridgeMultiLayer";
 describe("Databridge Basic Test", () => {
     it("should communicate successfully", async() => {
         const payload = {
-            test: "hello"
+            test: "hello",
         };
 
         const packetCallbackFn = jest.fn(packet => {
@@ -25,7 +25,7 @@ describe("Databridge Basic Test", () => {
             new DatabridgeMultiLayer()
                 .attachOutboundLayer(new DatabridgeJsonLayer("serialize"))
                 .attachOutboundLayer(new DatabridgeBufferLayer())
-                .attachOutboundLayer(new DatabridgeLocalOutboundLayer<Buffer>(packetCallbackFn))
+                .attachOutboundLayer(new DatabridgeLocalOutboundLayer<Buffer>(packetCallbackFn)),
         );
 
         await databridge.start();

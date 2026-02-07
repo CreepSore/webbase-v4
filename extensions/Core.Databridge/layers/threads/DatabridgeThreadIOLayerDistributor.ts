@@ -23,7 +23,7 @@ export default class DatabridgeThreadIOLayerDistributor implements IDatabridgeIn
         type: TType,
         handler: (message: IncomingThreadMessage<TPayload, TType>) =>
             Promise<IncomingThreadMessage<any, any>>
-            | IncomingThreadMessage<TPayload, TType>
+            | IncomingThreadMessage<TPayload, TType>,
     ): this {
         this._handlers.set(type, handler);
         return this;

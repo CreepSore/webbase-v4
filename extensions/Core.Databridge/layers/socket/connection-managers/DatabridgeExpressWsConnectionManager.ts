@@ -1,5 +1,5 @@
 import * as events from "events";
-import * as ws from "ws";
+import * as wslib from "ws";
 import * as crypto from "crypto";
 
 import IDatabridgeConnectionManager from "../IDatabridgeConnectionManager";
@@ -7,13 +7,13 @@ import IDatabridgeSocket from "../IDatabridgeSocket";
 import expressWs from "express-ws";
 import { PermissionEntry } from "../../../../Core.Usermgmt/permissions";
 
-export default class DatabridgeExpressWsConnectionManager implements IDatabridgeConnectionManager<string, IDatabridgeSocket<string, ws.WebSocket>> {
-    private _clients: Array<IDatabridgeSocket<string, ws.WebSocket>> = [];
-    private _clientMap: Map<string, IDatabridgeSocket<string, ws.WebSocket>> = new Map();
-    private _websocketClientIdMap: Map<ws.WebSocket, IDatabridgeSocket<string, ws.WebSocket>["id"]> = new Map();
+export default class DatabridgeExpressWsConnectionManager implements IDatabridgeConnectionManager<string, IDatabridgeSocket<string, wslib.WebSocket>> {
+    private _clients: Array<IDatabridgeSocket<string, wslib.WebSocket>> = [];
+    private _clientMap: Map<string, IDatabridgeSocket<string, wslib.WebSocket>> = new Map();
+    private _websocketClientIdMap: Map<wslib.WebSocket, IDatabridgeSocket<string, wslib.WebSocket>["id"]> = new Map();
     private _emitter: events.EventEmitter = new events.EventEmitter();
 
-    get clients(): IDatabridgeSocket<string, ws.WebSocket>[] {
+    get clients(): IDatabridgeSocket<string, wslib.WebSocket>[] {
         return this._clients;
     }
 
@@ -33,17 +33,17 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
         return Promise.resolve();
     }
 
-    onConnectionEstablished(callback: (socket: IDatabridgeSocket<string, ws.WebSocket>) => any): this {
+    onConnectionEstablished(callback: (socket: IDatabridgeSocket<string, wslib.WebSocket>) => any): this {
         this._emitter.on("connection-established", callback);
         return this;
     }
 
-    onConnectionDisconnected(callback: (socket: IDatabridgeSocket<string, ws.WebSocket>) => any): this {
+    onConnectionDisconnected(callback: (socket: IDatabridgeSocket<string, wslib.WebSocket>) => any): this {
         this._emitter.on("connection-disconnected", callback);
         return this;
     }
 
-    getSocketById(id: string): IDatabridgeSocket<string, ws.WebSocket> {
+    getSocketById(id: string): IDatabridgeSocket<string, wslib.WebSocket> {
         return this._clientMap.get(id);
     }
 
@@ -60,7 +60,7 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
         };
     }
 
-    private _connectionEstablished(websocket: ws.WebSocket): void {
+    private _connectionEstablished(websocket: wslib.WebSocket): void {
         const id = crypto.randomUUID();
         const client = {
             id,
@@ -73,7 +73,7 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
             },
             removeAllListeners: () => {
                 this._emitter.removeAllListeners(`message-received/${id}`);
-            }
+            },
         };
 
         this._websocketClientIdMap.set(websocket, id);
@@ -81,11 +81,11 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
         this._clients.push(client);
     }
 
-    private _connectionDisconnected(websocket: ws.WebSocket): void {
+    private _connectionDisconnected(websocket: wslib.WebSocket): void {
         websocket.removeAllListeners();
     }
 
-    private _onMessage(websocket: ws.WebSocket, data: ws.RawData): void {
+    private _onMessage(websocket: wslib.WebSocket, data: wslib.RawData): void {
         const websocketId = this._websocketClientIdMap.get(websocket);
 
         if(!websocketId) {
@@ -96,7 +96,7 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
         this._emitter.emit(`message-received/${websocketId}`, dataAsString);
     }
 
-    private _websocketToClient(websocket: ws.WebSocket): IDatabridgeSocket<string> {
+    private _websocketToClient(websocket: wslib.WebSocket): IDatabridgeSocket<string> {
         return this._clientMap.get(this._websocketClientIdMap.get(websocket));
     }
 }

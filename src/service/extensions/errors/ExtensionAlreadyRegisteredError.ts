@@ -1,7 +1,7 @@
 export default class ExtensionAlreadyRegisterdError extends Error {
     private _extensionName: string;
 
-    get extensionName() {
+    get extensionName(): typeof this._extensionName {
         return this._extensionName;
     }
 

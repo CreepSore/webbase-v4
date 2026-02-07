@@ -8,9 +8,9 @@ import DatabridgeLambdaLayer from "../layers/misc/DatabridgeLambdaLayer";
 import TestUtils from "../../../test/TestUtils";
 
 describe("DatabridgeWebsocket Test", () => {
-    let eapp = express();
-    let app = expressWs(eapp).app;
-    let server = app.listen(9091, "127.0.0.1");
+    const eapp = express();
+    const {app} = expressWs(eapp);
+    const server = app.listen(9091, "127.0.0.1");
 
     afterAll(() => {
         return new Promise<void>(res => {
@@ -21,7 +21,7 @@ describe("DatabridgeWebsocket Test", () => {
         });
     });
 
-    it("should establish a connection successfully", async () => {
+    it("should establish a connection successfully", async() => {
         const testPacket = { hello: "world" };
         const testPacket2 = { hello: "world2" };
 
@@ -41,7 +41,7 @@ describe("DatabridgeWebsocket Test", () => {
             ws.on("message", messageFn);
         });
 
-        const receiveFn = jest.fn(async (packet: any) => {
+        const receiveFn = jest.fn(async(packet: any) => {
             expect(packet).toStrictEqual(testPacket);
         });
 
@@ -53,12 +53,12 @@ describe("DatabridgeWebsocket Test", () => {
                     .attachInboundLayer(websocketLayer)
                     .attachInboundLayer(new DatabridgeJsonLayer("deserialize"))
                     .attachInboundLayer(new DatabridgeLambdaLayer({
-                        processInbound: receiveFn
-                    }))
+                        processInbound: receiveFn,
+                    })),
             ).setOutboundLayer(
                 new DatabridgeMultiLayer<any>()
                     .attachOutboundLayer(new DatabridgeJsonLayer("serialize"))
-                    .attachOutboundLayer(websocketLayer)
+                    .attachOutboundLayer(websocketLayer),
             ).finish();
 
         await db.start();

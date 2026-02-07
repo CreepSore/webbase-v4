@@ -47,7 +47,7 @@ export default class CoreCache implements IExtension {
     createCacheEntry<T>(config: CacheEntryConfig<T>): ICacheEntry<T> {
         return this.cache.getOrCreateCacheEntry(config.key, () => new CallbackCacheEntry(config.key, config.defaultValue)
             .setLogger(new LogBuilder({
-                infos: ["Core.Cache"]
+                infos: ["Core.Cache"],
             }))
             .setLifetimeMs(config.updateEveryMs)
             .setUpdateCallback(config.updateCallback));
@@ -64,7 +64,7 @@ export default class CoreCache implements IExtension {
     getCachedInstance<T>(key: string, config: Omit<CacheEntryConfig<T>, "key">): ICacheEntry<T> {
         return this.cache.getOrCreateCacheEntry(key, () => new CallbackCacheEntry(key, config.defaultValue)
             .setLogger(new LogBuilder({
-                infos: ["Core.Cache"]
+                infos: ["Core.Cache"],
             }))
             .setLifetimeMs(config.updateEveryMs)
             .setUpdateCallback(config.updateCallback));

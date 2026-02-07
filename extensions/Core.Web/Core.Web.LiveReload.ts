@@ -14,15 +14,15 @@ window.addEventListener("load", async() => {
                     processInbound: () => {
                         location.reload();
                         return Promise.resolve();
-                    }
-                }))
+                    },
+                })),
         )
         .setOutboundLayer(
             new DatabridgeMultiLayer()
                 .attachOutboundLayer(new DatabridgeLambdaLayer({
                     processOutbound: (data) => Promise.resolve(JSON.stringify(data)),
                 }))
-                .attachOutboundLayer(websocketLayer)
+                .attachOutboundLayer(websocketLayer),
         )
         .finish();
 

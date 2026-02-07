@@ -16,7 +16,7 @@ class CoreLokiConfig {
             enabled: false,
             username: "<PLACEHOLDER>",
             password: "<PLACEHOLDER>",
-        }
+        },
     }
 }
 
@@ -91,7 +91,7 @@ export default class CoreLoki implements IExtension {
             return;
         }
 
-        if(this.config.loki.serviceName == "<PLACEHOLDER>") {
+        if(this.config.loki.serviceName === "<PLACEHOLDER>") {
             throw new Error("Please specify a valid loki service name!");
         }
 

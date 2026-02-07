@@ -42,7 +42,7 @@ export default class DatabridgeWebsocketLayer implements IDatabridgeLayer<string
             return null;
         }
 
-        return this._connectPromise = new Promise((res, rej) => {
+        return (this._connectPromise = new Promise((res, rej) => {
             if(!this._started) {
                 res();
                 return;
@@ -80,6 +80,6 @@ export default class DatabridgeWebsocketLayer implements IDatabridgeLayer<string
             this.socket.onmessage = event => {
                 databridge.handleInboundPacket(event.data);
             };
-        });
+        }));
     }
 }

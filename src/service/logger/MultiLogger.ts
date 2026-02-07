@@ -3,7 +3,7 @@ import ILogger from "./ILogger";
 
 export default class MultiLogger implements ILogger {
     private _loggers: Array<ILogger> = [];
-    
+
     addLogger(logger: ILogger): this {
         this._loggers.push(logger);
         return this;

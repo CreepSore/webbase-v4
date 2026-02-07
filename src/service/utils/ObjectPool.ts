@@ -9,13 +9,13 @@ export type ObjectPoolOptions<T> = {
 export default class ObjectPool<T> {
     private _options: ObjectPoolOptions<T>;
 
-    private _isStarted: boolean;
+    private _isStarted: boolean = false;
 
     private _free: Set<T> = new Set();
     private _used: Set<T> = new Set();
     private _waitingGets: Array<(instance: T) => void> = [];
 
-    get total() {
+    get total(): number {
         return this._free.size + this._used.size;
     }
 
@@ -23,7 +23,7 @@ export default class ObjectPool<T> {
         this._options = options;
     }
 
-    async start() {
+    async start(): Promise<void> {
         if(this._isStarted) {
             return;
         }
@@ -33,9 +33,9 @@ export default class ObjectPool<T> {
         await this.ensureMinimum();
     }
 
-    stop() {
+    stop(): Promise<void> {
         if(!this._isStarted) {
-            return;
+            return Promise.resolve();
         }
 
         this._isStarted = false;
@@ -51,7 +51,7 @@ export default class ObjectPool<T> {
                 toAwait.push(this._options.destructor(instance));
             }
 
-            return Promise.all(toAwait);
+            return Promise.all(toAwait).then(() => {});
         }
 
         return Promise.resolve();
@@ -60,13 +60,13 @@ export default class ObjectPool<T> {
     async get(): Promise<T> {
         await this.ensureMinimum();
 
-        let instance: T = this._free.values().next().value;
+        let instance: T | undefined = this._free.values().next().value;
 
         if(!instance) {
             if(this._free.size === 0 && this._used.size >= this._options.max) {
                 return new Promise<T>(res => {
-                    this._waitingGets.push((instance) => {
-                        res(instance);
+                    this._waitingGets.push((i) => {
+                        res(i);
                     });
                 });
             }
@@ -89,7 +89,7 @@ export default class ObjectPool<T> {
             const instanceFreeCallback = this._waitingGets.shift();
             if(instanceFreeCallback !== undefined) {
                 instanceFreeCallback(instance);
-                return;
+                return this;
             }
         }
 
@@ -99,7 +99,7 @@ export default class ObjectPool<T> {
     }
 
     private async ensureMinimum(): Promise<void> {
-        const toCreate = this._options.min - this.total;
+        const toCreate = (this._options.min || 0) - this.total;
         for(let i = 0; i < toCreate; i++) {
             this._free.add(await this._options.builder());
         }

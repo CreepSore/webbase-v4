@@ -18,7 +18,7 @@ describe("ExtensionService Tests", () => {
 
         const context = {
             contextType: "any",
-            extensionService: extensionService,
+            extensionService,
         } as AnyExecutionContext;
         extensionService.initialize(context)
 
@@ -49,7 +49,7 @@ describe("ExtensionService Tests", () => {
         await extensionService.unloadExtension(core);
 
         extensionService.unregisterExtension(core);
-        
+
         expect(extensionService.getExtensionByConstructor(Core)).toBeFalsy();
         expect(extensionService.getExtensionByName(core.metadata.name)).toBeFalsy();
         expect(core.start).toHaveBeenCalledTimes(1);
@@ -64,28 +64,28 @@ describe("ExtensionService Tests", () => {
             new NullExtension({
                 name: "E1.1",
                 dependencies: [],
-                version: "0.0.0"
+                version: "0.0.0",
             }),
             new NullExtension({
                 name: "E1.2",
                 dependencies: [],
-                version: "0.0.0"
+                version: "0.0.0",
             }),
             new NullExtension({
                 name: "E2.1",
                 dependencies: ["E1.1"],
-                version: "0.0.0"
+                version: "0.0.0",
             }),
             new NullExtension({
                 name: "E2.2",
                 dependencies: ["E1.1", "E1.2"],
-                version: "0.0.0"
+                version: "0.0.0",
             }),
             new NullExtension({
                 name: "E3",
                 dependencies: ["E1.1", "E2.2"],
-                version: "0.0.0"
-            })
+                version: "0.0.0",
+            }),
         ] as const;
 
         const reversed = [...extensions].reverse();
@@ -123,13 +123,13 @@ describe("ExtensionService Error Tests", () => {
         const extension1 = new NullExtension({
             name: "E1",
             dependencies: [],
-            version: "0.0.0"
+            version: "0.0.0",
         });
 
         const extension2 = new NullExtension({
             name: "E1",
             dependencies: [],
-            version: "0.0.0"
+            version: "0.0.0",
         });
 
         extensionService.registerExtension(extension1);
@@ -143,7 +143,7 @@ describe("ExtensionService Error Tests", () => {
 
     it("Should throw when trying to do lifecycle-based actions on extensions without a registered loader", async() => {
         const virtualEnvironment = new VirtualExtensionEnvironment([
-            new NullExtension({name: "E1", dependencies: [], version: "0.0.0"}, jest.fn(), jest.fn())
+            new NullExtension({name: "E1", dependencies: [], version: "0.0.0"}, jest.fn(), jest.fn()),
         ]);
         const extensions = [...virtualEnvironment.extensions.values()];
 
@@ -153,7 +153,7 @@ describe("ExtensionService Error Tests", () => {
 
         extensionService.initialize({
             contextType: "any",
-            extensionService: extensionService,
+            extensionService,
         })
 
         await expect(extensionService.loadExtensions()).rejects.toThrow();

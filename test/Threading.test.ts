@@ -1,10 +1,5 @@
-import * as workerThreads from "node:worker_threads";
-import ThreadApplication from "../src/application/ThreadApplication";
 import ThreadMockChannel from "../src/logic/threads/channels/ThreadMockChannel";
-import OutgoingThreadMessage from "../src/logic/threads/messages/OutgoingThreadMessage";
-import ThreadMessageFactory from "../src/logic/threads/messages/ThreadMessageFactory";
 import IncomingThreadMessage from "../src/logic/threads/messages/IncomingThreadMessage";
-import ExtensionControlPayload from "../src/logic/threads/message-payload-types/ExtensionControlPayload";
 import ThreadIO from "../src/logic/threads/io/ThreadIO";
 
 describe("Multithreading Test", () => {
@@ -24,7 +19,7 @@ describe("Multithreading Test", () => {
         const testMessage1 = io1.messageFactory.buildOutgoing("TEST", {});
         io1.sendMessage(testMessage1);
 
-        let receiveResult: IncomingThreadMessage<any> = await Promise.race([receiveMessagePromise, new Promise<any>(res => setTimeout(() => res(null), 100))]);
+        const receiveResult: IncomingThreadMessage<any> = await Promise.race([receiveMessagePromise, new Promise<any>(res => setTimeout(() => res(null), 100))]);
         expect(receiveResult).not.toBeNull();
         expect(receiveResult.type).toBe("TEST");
 

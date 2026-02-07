@@ -15,7 +15,7 @@ export default class DatabridgeChoiceLayer<TInIn, TInOut, TOutIn = TInOut, TOutO
     private _chooseLayerOutbound: (data: TOutIn, metadata: DatabridgeDefaultPipelineMetadata) => string;
 
     constructor(
-        options: DatabridgeChoiceLayerOptions<TInIn, TInOut, TOutIn, TOutOut, TMetadata> = {}
+        options: DatabridgeChoiceLayerOptions<TInIn, TInOut, TOutIn, TOutOut, TMetadata> = {},
     ) {
         this._chooseLayerInbound = options.chooseLayerInbound;
         this._chooseLayerOutbound = options.chooseLayerOutbound;

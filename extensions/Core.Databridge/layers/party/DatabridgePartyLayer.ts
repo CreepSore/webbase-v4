@@ -40,7 +40,7 @@ export default class DatabridgePartyClientLayer<TPayload> implements IDatabridge
             id: crypto.randomUUID(),
             fromParty: this._myParty,
             toParty: this._targetParty,
-            payload: data
+            payload: data,
         });
     }
 }

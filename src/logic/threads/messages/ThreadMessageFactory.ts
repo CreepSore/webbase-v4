@@ -13,20 +13,20 @@ export default class ThreadMessageFactory {
         return this.buildOutgoing("READY", {});
     }
 
-    buildResponseTelegram<TPayload, TType extends string = string>(
+    buildResponseTelegram<TPayload>(
         responseToId: string,
         payload: TPayload,
-        id: string = null
+        id: string | null = null,
     ): OutgoingThreadMessage<{responseToId: string, payload: TPayload}, "RESPONSE"> {
         return this.buildOutgoing("RESPONSE", {responseToId, payload}, id);
     }
 
-    buildOutgoing<TPayload, TType extends string = string>(type: TType, payload: TPayload, id: string = null): OutgoingThreadMessage<TPayload, TType> {
+    buildOutgoing<TPayload, TType extends string = string>(type: TType, payload: TPayload, id: string | null = null): OutgoingThreadMessage<TPayload, TType> {
         return new OutgoingThreadMessage(
             id ?? crypto.randomUUID(),
             type,
             payload,
-            this._io
+            this._io,
         );
     }
 }

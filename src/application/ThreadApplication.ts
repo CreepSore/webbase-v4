@@ -13,7 +13,6 @@ import IThreadChannel from "../logic/threads/channels/IThreadChannel";
 import ThreadMessagePortChannel from "../logic/threads/channels/ThreadMessagePortChannel";
 import LogBuilder from "../service/logger/LogBuilder";
 import LoggerService from "../service/logger/LoggerService";
-import MultiLogger from "../service/logger/MultiLogger";
 import ConsoleLogger from "../service/logger/ConsoleLogger";
 import FileLogger from "../service/logger/FileLogger";
 
@@ -113,7 +112,7 @@ export default class ThreadApplication implements IApplication {
         this._executionContext = {
             contextType: "thread",
             application: this,
-            extensionService: null
+            extensionService: null,
         };
 
         const environments = await ExtensionServiceFactory.createDefaultEnvironments();
@@ -138,7 +137,7 @@ export default class ThreadApplication implements IApplication {
     private setupLogging(): void {
         LoggerService.addLogger(
             new ConsoleLogger(true),
-            "ThreadMultiLogger/Console"
+            "ThreadMultiLogger/Console",
         );
 
         LoggerService.hookConsoleLog();
@@ -163,7 +162,7 @@ export default class ThreadApplication implements IApplication {
 
         LoggerService.addLogger(
             new FileLogger(`logs/out_thread_${this._id}_${new Date().toISOString().replace(/(\d+)-(\d+)-(\d+)T(\d+):(\d+):(\d+).(\d+)Z/, "$1_$2_$3_$4_$5")}.log`),
-            "ThreadMultiLogger/File"
+            "ThreadMultiLogger/File",
         );
 
         await LogBuilder

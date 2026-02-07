@@ -18,14 +18,14 @@ describe("EnvironmentFiles parsing tests", () => {
             BACKTICK_NEWLINES: "HelloNewline\r\n",
         };
 
-        for(let [key, value] of Object.entries(expectedMapping)) {
+        for(const [key, value] of Object.entries(expectedMapping)) {
             expect(parsed.getMapping(key)).toMatch(value);
             expect(process.env[key]).toBeUndefined();
         }
 
         parsed.apply();
 
-        for(let [key, value] of Object.entries(expectedMapping)) {
+        for(const [key, value] of Object.entries(expectedMapping)) {
             expect(process.env[key]).toMatch(value);
         }
     });

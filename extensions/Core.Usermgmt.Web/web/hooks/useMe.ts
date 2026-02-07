@@ -10,7 +10,7 @@ export default function useMe(): {
     hasPermission: (key: string|PermissionEntry) => boolean,
     isAnonymous: () => boolean,
     isLoading: boolean
-} {
+    } {
     const [loading, setLoading] = React.useState(true);
     const [currentMe, setCurrentMe] = React.useState<IUser>(null);
 

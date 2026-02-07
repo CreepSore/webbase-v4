@@ -1,7 +1,7 @@
 import EnvironmentFileParser from "./EnvironmentFileParser";
 
 export default class EnvironmentFile {
-    identifier: string;
+    identifier?: string;
     private environmentVariableMapping: Map<string, string[]> = new Map();
 
     addMapping(name: string, value: string): this {
@@ -17,7 +17,7 @@ export default class EnvironmentFile {
         return this;
     }
 
-    getMapping(name: string): string {
+    getMapping(name: string): string | null {
         const values = this.environmentVariableMapping.get(name);
         if(!values) {
             return null;
@@ -29,8 +29,8 @@ export default class EnvironmentFile {
     /**
      * Applies this environment file to the process.env object
      */
-    apply() {
-        for(let [key, value] of this.environmentVariableMapping.entries()) {
+    apply(): void {
+        for(const [key, value] of this.environmentVariableMapping.entries()) {
             // ! Skip already set environment variables
             if(process.env[key]) {
                 continue;

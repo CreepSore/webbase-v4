@@ -9,9 +9,9 @@ describe("Databridge error test", () => {
                 .attachInboundLayer(new DatabridgeLambdaLayer({
                     processInbound: async() => {
                         await db.handleError(new Error("test"), this);
-                    }
+                    },
                 })),
-                new DatabridgeMultiLayer()
+            new DatabridgeMultiLayer(),
         );
 
         db.handleError = jest.fn();

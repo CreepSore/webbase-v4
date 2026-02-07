@@ -8,21 +8,21 @@ import ConsoleLogger from "./service/logger/ConsoleLogger";
 import Thread from "./logic/threads/Thread";
 import ThreadApplication from "./application/ThreadApplication";
 
-const setupEnvironment = async(log: boolean) => {
+const setupEnvironment = async(log: boolean): Promise<void> => {
     const consoleLogger = new ConsoleLogger();
     const scanDirs = [
         {
             path: ".",
-            recursive: false
+            recursive: false,
         },
         {
             path: "./.env",
-            recursive: true
+            recursive: true,
         },
         {
             path: "./env",
-            recursive: true
-        }
+            recursive: true,
+        },
     ] as const;
 
     for(const dir of scanDirs) {
@@ -35,8 +35,8 @@ const setupEnvironment = async(log: boolean) => {
                     level: "ERROR",
                     date: new Date(),
                     infos: ["AppLoader", "Environment"],
-                    lines: [`Failed loading .env files:`, parsedDir.errors.join("\n\n")],
-                    objects: {}
+                    lines: ["Failed loading .env files:", parsedDir.errors.join("\n\n")],
+                    objects: {},
                 });
             }
 
@@ -47,7 +47,7 @@ const setupEnvironment = async(log: boolean) => {
                         date: new Date(),
                         infos: ["AppLoader", "Environment"],
                         lines: [`Loaded .env file [${file.identifier}]`],
-                        objects: {}
+                        objects: {},
                     });
                 }
                 file.apply();
@@ -89,7 +89,7 @@ const setupEnvironment = async(log: boolean) => {
     try {
         await app.start();
     }
-    catch(err) {
+    catch(err: any) {
         console.log("CRITICAL", "app.ts", `Critical error occured: [${err.message}]\n${err.stack}`);
     }
 })();

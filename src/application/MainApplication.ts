@@ -32,7 +32,7 @@ export default class MainAppliation implements IApplication {
 
         this.extensionService = await ExtensionServiceFactory.fullCreateAndStart(
             this.executionContext,
-            (level, message) => console.log(level, "ExtensionService", message)
+            (level, message) => console.log(level, "ExtensionService", message),
         );
 
         console.log("INFO", "MainApplication.ts", "Main Application Startup successful.");

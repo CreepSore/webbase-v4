@@ -1,4 +1,3 @@
-import Databridge from "../Databridge";
 import DatabridgeBuilder from "../DatabridgeBuilder";
 import DatabridgeMultiLayer from "../layers/DatabridgeMultiLayer";
 import DatabridgeChoiceLayer from "../layers/misc/DatabridgeChoiceLayer";
@@ -10,7 +9,7 @@ describe("DatabridgeParty Test", () => {
     it("should handle parties correctly", async() => {
         const myParty = "party1";
         const targetParty = "party2";
-/*
+        /*
                 .attachInboundLayer(new DatabridgeLambdaLayer({
                     processInbound: (data, metadata) => {
                         if(metadata.partyLayer.fromParty !== targetParty) {
@@ -25,8 +24,8 @@ describe("DatabridgeParty Test", () => {
         const db1 = new DatabridgeBuilder()
             .setInboundLayer(
                 new DatabridgeMultiLayer<DatabridgePartyPacket<{hello: string}>>()
-                .attachInboundLayer(new DatabridgePartyClientLayer(myParty, targetParty))
-                .attachInboundLayer(new DatabridgeChoiceLayer())
+                    .attachInboundLayer(new DatabridgePartyClientLayer(myParty, targetParty))
+                    .attachInboundLayer(new DatabridgeChoiceLayer()),
             ).setOutboundLayer(new DatabridgeLambdaLayer())
             .finish();
 
@@ -38,7 +37,7 @@ describe("DatabridgeParty Test", () => {
             toParty: myParty,
             payload: {
                 hello: "test",
-            }
+            },
         });
     });
 });

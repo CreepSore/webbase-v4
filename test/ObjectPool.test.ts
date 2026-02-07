@@ -6,7 +6,7 @@ describe("ObjectPool tests", () => {
         const objectPool = new ObjectPool<number>({
             builder: () => Promise.resolve(++index),
             min: 50,
-            max: 50
+            max: 50,
         });
 
         await objectPool.start();
@@ -19,14 +19,14 @@ describe("ObjectPool tests", () => {
         const objectPool = new ObjectPool<number>({
             builder: () => Promise.resolve(++index),
             min: 50,
-            max: 51
+            max: 51,
         });
 
         await objectPool.start();
 
         expect(objectPool.total).toBe(50);
 
-        for(let i = 0 ; i < 51; i++) {
+        for(let i = 0; i < 51; i++) {
             await objectPool.get();
         }
 
@@ -38,7 +38,7 @@ describe("ObjectPool tests", () => {
         const objectPool = new ObjectPool<number>({
             builder: () => Promise.resolve(++index),
             min: 50,
-            max: 50
+            max: 50,
         });
 
         await objectPool.start();
@@ -46,7 +46,7 @@ describe("ObjectPool tests", () => {
         expect(objectPool.total).toBe(50);
 
         const rented = [];
-        for(let i = 0 ; i < 50; i++) {
+        for(let i = 0; i < 50; i++) {
             rented.push(await objectPool.get());
         }
 

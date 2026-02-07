@@ -2,9 +2,9 @@ import IExtensionService from "../IExtensionService";
 import IExtensionEnvironment from "./IExtensionEnvironment";
 
 export default class ExtensionEnvironmentCollection extends Array<IExtensionEnvironment> {
-    applyTo(extensionService: IExtensionService) {
+    async applyTo(extensionService: IExtensionService): Promise<void> {
         for(const environment of this) {
-            environment.applyTo(extensionService);
+            await environment.applyTo(extensionService);
         }
     }
 }

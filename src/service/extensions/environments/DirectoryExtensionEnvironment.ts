@@ -1,4 +1,3 @@
-import * as fs from "fs";
 import * as fsp from "fs/promises";
 import * as path from "path";
 
@@ -9,7 +8,7 @@ import IExtension, { IExtensionConstructor } from "../IExtension";
 export default class DirectoryExtensionEnvironment implements IExtensionEnvironment {
     private _path: string;
     private _extensions: Set<IExtension> = new Set();
-    onLoadError: (name: string, error: Error) => void;
+    onLoadError?: (name: string, error: Error) => void;
 
     constructor(dirPath: string) {
         this._path = path.resolve(dirPath);
@@ -33,7 +32,7 @@ export default class DirectoryExtensionEnvironment implements IExtensionEnvironm
                     instance.metadata.extensionPath = path.resolve(this._path, subDir);
                     res(instance);
                 }
-                catch(err) {
+                catch(err: any) {
                     if(this.onLoadError && err.code !== "MODULE_NOT_FOUND") {
                         this.onLoadError(subDir, err as Error);
                     }
@@ -49,15 +48,16 @@ export default class DirectoryExtensionEnvironment implements IExtensionEnvironm
 
     applyTo(extensionService: IExtensionService): Promise<void> {
         const iterator = this._extensions.values();
-        let currentEntry: IteratorResult<IExtension, IExtension>;
+        let currentEntry: IteratorResult<IExtension, any>;
 
         do {
             currentEntry = iterator.next();
             if(currentEntry.done) {
-                return null;
+                return Promise.resolve();
             }
 
             extensionService.registerExtension(currentEntry.value);
+            /* eslint-disable no-constant-condition */
         } while(true);
     }
 

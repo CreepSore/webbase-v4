@@ -1,3 +1,4 @@
+/* eslint-disable no-loop-func */
 import EnvironmentFile from "./EnvironmentFile";
 
 enum Tokens {
@@ -20,7 +21,7 @@ const tokenParsers = {
     [Tokens.SINGLE_QUOTE]: /^\'/,
     [Tokens.BACKTICK]: /^\`/,
     [Tokens.EQUALS]: /^=/,
-    [Tokens.COMMENT_START]: /^#/
+    [Tokens.COMMENT_START]: /^#/,
 } as const;
 
 type Expectation = {
@@ -45,9 +46,9 @@ type ParsedEnvironmentLine = {
 
 export default class EnvironmentFileParser {
     private data: string[];
-    private currentLine: string;
-    private currentLineOffset: number;
-    private currentLineIndex: number;
+    private currentLine?: string;
+    private currentLineOffset?: number;
+    private currentLineIndex?: number;
 
     constructor(buffer: Buffer) {
         this.data = buffer.toString().replace(/\r/g, "").split("\n").map(l => l.trim());
@@ -89,75 +90,75 @@ export default class EnvironmentFileParser {
                 onMatch: (value) => {
                     result.name = value;
                     return true;
-                }
-            }
+                },
+            },
         ]).expect([
             {
                 token: Tokens.WHITESPACE,
                 onMatch: () => true,
-                continue: true
+                "continue": true,
             },
             {
                 token: Tokens.EQUALS,
                 onMatch: () => true,
-            }
+            },
         ]).expect([
             {
                 token: Tokens.WHITESPACE,
                 onMatch: () => true,
-                continue: true,
-                lineFinished: () => lineFinished = true
+                "continue": true,
+                lineFinished: () => (lineFinished = true),
             },
             {
                 token: Tokens.QUOTE,
                 onMatch: () => {
                     expectEndQuoteToken = {
                         token: Tokens.QUOTE,
-                        onMatch: () => true
+                        onMatch: () => true,
                     };
                     return true;
-                }
+                },
             },
             {
                 token: Tokens.SINGLE_QUOTE,
                 onMatch: () => {
                     expectEndQuoteToken = {
                         token: Tokens.SINGLE_QUOTE,
-                        onMatch: () => true
+                        onMatch: () => true,
                     };
                     return true;
-                }
+                },
             },
             {
                 token: Tokens.BACKTICK,
                 onMatch: () => {
                     expectEndQuoteToken = {
                         token: Tokens.BACKTICK,
-                        onMatch: () => true
+                        onMatch: () => true,
                     };
                     return true;
-                }
+                },
             },
             {
                 token: Tokens.NULL,
                 onMatch: () => false,
-                onNullMatch: () => {}
-            }
+                onNullMatch: () => {},
+            },
         ]);
 
-        if(expectEndQuoteToken) {
+        if(expectEndQuoteToken!) {
             expectEndQuoteToken.onMatch = () => {
                 lineFinished = true;
                 return true;
             };
 
-            expectEndQuoteToken.lineFinished = () => lineFinished = true;
+            expectEndQuoteToken.lineFinished = () => (lineFinished = true);
             expectEndQuoteToken.continue = true;
         }
 
         while(!lineFinished) {
             this.expect([
-                expectEndQuoteToken,
+                expectEndQuoteToken!,
                 {
                     token: Tokens.COMMENT_START,
                     onMatch: (value) => {
@@ -169,7 +170,7 @@ export default class EnvironmentFileParser {
                     },
                     lineFinished: () => {
                         lineFinished = true;
-                    }
+                    },
                 },
                 {
                     token: Tokens.ANY,
@@ -179,19 +180,19 @@ export default class EnvironmentFileParser {
                             : value;
 
                         return true;
-                    }
-                }
+                    },
+                },
             ]);
         }
 
         if(!result.value) {
             result.value = "";
         }
-        else if(!expectEndQuoteToken) {
+        else if(!expectEndQuoteToken!) {
             result.value = result.value.trim();
         }
 
-        if(expectEndQuoteToken?.token === Tokens.BACKTICK) {
+        if(expectEndQuoteToken!?.token === Tokens.BACKTICK) {
             result.value = result.value
                 .replace(/\\n/g, "\n")
                 .replace(/\\r/g, "\r");
@@ -200,8 +201,12 @@ export default class EnvironmentFileParser {
         return result as ParsedEnvironmentLine;
     }
 
-    private expect(expectations: Expectation[]): this {
-        let nullExpectation: Expectation;
+    private expect(expectations: Array<Expectation | null>): this {
+        let nullExpectation: Expectation | null = null;
+
+        if(!this.currentLine || this.currentLineOffset === undefined || this.currentLineIndex === undefined) {
+            return this;
+        }
 
         for(const expectation of expectations) {
             if(!expectation) {
@@ -242,14 +247,14 @@ export default class EnvironmentFileParser {
             return this;
         }
 
-        throw this._error(`Expected one of: [${expectations.map(e => e.token).join(", ")}]`);
+        throw this._error(`Expected one of: [${expectations.map(e => e?.token).join(", ")}]`);
     }
 
     private _error(message: string): Error {
         return new Error(`Failed to parse line - ${message}:
     LineNr = [${this.currentLineIndex}]
-    RemainingLine = [${this.currentLine.substring(this.currentLineOffset)}]
+    RemainingLine = [${(this.currentLine || "").substring(this.currentLineOffset || 0)}]
     Offset = [${this.currentLineOffset}]
     Line = [${this.currentLine}]`)
     }
-};
+}

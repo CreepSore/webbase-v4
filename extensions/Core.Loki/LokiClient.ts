@@ -20,7 +20,7 @@ type LokiLog = {
 export type {
     LokiAuthentication,
     LokiConfig,
-    LokiLog
+    LokiLog,
 };
 
 export default class LokiClient {
@@ -32,7 +32,7 @@ export default class LokiClient {
         this.config = config;
 
         this.headers = {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         };
 
         if(config.authentication.enabled) {
@@ -51,18 +51,18 @@ export default class LokiClient {
                                 level: log.level,
                                 service_name: this.config.serviceName,
                             },
-                            values: logs.map(l => ([String(l.date.valueOf() * 1000 * 1000), log.message, log.appendedJson].filter(Boolean)))
-                        }
-                    ]
+                            values: logs.map(l => ([String(l.date.valueOf() * 1000 * 1000), log.message, log.appendedJson].filter(Boolean))),
+                        },
+                    ],
                 }),
                 method: "POST",
-                headers: this.headers
+                headers: this.headers,
             }).then((e) => {
                 if(e.status === 204) {
                     this.toPush.delete(level);
                 }
             }).catch((e) => {
-                let existing = this.toPush.get(log.level);
+                const existing = this.toPush.get(log.level);
                 if(!Array.isArray(existing)) {
                     this.toPush.set(log.level, [log]);
                 }

@@ -46,6 +46,7 @@ export default class DatabridgeTcpServerLayer implements IDatabridgeLayer<Buffer
         const iterator = this._clients.values();
         let current: IteratorResult<net.Socket>;
 
+        /* eslint-disable no-cond-assign */
         while(!(current = iterator.next()).done) {
             toAwait.push(this.sendToSocket(current.value, data));
         }

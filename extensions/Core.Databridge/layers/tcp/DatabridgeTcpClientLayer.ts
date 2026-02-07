@@ -16,7 +16,7 @@ export default class DatabridgeTcpClientLayer implements IDatabridgeLayer<Buffer
     private _isConnected: boolean;
     private _emitter: events.EventEmitter = new events.EventEmitter();
 
-    get isConnected() {
+    get isConnected(): typeof this._isConnected {
         return this._isConnected;
     }
 
@@ -53,7 +53,7 @@ export default class DatabridgeTcpClientLayer implements IDatabridgeLayer<Buffer
             return this._connectingPromise;
         }
 
-        return this._connectingPromise = new Promise(res => {
+        return (this._connectingPromise = new Promise(res => {
             if(this._socket) {
                 this._socket.removeAllListeners();
             }
@@ -82,7 +82,7 @@ export default class DatabridgeTcpClientLayer implements IDatabridgeLayer<Buffer
             this._socket.on("data", data => {
                 databridge.handleInboundPacket(data);
             });
-        });
+        }));
     }
 
     on(eventName: "connected", listener: (args: {socket: net.Socket}) => void | Promise<void>): this;

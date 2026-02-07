@@ -5,13 +5,13 @@ export default class IncomingThreadMessage<TPayload, TType extends string = stri
     id: string;
     type: TType;
     payload: TPayload;
-    private _io: IThreadIO;
+    private _io: IThreadIO | null;
 
     constructor(
         id: string,
         type: TType,
         payload: TPayload,
-        io: IThreadIO = null
+        io: IThreadIO | null = null,
     ) {
         this.id = id;
         this.type = type;
@@ -19,8 +19,8 @@ export default class IncomingThreadMessage<TPayload, TType extends string = stri
         this._io = io;
     }
 
-    respond<T>(payload: T, id: string = null) {
-        this._io.messageFactory.buildResponseTelegram(this.id, payload, id).send();
+    respond<T>(payload: T, id: string | null = null): void {
+        this._io?.messageFactory.buildResponseTelegram(this.id, payload, id).send();
     }
 
     toPayload(): IThreadMessage<TPayload, TType> {

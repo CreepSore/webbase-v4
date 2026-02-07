@@ -1,5 +1,3 @@
-import LogBuilder from "../../src/service/logger/LogBuilder";
-
 export default interface ICacheEntry<T> {
     get key(): string;
     get lifetime(): number;

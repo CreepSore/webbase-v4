@@ -21,7 +21,7 @@ describe("Databridge TCP Tests", () => {
     it("should establish a communication between two databridges correctly", async() => {
         const clientLayer = new DatabridgeTcpClientLayer({port: 9090, hostname: "127.0.0.1"});
         const payload = {
-            hello: "oworld"
+            hello: "oworld",
         };
 
         const clientOutbound = new DatabridgeLocalOutboundLayer();
@@ -41,13 +41,13 @@ describe("Databridge TCP Tests", () => {
                 .attachInboundLayer(new DatabridgeBufferLayer())
                 .attachInboundLayer(new DatabridgeJsonLayer<string, {hello: string}>("deserialize"))
                 .attachInboundLayer(new DatabridgeLambdaLayer({
-                    processInbound: clientReceivedCallback
+                    processInbound: clientReceivedCallback,
                 })),
             new DatabridgeMultiLayer()
                 .attachOutboundLayer(clientOutbound)
                 .attachOutboundLayer(new DatabridgeJsonLayer<any, string>("serialize"))
                 .attachOutboundLayer(new DatabridgeBufferLayer())
-                .attachOutboundLayer(clientLayer)
+                .attachOutboundLayer(clientLayer),
         );
 
         const serverLayer = new DatabridgeTcpServerLayer({port: 9090, bindAddress: "127.0.0.1"});
@@ -57,13 +57,13 @@ describe("Databridge TCP Tests", () => {
                 .attachInboundLayer(new DatabridgeBufferLayer())
                 .attachInboundLayer(new DatabridgeJsonLayer("deserialize"))
                 .attachInboundLayer(new DatabridgeLambdaLayer({
-                    processInbound: serverReceivedCallback
+                    processInbound: serverReceivedCallback,
                 })),
             new DatabridgeMultiLayer()
                 .attachOutboundLayer(serverOutbound)
                 .attachOutboundLayer(new DatabridgeJsonLayer("serialize"))
                 .attachOutboundLayer(new DatabridgeBufferLayer())
-                .attachOutboundLayer(serverLayer)
+                .attachOutboundLayer(serverLayer),
         );
 
         await db2.start();
