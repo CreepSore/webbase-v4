@@ -19,7 +19,7 @@ export default class CustomTemplate implements IExtension {
     metadata: ExtensionMetadata = CustomTemplate.metadata;
 
     config: CustomTemplateConfig = new CustomTemplateConfig();
-    $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
+    $!: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     constructor() {
         this.config = this.loadConfig();

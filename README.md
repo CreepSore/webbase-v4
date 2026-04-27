@@ -17,6 +17,9 @@
     - [Configuration](#configuration)
   - [📜 Logs](#-logs)
   - [⚙ Environment](#-environment)
+    - [Overriding configuration using env-vars](#overriding-configuration-using-env-vars)
+      - [More abstract example](#more-abstract-example)
+    - [.env-Files](#env-files)
 
 
 ## 🌐 Introduction
@@ -64,18 +67,20 @@ Custom-Extensions add functionalities to the web-app that are not covered by any
 ### 🧩 Core-Modules Introduction
 The core modules form the foundation of the webbase-v4 framework, offering essential functionalities required for web application development. By default, all core modules are activated, providing a comprehensive suite of tools right from the start. These modules can be individually disabled to streamline the application, according to specific needs (for guidance, refer to [ExtensionService](https://github.com/CreepSore/webbase-v4/blob/main/#extensionservice)).
 
-| Module               | Description                                                                                      |
-|----------------------|--------------------------------------------------------------------------------------------------|
-| Core                 | The primary module, encompassing basic framework utilities and configurations.                   |
-| Core.Web             | Facilitates the creation and management of web services, including HTTP server configurations.   |
-| Core.Db              | Provides database integration and management functionalities, supporting various DBMS.           |
-| Core.Usermgmt        | Manages user accounts, authentication, and authorization processes.                              |
-| Core.Usermgmt.Web    | Extends Core.Usermgmt with web interfaces for user management.                                   |
-| Core.Mail            | Enables email sending capabilities, supporting template-based email generation.                  |
-| Core.Cache           | Implements caching mechanisms to enhance application performance and reduce load times.          |
-| Core.Databridge      | Facilitates data exchange between different parts of the application or with external services.  |
-| Core.Dashboard       | Offers a dashboard module for monitoring and managing application states.                        |
-| Core.ReactComponents | Provides a set of React components for building user interfaces.                                 |
+| Module               | Description                                                                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Core                 | The primary module, encompassing basic framework utilities and configurations.                                                      |
+| Core.Web             | Facilitates the creation and management of web services, including HTTP server configurations.                                      |
+| Core.Db              | Provides database integration and management functionalities, supporting various DBMS.                                              |
+| Core.Usermgmt        | Manages user accounts, authentication, and authorization processes.                                                                 |
+| Core.Usermgmt.Web    | Extends Core.Usermgmt with web interfaces for user management.                                                                      |
+| Core.Mail            | Enables email sending capabilities, supporting template-based email generation.                                                     |
+| Core.Cache           | Implements caching mechanisms to enhance application performance and reduce load times.                                             |
+| Core.Databridge      | Facilitates data exchange between different parts of the application or with external services.                                     |
+| Core.Loki            | Provides the capability to exchange logs with a Grafana Loki-Server                                                                 |
+| Core.Interfaces      | Defines commonly used interfaces (and basic implementations) at a single point to prevent duplicate code across multiple extensions |
+| Core.Dashboard       | Offers a dashboard module for monitoring and managing application states.                                                           |
+| Core.ReactComponents | Provides a set of React components for building user interfaces.                                                                    |
 
 
 ## 🔌 Developing Extensions
