@@ -5,10 +5,10 @@ import IncomingMessage from "./IncomingMessage";
 import IOutgoingMessage from "./IOutgoingMessage";
 import OutgoingMessage from "./OutgoingMessage";
 
-export default class BasicMessageFactory implements IMessageFactory {
-    private _io: IIO;
+export default class BasicMessageFactory implements IMessageFactory<Buffer, Buffer> {
+    private _io!: IIO<any>;
 
-    setIo(io: IIO): void {
+    setIo(io: IIO<any>): void {
         this._io = io;
     }
 
@@ -41,5 +41,17 @@ export default class BasicMessageFactory implements IMessageFactory {
         }
 
         return Buffer.from(result);
+    }
+
+    prepareOutgoingMessage<T>(message: IOutgoingMessage<T>): IOutgoingMessage<Buffer> {
+        return message.transformPayload(p => this.prepareOutgoingPayload(p));
+    }
+
+    prepareIncomingPayload<T>(payload: Buffer): IIncomingMessage<T> {
+        throw new Error("Method not implemented.");
+    }
+
+    prepareIncomingMessage<T>(message: IIncomingMessage<Buffer>): IIncomingMessage<T> {
+        throw new Error("Method not implemented.");
     }
 }

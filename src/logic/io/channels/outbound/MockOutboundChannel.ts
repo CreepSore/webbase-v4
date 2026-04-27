@@ -1,9 +1,13 @@
 import IOutboundChannel from "./IOutboundChannel";
 
 export default class MockOutboundChannel implements IOutboundChannel {
-    private _sentCallback: (payload: Buffer) => any;
+    private _sentCallback?: (payload: Buffer) => any;
 
-    constructor(sentCallback: typeof this._sentCallback) {
+    constructor(sentCallback: typeof this._sentCallback = undefined) {
+        this._sentCallback = sentCallback;
+    }
+
+    setCallback(sentCallback: typeof this._sentCallback): void {
         this._sentCallback = sentCallback;
     }
 
@@ -16,6 +20,6 @@ export default class MockOutboundChannel implements IOutboundChannel {
     }
 
     send(payload: Buffer): Promise<void> {
-        return this._sentCallback(payload);
+        return this._sentCallback?.(payload);
     }
 }

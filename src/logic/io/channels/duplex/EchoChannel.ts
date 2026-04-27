@@ -1,7 +1,15 @@
+import IIncomingMessage from "../../messages/IIncomingMessage";
+import IMessageFactory from "../../messages/IMessageFactory";
+import IOutgoingMessage from "../../messages/IOutgoingMessage";
 import IDuplexChannel from "./IDuplexChannel";
 
-export default class EchoChannel implements IDuplexChannel {
-    private _onMessageReceivedCallbacks: Set<(message: Buffer) => any> = new Set();
+export default class EchoChannel implements IDuplexChannel<any> {
+    private _messageFactory: IMessageFactory | null = null;
+    private _onMessageReceivedCallbacks: Set<(message: IIncomingMessage<any>) => any> = new Set();
+
+    setMessageFactory(messageFactory: IMessageFactory): void {
+        this._messageFactory = messageFactory;
+    }
 
     start(): Promise<void> {
         return Promise.resolve();
@@ -11,17 +19,22 @@ export default class EchoChannel implements IDuplexChannel {
         return Promise.resolve();
     }
 
-    onMessageReceived(callback: (message: Buffer) => any): void {
+    onMessageReceived(callback: (message: IIncomingMessage<any>) => any): void {
         this._onMessageReceivedCallbacks.add(callback);
     }
 
-    removeOnMessageReceived(callback: (message: Buffer) => any): void {
+    removeOnMessageReceived(callback: (message: IIncomingMessage<any>) => any): void {
         this._onMessageReceivedCallbacks.delete(callback);
     }
 
-    send(payload: Buffer): Promise<void> {
+    async send(message: IOutgoingMessage<any>): Promise<void> {
+        if(!this._messageFactory) {
+            return;
+        }
+
         for(const callback of this._onMessageReceivedCallbacks) {
-            return callback(payload);
+            const outgoingMessage = this._messageFactory.buildIncomingMessage(structuredClone(message.payload));
+            callback(outgoingMessage);
         }
     }
 }

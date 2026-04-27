@@ -12,7 +12,7 @@ describe("BasicIO Tests", () => {
         });
 
         const io1 = new BasicIo(new BasicMessageFactory());
-        io1.registerDuplexChannel(new EchoChannel());
+        io1.channelRegistrate.registerDuplexChannel(new EchoChannel());
 
         io1.onMessageReceived(message => receiveFn(message));
 
@@ -28,7 +28,7 @@ describe("BasicIO Tests", () => {
         const testString = "Hello World!!";
 
         const io1 = new BasicIo(new BasicMessageFactory());
-        io1.registerDuplexChannel(new EchoChannel());
+        io1.channelRegistrate.registerDuplexChannel(new EchoChannel());
 
         await io1.start();
         const receivePromise = io1.receiveMessage();
@@ -55,7 +55,7 @@ describe("BasicIO Tests", () => {
         });
 
         const io1 = new BasicIo(new BasicMessageFactory());
-        io1.registerDuplexChannel(new EchoChannel());
+        io1.channelRegistrate.registerDuplexChannel(new EchoChannel());
 
         io1.onMessageReceived(message => receiveFn(message));
 

@@ -1,19 +1,34 @@
 import * as net from "node:net";
 import IDuplexChannel from "./IDuplexChannel";
+import IOutgoingMessage from "../../messages/IOutgoingMessage";
+import IIncomingMessage from "../../messages/IIncomingMessage";
+import IMessageFactory from "../../messages/IMessageFactory";
 
-export default class TcpSocketChannel implements IDuplexChannel {
-    private _started: boolean;
+type TIn = Buffer;
+type TOut = any;
+
+export default class TcpSocketChannel implements IDuplexChannel<TIn, TOut> {
+    private _started: boolean = false;
     private _socket: net.Socket;
-    private _onMessageReceivedCallbacks: Set<(message: Buffer) => any> = new Set();
+    private _onMessageReceivedCallbacks: Set<(message: IIncomingMessage<TIn>) => any> = new Set();
     private _handleMessageReceivedCallback: typeof this._handleMessageReceived = this._handleMessageReceived.bind(this);
+    private _messageFactory: IMessageFactory | null = null;
 
     constructor(socket: net.Socket) {
         this._socket = socket;
     }
 
+    setMessageFactory(messageFactory: IMessageFactory): void {
+        this._messageFactory = messageFactory;
+    }
+
     start(): Promise<void> {
         if(this._started) {
-            return;
+            return Promise.resolve();
+        }
+
+        if(!this._messageFactory) {
+            throw new Error("No MessageFactory defined!");
         }
 
         this._socket.on("data", this._handleMessageReceivedCallback);
@@ -25,7 +40,7 @@ export default class TcpSocketChannel implements IDuplexChannel {
 
     stop(): Promise<void> {
         if(!this._started) {
-            return;
+            return Promise.resolve();
         }
 
         this._socket.removeListener("data", this._handleMessageReceivedCallback);
@@ -35,22 +50,22 @@ export default class TcpSocketChannel implements IDuplexChannel {
         return Promise.resolve();
     }
 
-    send(payload: Buffer): Promise<void> {
-        this._socket.write(payload);
+    send(message: IOutgoingMessage<TOut>): Promise<void> {
+        this._socket.write(message.payload);
         return Promise.resolve();
     }
 
-    onMessageReceived(callback: (message: Buffer) => any): void {
+    onMessageReceived(callback: (message: IIncomingMessage<TIn>) => any): void {
         this._onMessageReceivedCallbacks.add(callback);
     }
 
-    removeOnMessageReceived(callback: (message: Buffer) => any): void {
+    removeOnMessageReceived(callback: (message: IIncomingMessage<TIn>) => any): void {
         this._onMessageReceivedCallbacks.delete(callback);
     }
 
-    private _handleMessageReceived(buffer: Buffer): void {
+    private _handleMessageReceived(buffer: TIn): void {
         for(const callback of this._onMessageReceivedCallbacks) {
-            callback(buffer);
+            callback(this._messageFactory!.prepareIncomingMessage(this._messageFactory!.buildIncomingMessage(buffer)));
         }
     }
 }
