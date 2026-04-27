@@ -12,6 +12,7 @@ export default class CodecError extends Error {
 
     constructor(message: string, cause?: Error, isDeserializing: boolean = false) {
         super(message);
+        this.name = "CodecError";
         this._cause = cause;
         this._isDeserializing = isDeserializing;
     }
