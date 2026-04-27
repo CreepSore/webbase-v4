@@ -6,6 +6,10 @@
   - [🌐 Introduction](#-introduction)
   - [🎨 Design Choices](#-design-choices)
     - [Main Principle](#main-principle)
+    - [Feature-Categories](#feature-categories)
+      - [Runtime](#runtime)
+      - [Core-Extensions](#core-extensions)
+      - [Custom-Extensions](#custom-extensions)
     - [🧩 Core-Modules Introduction](#-core-modules-introduction)
   - [🔌 Developing Extensions](#-developing-extensions)
   - [🏗️ Building and starting the Application](#️-building-and-starting-the-application)
@@ -13,6 +17,7 @@
     - [Configuration](#configuration)
   - [📜 Logs](#-logs)
   - [⚙ Environment](#-environment)
+
 
 ## 🌐 Introduction
 
@@ -28,6 +33,30 @@ The webbase-v4 framework is designed for developing web applications using expre
   - Example: If you don't require [Core_Db](https://github.com/CreepSore/webbase-v4/blob/main/#coredb), disable it to avoid module-resolving-errors. Remember, disabling Core.Db necessitates disabling Core.Usermgmt as well.
 - Efficiency: Thanks to webpack configuration, the application minimizes filesize by excluding unnecessary components.
 
+### Feature-Categories
+As this application is ever-growing, it's probably time to start categorizing certain functionality by stricter rules.
+Currently, the code is split up into three (keep in mind that no custom extensions are shipped!) distinct categories:
+  1. Runtime
+  1. Core-Extension
+  1. Custom-Extension
+
+#### Runtime
+The runtime covers all functionality needed to build up and execute the several application types.
+To be exact, there are four categories that are to be included here:
+  1. Extensions
+  1. Configurations
+  1. Threading
+  1. other startup related systems
+
+Code inside of this category must not be directly dependent on any Core-/ or Custom-Extensions **at all**.
+The strict main goal is always to be able to rip the whole extensions folder out, and the application should still be able to run, to the end, since no code is run after startup by default, without problems!
+
+#### Core-Extensions
+Everything that does not cover those three logical categories above but are still maintained and shipped on the main repository does count as a Core-Extension.
+Core-Extensions are allowed to be dependent on oneanother, but must never be dependent on any Custom-Extensions.
+
+#### Custom-Extensions
+Custom-Extensions add functionalities to the web-app that are not covered by any of the other two categories. They only exist outside of the main repository.
 
 ---
 
