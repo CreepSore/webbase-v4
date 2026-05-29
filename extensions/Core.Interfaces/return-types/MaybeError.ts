@@ -4,6 +4,7 @@ import IMaybeError from "./IMaybeError";
 import { MaybeSerializable } from "./Maybe";
 
 export type MaybeErrorSerializable<TValue> = MaybeSerializable<TValue> & {
+    error: string | null;
     hasError: boolean;
 }
 
@@ -59,6 +60,9 @@ ICanApplySerializable<MaybeErrorSerializable<TValue>> {
         this._value = serialized.value as TValue;
         this._hasValue= serialized.hasValue;
         this._hasError = serialized.hasError;
+        if(serialized.error) {
+            this._error = new Error(serialized.error || undefined) as TError;
+        }
         return MaybeError.void();
     }
 
@@ -66,6 +70,7 @@ ICanApplySerializable<MaybeErrorSerializable<TValue>> {
         return {
             value: this._value,
             hasValue: this._hasValue,
+            error: String(this._error) || null,
             hasError: this._hasError,
         };
     }
@@ -92,6 +97,16 @@ ICanApplySerializable<MaybeErrorSerializable<TValue>> {
         return promise
             .then(value => MaybeError.fromValue(value))
             .catch(error => MaybeError.fromError(error));
+    }
+
+    static wrap<TValue, TError>(fn: () => any): MaybeError<TValue, TError> {
+        try {
+            const result = fn();
+            return MaybeError.fromValue(result);
+        }
+        catch(error) {
+            return MaybeError.fromError(error as TError);
+        }
     }
 
     static void(): MaybeError<void, any> {
