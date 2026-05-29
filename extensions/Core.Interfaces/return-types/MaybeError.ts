@@ -99,6 +99,12 @@ ICanApplySerializable<MaybeErrorSerializable<TValue>> {
             .catch(error => MaybeError.fromError(error));
     }
 
+    static fromSerializable<TValue, TError = any>(serialized: MaybeErrorSerializable<TValue>): MaybeError<TValue, TError> {
+        const maybeError = new MaybeError<TValue, TError>();
+        maybeError.applySerializable(serialized);
+        return maybeError;
+    }
+
     static wrap<TValue, TError>(fn: () => any): MaybeError<TValue, TError> {
         try {
             const result = fn();

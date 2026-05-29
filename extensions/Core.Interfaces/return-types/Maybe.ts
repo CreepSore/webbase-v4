@@ -64,6 +64,12 @@ export default class Maybe<T> implements IMaybe<T>, IProducesSerializable<MaybeS
             .catch(() => Maybe.never());
     }
 
+    static fromSerializable<T>(serialized: MaybeSerializable<T>): Maybe<T> {
+        const maybe = new Maybe<T>();
+        maybe.applySerializable(serialized);
+        return maybe;
+    }
+
     static wrap<TValue, TError>(fn: () => any): Maybe<TValue> {
         try {
             const result = fn();
