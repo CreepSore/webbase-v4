@@ -34,4 +34,8 @@ export default class Maybe<T> implements IMaybe<T> {
     static fromValue<T>(value: T): Maybe<T> {
         return new Maybe(value, true);
     }
+
+    static void(): Maybe<void> {
+        return Maybe.fromValue(undefined);
+    }
 }

@@ -44,15 +44,19 @@ export default class MaybeError<TValue, TError = Error> implements IMaybeError<T
         }
     }
 
-    static fromError<TError>(error: TError): MaybeError<never, TError> {
-        return new MaybeError<never, TError>(undefined, error, false, true);
+    static fromError<TError>(error: TError): MaybeError<any, TError> {
+        return new MaybeError<any, TError>(undefined, error, false, true);
     }
 
-    static fromNullable<TValue>(value: TValue | null | undefined): MaybeError<TValue, never> {
-        return new MaybeError<TValue, never>(value);
+    static fromNullable<TValue>(value: TValue | null | undefined): MaybeError<TValue, any> {
+        return new MaybeError<TValue, any>(value);
     }
 
-    static fromValue<TValue>(value: TValue): MaybeError<TValue, never> {
-        return new MaybeError<TValue, never>(value, undefined, true, false);
+    static fromValue<TValue>(value: TValue): MaybeError<TValue, any> {
+        return new MaybeError<TValue, any>(value, undefined, true, false);
+    }
+
+    static void(): MaybeError<void, any> {
+        return MaybeError.fromValue(undefined);
     }
 }
