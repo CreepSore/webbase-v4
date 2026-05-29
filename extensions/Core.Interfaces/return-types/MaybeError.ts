@@ -1,6 +1,17 @@
+import ICanApplySerializable from "../seralization/ICanApplySerializable";
+import IProducesSerializable from "../seralization/IProducesSerializable";
 import IMaybeError from "./IMaybeError";
+import { MaybeSerializable } from "./Maybe";
 
-export default class MaybeError<TValue, TError = Error> implements IMaybeError<TValue, TError> {
+export type MaybeErrorSerializable<TValue> = MaybeSerializable<TValue> & {
+    hasError: boolean;
+}
+
+export default class MaybeError<TValue, TError = Error>
+implements
+IMaybeError<TValue, TError>,
+IProducesSerializable<MaybeErrorSerializable<TValue>>,
+ICanApplySerializable<MaybeErrorSerializable<TValue>> {
     private _value: TValue;
     private _error: TError;
     private _hasValue: boolean;
@@ -44,6 +55,27 @@ export default class MaybeError<TValue, TError = Error> implements IMaybeError<T
         }
     }
 
+    applySerializable(serialized: MaybeErrorSerializable<TValue>): IMaybeError<void> {
+        this._value = serialized.value as TValue;
+        this._hasValue= serialized.hasValue;
+        this._hasError = serialized.hasError;
+        return MaybeError.void();
+    }
+
+    produceSerializable(): MaybeErrorSerializable<TValue> {
+        return {
+            value: this._value,
+            hasValue: this._hasValue,
+            hasError: this._hasError,
+        };
+    }
+
+    throwOnError(): asserts this is this & { hasError: false } {
+        if(this._hasError) {
+            throw this._error || new Error("hasError is set but no error set!");
+        }
+    }
+
     static fromError<TError>(error: TError): MaybeError<any, TError> {
         return new MaybeError<any, TError>(undefined, error, false, true);
     }
@@ -54,6 +86,12 @@ export default class MaybeError<TValue, TError = Error> implements IMaybeError<T
 
     static fromValue<TValue>(value: TValue): MaybeError<TValue, any> {
         return new MaybeError<TValue, any>(value, undefined, true, false);
+    }
+
+    static fromPromise<TValue, TError = any>(promise: Promise<TValue>): Promise<MaybeError<TValue, TError>> {
+        return promise
+            .then(value => MaybeError.fromValue(value))
+            .catch(error => MaybeError.fromError(error));
     }
 
     static void(): MaybeError<void, any> {
