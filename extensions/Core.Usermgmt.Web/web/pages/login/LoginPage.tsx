@@ -9,7 +9,7 @@ interface LoginPageProperties {
 }
 
 export default function LoginPage(props: LoginPageProperties): React.ReactElement {
-    return <Paper className="w-[100vw] h-[100vh] flex justify-center items-center" square>
+    return <Paper className="w-screen h-screen min-h-[100vh] flex justify-center items-center" square>
         <Container maxWidth="xs">
             <Paper className="p-3" elevation={3}>
                 <LoginControl

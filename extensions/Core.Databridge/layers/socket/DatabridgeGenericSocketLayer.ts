@@ -9,9 +9,9 @@ export type DatabridgeGenericSocketLayerMetadata<TData, TSocket extends IDatabri
 
 export default class DatabridgeGenericSocketLayer<TData, TSocket extends IDatabridgeSocket<TData>>
 implements IDatabridgeLayer<TData, TData, TData, TData, DatabridgeDefaultPipelineMetadata & DatabridgeGenericSocketLayerMetadata<TData, TSocket>> {
-    private _isStarted: boolean;
+    private _isStarted: boolean = false;
     private _connectionManager: IDatabridgeConnectionManager<TData, TSocket>;
-    private _databridge: IDatabridge<any, any, any, any, DatabridgeDefaultPipelineMetadata & DatabridgeGenericSocketLayerMetadata<TData, TSocket>>;
+    private _databridge!: IDatabridge<any, any, any, any, DatabridgeDefaultPipelineMetadata & DatabridgeGenericSocketLayerMetadata<TData, TSocket>>;
 
     constructor(connectionManager: IDatabridgeConnectionManager<TData, TSocket>) {
         this._connectionManager = connectionManager;

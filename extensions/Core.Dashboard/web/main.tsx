@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import "./style.scss";
+import "./style.css";
 import ThemeProvider from "@mui/system/ThemeProvider";
 import {createTheme} from "@mui/material/styles";
 import Router from "@extensions/Core.React/Router";

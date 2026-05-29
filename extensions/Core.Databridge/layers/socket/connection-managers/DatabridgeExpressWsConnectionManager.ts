@@ -7,13 +7,15 @@ import IDatabridgeSocket from "../IDatabridgeSocket";
 import expressWs from "express-ws";
 import { PermissionEntry } from "../../../../Core.Usermgmt/permissions";
 
-export default class DatabridgeExpressWsConnectionManager implements IDatabridgeConnectionManager<string, IDatabridgeSocket<string, wslib.WebSocket>> {
-    private _clients: Array<IDatabridgeSocket<string, wslib.WebSocket>> = [];
-    private _clientMap: Map<string, IDatabridgeSocket<string, wslib.WebSocket>> = new Map();
-    private _websocketClientIdMap: Map<wslib.WebSocket, IDatabridgeSocket<string, wslib.WebSocket>["id"]> = new Map();
+export type DatabridgeExpressWsConnectionManagerSocket = IDatabridgeSocket<string, wslib.WebSocket>;
+
+export default class DatabridgeExpressWsConnectionManager implements IDatabridgeConnectionManager<string, DatabridgeExpressWsConnectionManagerSocket> {
+    private _clients: Array<DatabridgeExpressWsConnectionManagerSocket> = [];
+    private _clientMap: Map<string, DatabridgeExpressWsConnectionManagerSocket> = new Map();
+    private _websocketClientIdMap: Map<wslib.WebSocket, DatabridgeExpressWsConnectionManagerSocket["id"]> = new Map();
     private _emitter: events.EventEmitter = new events.EventEmitter();
 
-    get clients(): IDatabridgeSocket<string, wslib.WebSocket>[] {
+    get clients(): DatabridgeExpressWsConnectionManagerSocket[] {
         return this._clients;
     }
 
@@ -33,17 +35,17 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
         return Promise.resolve();
     }
 
-    onConnectionEstablished(callback: (socket: IDatabridgeSocket<string, wslib.WebSocket>) => any): this {
+    onConnectionEstablished(callback: (socket: DatabridgeExpressWsConnectionManagerSocket) => any): this {
         this._emitter.on("connection-established", callback);
         return this;
     }
 
-    onConnectionDisconnected(callback: (socket: IDatabridgeSocket<string, wslib.WebSocket>) => any): this {
+    onConnectionDisconnected(callback: (socket: DatabridgeExpressWsConnectionManagerSocket) => any): this {
         this._emitter.on("connection-disconnected", callback);
         return this;
     }
 
-    getSocketById(id: string): IDatabridgeSocket<string, wslib.WebSocket> {
+    getSocketById(id: string): DatabridgeExpressWsConnectionManagerSocket {
         return this._clientMap.get(id);
     }
 
@@ -55,15 +57,16 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
 
             this._connectionEstablished(ws);
 
-            ws.once("close", this._connectionDisconnected.bind(this));
+            ws.once("close", (...args) => this._connectionDisconnected(ws));
             ws.on("message", (data) => this._onMessage(ws, data));
         };
     }
 
     private _connectionEstablished(websocket: wslib.WebSocket): void {
         const id = crypto.randomUUID();
-        const client = {
+        const client: DatabridgeExpressWsConnectionManagerSocket = {
             id,
+            raw: websocket,
             sendData: (data: string) => {
                 websocket.send(data);
                 return Promise.resolve();
@@ -79,10 +82,27 @@ export default class DatabridgeExpressWsConnectionManager implements IDatabridge
         this._websocketClientIdMap.set(websocket, id);
         this._clientMap.set(id, client);
         this._clients.push(client);
+
+        this._emitter.emit("connection-established", client);
     }
 
     private _connectionDisconnected(websocket: wslib.WebSocket): void {
-        websocket.removeAllListeners();
+        websocket?.removeAllListeners();
+
+        const clientId = this._websocketClientIdMap.get(websocket);
+        if (!clientId) {
+            return;
+        }
+
+        const client = this._clientMap.get(clientId);
+        if (!client) {
+            return;
+        }
+
+        this._emitter.emit("connection-disconnected", client);
+        this._clients = this._clients.filter(c => c.id !== clientId);
+        this._clientMap.delete(clientId);
+        this._websocketClientIdMap.delete(websocket);
     }
 
     private _onMessage(websocket: wslib.WebSocket, data: wslib.RawData): void {

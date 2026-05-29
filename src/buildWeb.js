@@ -7,8 +7,6 @@ const perf_hooks = require("perf_hooks");
 const tailwindcss = require("@tailwindcss/postcss");
 const postcss = require("postcss");
 
-const { default: sassPlugin } = require("esbuild-sass-plugin");
-
 const parsedArgs = minimist(process.argv.slice(2), {
     alias: {
         watch: "w",
@@ -31,6 +29,31 @@ const getExtensionConfigs = function() {
     return extensionFiles;
 }
 
+const handleCssFiles = {
+    name: "handleCssFiles",
+    setup(/** @type {any} */ build) {
+        build.onLoad({ filter: /\.css$/ }, async (/** @type {any} */ args) => {
+            const sourceCSS = await fs.promises.readFile(args.path, "utf8");
+            const result = await postcss([tailwindcss({base: path.resolve(__dirname, "..", "extensions"), optimize: true})]).process(sourceCSS, {
+              from: args.path
+            });
+
+            const safeCSS = result.css
+                .replace(/`/g, "\\`")
+                .replace(/\$/g, "\\$");
+
+            const injectJS = `
+              const style = document.createElement('style');
+              style.textContent = \`${safeCSS}\`;
+              document.head.appendChild(style);
+            `.trim();
+
+            // Return as JavaScript
+            return { contents: injectJS, loader: "js" };
+        });
+    }
+};
+
 const buildWebApp = async function() {
     const extensionConfigs = getExtensionConfigs();
 
@@ -44,18 +67,7 @@ const buildWebApp = async function() {
         outbase: path.resolve(__dirname, "..", "extensions"),
         outdir: path.resolve(__dirname, "..", "out"),
         sourcemap: parsedArgs.mode === "development" ? "both" : undefined,
-        plugins: [sassPlugin({
-            type: "style",
-            async transform(source, resolveDir) {
-                // @ts-ignore
-                const {css} = await postcss([
-                    tailwindcss
-                ]).process(source);
-
-                return css;
-            },
-            cache: false,
-        })],
+        plugins: [handleCssFiles],
         legalComments: "external",
         minify: parsedArgs.mode !== "development",
         lineLimit: parsedArgs.mode === "development" ? 0 : 0,

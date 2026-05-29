@@ -125,7 +125,7 @@ export default class UsermgmtWebApi {
     }
 
     static buildUrl(path: string, replace: [RegExp, string][] = []): string {
-        let finalPath = `${Urls.base}/${path}`;
+        let finalPath = `${Urls.base}${path}`;
 
         for(const [key, value] of replace) {
             finalPath = finalPath.replace(key, value);

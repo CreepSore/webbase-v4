@@ -63,12 +63,12 @@ export default class DatabridgeMultiLayer<TIn, TLayerIn = TIn, TOut = any, TMeta
 
     attachOutboundLayer<TNewIn, TNewMetadata>(layer: IDatabridgeOutboundLayer<TLayerIn, TNewIn, TMetadata & TNewMetadata>): DatabridgeMultiLayer<TIn, TNewIn, TOut, TMetadata & TNewMetadata> {
         this.attachLayer(layer);
-        return this as any;
+        return this as unknown as DatabridgeMultiLayer<TIn, TNewIn, TOut, TMetadata & TNewMetadata>;
     }
 
     attachInboundLayer<TNewIn, TNewMetadata>(layer: IDatabridgeInboundLayer<TLayerIn, TNewIn, TMetadata & TNewMetadata>): DatabridgeMultiLayer<TIn, TNewIn, TOut, TMetadata & TNewMetadata> {
         this.attachLayer(layer);
-        return this as any;
+        return this as unknown as DatabridgeMultiLayer<TIn, TNewIn, TOut, TMetadata & TNewMetadata>;
     }
 
     private attachLayer(layer: IDatabridgeLayer<any, any, any>): void {
