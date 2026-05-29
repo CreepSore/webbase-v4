@@ -39,6 +39,7 @@ const handleCssFiles = {
             });
 
             const safeCSS = result.css
+                .replace(/\\/g, "\\\\")
                 .replace(/`/g, "\\`")
                 .replace(/\$/g, "\\$");
 
@@ -48,7 +49,6 @@ const handleCssFiles = {
               document.head.appendChild(style);
             `.trim();
 
-            // Return as JavaScript
             return { contents: injectJS, loader: "js" };
         });
     }
