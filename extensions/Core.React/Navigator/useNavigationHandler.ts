@@ -3,6 +3,8 @@ import FullNavigator from "./FullNavigator";
 
 interface UseNavigationHandlerOptions<NavigationKeyType, NavigationArgumentsType> {
     defaultPage: NavigationKeyType;
+    /** default 'true' */
+    persistCurrentPage?: boolean;
     shouldHandleNavigationRequest?: (navigationKey: NavigationKeyType, navigationArguments: NavigationArgumentsType) => boolean;
 }
 
@@ -11,15 +13,18 @@ export default function useNavigationHandler<
     NavigationArgumentsType = any
 >(options: UseNavigationHandlerOptions<NavigationKeyType, NavigationArgumentsType>): FullNavigator<NavigationKeyType, NavigationArgumentsType> {
     const [currentPage, setCurrentPage] = React.useState<NavigationKeyType>(options.defaultPage);
-    const [currentArgs, setCurrentArgs] = React.useState<NavigationArgumentsType>(null);
+    const [currentArgs, setCurrentArgs] = React.useState<NavigationArgumentsType>(null as NavigationArgumentsType);
+    const [persistCurrentPage, setPersistCurrentPage] = React.useState(options.persistCurrentPage ?? true);
     const [pageStack, setPageStack] = React.useState<Array<{
         navKey: NavigationKeyType,
         args: NavigationArgumentsType
     }>>([]);
 
     const doNavigationRequest = (key: NavigationKeyType, args: NavigationArgumentsType): void => {
-        const shouldHandleRequest = options.shouldHandleNavigationRequest?.(key, args);
-        if(!shouldHandleRequest && !options.shouldHandleNavigationRequest) {
+        if(
+            options.shouldHandleNavigationRequest
+            && options.shouldHandleNavigationRequest(key, args)
+        ) {
             return;
         }
 
@@ -27,7 +32,9 @@ export default function useNavigationHandler<
         setCurrentPage(key);
         setCurrentArgs(args);
 
-        location.hash = key;
+        if(persistCurrentPage) {
+            location.hash = key;
+        }
     };
 
     const doBackRequest = (): boolean => {
@@ -46,7 +53,10 @@ export default function useNavigationHandler<
 
     const forceCurrentPage = (page: NavigationKeyType): void => {
         setCurrentPage(page);
-        location.hash = page;
+
+        if(persistCurrentPage) {
+            location.hash = page;
+        }
     };
 
     const updateCurrentArguments = (args: NavigationArgumentsType): void => {
