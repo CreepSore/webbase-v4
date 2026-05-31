@@ -4,7 +4,7 @@ import MeContext from "../me-provider/MeContext";
 import { PermissionEntry } from "@extensions/Core.Usermgmt/permissions";
 
 interface PermissionCheckProperties {
-    permissions: Array<string|PermissionEntry>|Array<string[]|PermissionEntry[]>;
+    permissions: Array<string|PermissionEntry>|Array<string[]|PermissionEntry[]>|string|PermissionEntry;
 }
 
 /**
@@ -13,6 +13,10 @@ interface PermissionCheckProperties {
 export default function PermissionCheck(props: React.PropsWithChildren<PermissionCheckProperties>): React.ReactElement {
     const me = useContext(MeContext);
     const hasPermissions = React.useMemo(() => {
+        if(!Array.isArray(props.permissions)) {
+            return me.hasPermission(props.permissions);
+        }
+
         if(Array.isArray(props.permissions[0])) {
             // ! WTF?
             // @ts-ignore
