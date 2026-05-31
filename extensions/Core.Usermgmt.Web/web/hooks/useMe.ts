@@ -10,9 +10,9 @@ export default function useMe(): {
     hasPermission: (key: string|PermissionEntry) => boolean,
     isAnonymous: () => boolean,
     isLoading: boolean
-    } {
+} {
     const [loading, setLoading] = React.useState(true);
-    const [currentMe, setCurrentMe] = React.useState<IUser>(null);
+    const [currentMe, setCurrentMe] = React.useState<IUser>({username: "", email: "", groups: [], authentication: [], apiKeys: []});
 
     const permissions = React.useMemo<IPermission[]>(() => {
         if(!currentMe) return [];
