@@ -23,7 +23,7 @@ export default function useNavigationHandler<
     const doNavigationRequest = (key: NavigationKeyType, args: NavigationArgumentsType): void => {
         if(
             options.shouldHandleNavigationRequest
-            && options.shouldHandleNavigationRequest(key, args)
+            && !options.shouldHandleNavigationRequest(key, args)
         ) {
             return;
         }

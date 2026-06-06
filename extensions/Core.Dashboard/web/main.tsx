@@ -48,21 +48,20 @@ function Main(): React.ReactElement {
     });
 
     const dataStream = useDataStream();
-
     const me = useMe();
 
     React.useEffect(() => {
-        if(!me.me) {
+        if(!me.me || me.isLoading) {
             return;
         }
 
-        if(me.me.username === "Anonymous") {
+        if(me.isAnonymous()) {
             UsermgmtWebApi.startLoginProcess(location.href);
             return;
         }
 
         navigator.forceCurrentPage("home");
-    }, [me.me]);
+    }, [me.me, me.isLoading]);
 
     return <ThemeProvider theme={theme}>
         <DataStreamContext.Provider value={dataStream}>

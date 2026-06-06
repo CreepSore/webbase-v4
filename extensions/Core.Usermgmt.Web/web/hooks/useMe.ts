@@ -12,11 +12,9 @@ export default function useMe(): {
     isLoading: boolean
 } {
     const [loading, setLoading] = React.useState(true);
-    const [currentMe, setCurrentMe] = React.useState<IUser>({username: "", email: "", groups: [], authentication: [], apiKeys: []});
+    const [currentMe, setCurrentMe] = React.useState<IUser>({username: "Anonymous", groups: [], authentication: [], apiKeys: []});
 
     const permissions = React.useMemo<IPermission[]>(() => {
-        if(!currentMe) return [];
-
         return (currentMe.groups || [])
             .map(g => g.permissions)
             .filter(Boolean)
