@@ -6,10 +6,12 @@ import INamedComponent from "../components/INamedComponent";
 import IComponent from "../components/interface/IComponent";
 import IComponentFactory from "../components/interface/IComponentFactory";
 import INamedComponentFactory from "../components/interface/INamedComponentFactory";
+import ISerializableComponent from "../components/interface/ISerializableComponent";
 import IComponentContainer from "./IComponentContainer";
 
 export type ComponentContainerSerializable = {
     components: Record<string, any>;
+    serializedComponents: Record<string, any>;
     componentFactories: Record<string, {
         factoryId: any,
         type: ComponentFactoryType
@@ -22,9 +24,14 @@ IProducesSerializable<ComponentContainerSerializable> {
     private _components: Map<string, TComponents> = new Map();
     private _componentFactories: Map<string, IComponentFactory<TComponents>> = new Map();
     private _componentFactoryTypes: Map<string, ComponentFactoryType> = new Map();
+    private _serializedData: Map<string, any> = new Map();
 
     get components(): ReadonlyMap<string, TComponents> {
         return this._components;
+    }
+
+    get factories(): ReadonlyMap<string, IComponentFactory<TComponents>> {
+        return this._componentFactories;
     }
 
     attachComponent<TComponent extends TComponents>(id: string, component: TComponent): IComponentContainer<TComponents> {
@@ -65,16 +72,28 @@ IProducesSerializable<ComponentContainerSerializable> {
         return this;
     }
 
+    defineSerializableData(id: string, data: any): IComponentContainer<TComponents> {
+        this._serializedData.set(id, data);
+        return this;
+    }
+
     produceSerializable(): ComponentContainerSerializable {
         const result: ComponentContainerSerializable = {
-            components: [],
+            components: {},
+            serializedComponents: {},
             componentFactories: {},
         };
 
         for(const [componentId, component] of this._components) {
-            const componentAsNamed = component as unknown as INamedComponent;
+            const componentAsNamed = component as any as INamedComponent;
             if(!componentAsNamed.id) {
                 continue;
+            }
+
+            const componentAsSerializable = component as any as Partial<ISerializableComponent<any>>;
+            if(componentAsSerializable.produceSerializable) {
+                const serialized = componentAsSerializable.produceSerializable();
+                result.serializedComponents[componentId] = serialized;
             }
 
             result.components[componentId] = componentAsNamed.id;
@@ -118,6 +137,14 @@ IProducesSerializable<ComponentContainerSerializable> {
 
         switch(type) {
             case ComponentFactoryType.SINGLETON:
+                const instanceAsSerializable = instance as any as ICanApplySerializable<any>;
+                if(instanceAsSerializable.applySerializable) {
+                    const serializedData = this._serializedData.get(id);
+                    if(serializedData) {
+                        instanceAsSerializable.applySerializable(serializedData);
+                    }
+                }
+
                 this._components.set(id, instance);
                 break;
 

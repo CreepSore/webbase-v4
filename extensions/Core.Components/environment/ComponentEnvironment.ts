@@ -5,6 +5,7 @@ import IProducesSerializable from "../../Core.Interfaces/seralization/IProducesS
 import INamedComponent from "../components/INamedComponent";
 import IComponent from "../components/interface/IComponent";
 import INamedComponentFactory from "../components/interface/INamedComponentFactory";
+import ISerializableComponent from "../components/interface/ISerializableComponent";
 import ComponentContainer, { ComponentContainerSerializable } from "../container/ComponentContainer";
 import ComponentEnvironmentInitializeError from "./ComponentEnvironmentInitializeError";
 
@@ -36,13 +37,8 @@ export default class ComponentEnvironment<TComponents extends IComponent> implem
     }
 
     applySerializable(serialized: ComponentEnvironmentSerializable): IMaybeError<void> {
-        for(const [componentId, componentName] of Object.entries(serialized.componentContainer.components)) {
-            const component = this._components.get(componentName);
-            if(!component) {
-                return MaybeError.fromError(new ComponentEnvironmentInitializeError(`Component not found: ${componentName}`));
-            }
-
-            this._container.attachComponent(componentId, component as any as TComponents);
+        for(const [componentId, serializedData] of Object.entries(serialized.componentContainer.serializedComponents)) {
+            this._container.defineSerializableData(componentId, serializedData);
         }
 
         for(const [componentId, factoryData] of Object.entries(serialized.componentContainer.componentFactories)) {
@@ -52,6 +48,25 @@ export default class ComponentEnvironment<TComponents extends IComponent> implem
             }
 
             this._container.attachComponentFactory(componentId, factory, factoryData.type);
+        }
+
+        for(const [componentId, componentName] of Object.entries(serialized.componentContainer.components)) {
+            if(this.container.factories.has(componentId)) {
+                continue;
+            }
+
+            const component = this._components.get(componentName);
+            if(!component) {
+                return MaybeError.fromError(new ComponentEnvironmentInitializeError(`Component not found: ${componentName}`));
+            }
+
+            const serializedData = serialized.componentContainer.serializedComponents[componentId];
+            const componentAsSerializable = component as Partial<ISerializableComponent<any>>;
+            if(serializedData && componentAsSerializable.applySerializable) {
+                componentAsSerializable.applySerializable(serializedData);
+            }
+
+            this._container.attachComponent(componentId, component as any as TComponents);
         }
 
         return MaybeError.void();
