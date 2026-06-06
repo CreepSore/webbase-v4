@@ -13,16 +13,24 @@ export type ComponentEnvironmentSerializable = {
 };
 
 export default class ComponentEnvironment<TComponents extends IComponent> implements IProducesSerializable<ComponentEnvironmentSerializable>, ICanApplySerializable<ComponentEnvironmentSerializable> {
-    private _container: ComponentContainer<any> = new ComponentContainer();
+    private _container: ComponentContainer<TComponents> = new ComponentContainer();
     private _components: Map<string, INamedComponent> = new Map();
     private _factories: Map<string, INamedComponentFactory<TComponents>> = new Map();
 
-    registerComponent(component: INamedComponent): this {
+    get container(): ComponentContainer<TComponents> {
+        return this._container;
+    }
+
+    registerComponent<TComponent extends INamedComponent>(component: TComponent): this {
         this._components.set(component.id, component);
         return this;
     }
 
-    registerFactory(factory: INamedComponentFactory<TComponents>): this {
+    registerFactory<TFactory extends INamedComponentFactory<TComponents>>(factory: TFactory): this {
+        if(!factory.id) {
+            return this;
+        }
+
         this._factories.set(factory.id, factory);
         return this;
     }
@@ -34,7 +42,7 @@ export default class ComponentEnvironment<TComponents extends IComponent> implem
                 return MaybeError.fromError(new ComponentEnvironmentInitializeError(`Component not found: ${componentName}`));
             }
 
-            this._container.attachComponent(componentId, component);
+            this._container.attachComponent(componentId, component as any as TComponents);
         }
 
         for(const [componentId, factoryData] of Object.entries(serialized.componentContainer.componentFactories)) {
