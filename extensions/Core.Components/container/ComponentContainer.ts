@@ -1,9 +1,24 @@
+import IMaybeError from "../../Core.Interfaces/return-types/IMaybeError";
+import ICanApplySerializable from "../../Core.Interfaces/seralization/ICanApplySerializable";
+import IProducesSerializable from "../../Core.Interfaces/seralization/IProducesSerializable";
 import { ComponentFactoryType } from "../components/ComponentFactoryType";
+import INamedComponent from "../components/INamedComponent";
 import IComponent from "../components/interface/IComponent";
 import IComponentFactory from "../components/interface/IComponentFactory";
+import INamedComponentFactory from "../components/interface/INamedComponentFactory";
 import IComponentContainer from "./IComponentContainer";
 
-export default class ComponentContainer<TComponents extends IComponent> implements IComponentContainer<TComponents> {
+export type ComponentContainerSerializable = {
+    components: Record<string, any>;
+    componentFactories: Record<string, {
+        factoryId: any,
+        type: ComponentFactoryType
+    }>;
+};
+
+export default class ComponentContainer<TComponents extends IComponent> implements
+IComponentContainer<TComponents>,
+IProducesSerializable<ComponentContainerSerializable> {
     private _components: Map<string, TComponents> = new Map();
     private _componentFactories: Map<string, IComponentFactory<TComponents>> = new Map();
     private _componentFactoryTypes: Map<string, ComponentFactoryType> = new Map();
@@ -48,6 +63,42 @@ export default class ComponentContainer<TComponents extends IComponent> implemen
         this._componentFactories.delete(id);
         this._componentFactoryTypes.delete(id);
         return this;
+    }
+
+    produceSerializable(): ComponentContainerSerializable {
+        const result: ComponentContainerSerializable = {
+            components: [],
+            componentFactories: {},
+        };
+
+        for(const [componentId, component] of this._components) {
+            const componentAsNamed = component as unknown as INamedComponent;
+            if(!componentAsNamed.id) {
+                continue;
+            }
+
+            result.components[componentId] = componentAsNamed.id;
+        }
+
+        for(const [componentId, factory] of this._componentFactories) {
+            const factoryAsNamed = factory as INamedComponentFactory<any>;
+            if(!factoryAsNamed.id) {
+                continue;
+            }
+
+            const type = this._componentFactoryTypes.get(componentId);
+
+            if(!type) {
+                continue;
+            }
+
+            result.componentFactories[componentId] = {
+                factoryId: factoryAsNamed.id,
+                type: type,
+            };
+        }
+
+        return result;
     }
 
     private _getComponent<TComponent extends TComponents>(id: string): TComponent | null {
