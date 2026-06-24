@@ -11,6 +11,12 @@ export default class ValidationResult implements IValidationResult {
         return this._invalidProperties;
     }
 
+    constructor(invalidProperties: Record<string, string> = {}) {
+        for (const [name, error] of Object.entries(invalidProperties)) {
+            this._invalidProperties.set(name, error);
+        }
+    }
+
     addInvalidProperty(name: string, error: string): this {
         this._invalidProperties.set(name, error);
         return this;
