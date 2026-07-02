@@ -1,7 +1,0 @@
-{
-    "appBuildConfig": {
-        "externals": {
-            "mongoose": "commonjs mongoose"
-        }
-    }
-}

@@ -3,22 +3,22 @@ import IExtension, { ExtensionMetadata } from "@service/extensions/IExtension";
 import ConfigLoader from "@logic/config/ConfigLoader";
 import Core from "@extensions/Core";
 
-class CoreDbConfig {
+class CoreDbPostgresConfig {
 
 }
 
-export default class CoreDb implements IExtension {
+export default class CoreDbPostgres implements IExtension {
     static metadata: ExtensionMetadata = {
-        name: "Core.Db",
+        name: "Core.Db.Postgres",
         version: "1.0.0",
-        description: "Database driver module",
+        description: "Template Module",
         author: "ehdes",
         dependencies: [Core],
     };
 
-    metadata: ExtensionMetadata = CoreDb.metadata;
+    metadata: ExtensionMetadata = CoreDbPostgres.metadata;
 
-    config: CoreDbConfig = new CoreDbConfig();
+    config: CoreDbPostgresConfig = new CoreDbPostgresConfig();
     $!: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     constructor() {
@@ -64,7 +64,7 @@ export default class CoreDb implements IExtension {
         return ConfigLoader.initConfigWithModel(
             configPath,
             templatePath,
-            new CoreDbConfig(),
+            new CoreDbPostgresConfig(),
             createDefault,
         );
     }
