@@ -7,7 +7,7 @@ import IAuthenticator from "./IAuthenticator";
 
 export default class TotpAuthenticator implements IAuthenticator<TotpAuthenticationType, TotpAuthenticationParameters> {
     authenticate(authenticationType: TotpAuthenticationType, parameter: TotpAuthenticationParameters): Promise<AuthenticationResult> {
-        if(!parameter.totp) {
+        if(!parameter.totp || typeof parameter.totp !== "string") {
             return Promise.resolve(AuthenticationHandler.createErrorResult("No totp-code provided", "NO_TOTP_PROVIDED"));
         }
 

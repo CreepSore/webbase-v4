@@ -14,7 +14,7 @@ export default class PermanentKeyAuthenticator implements IAuthenticator<Permane
     }
 
     async authenticate(authenticationType: PermanentKeyAuthenticationType, parameter: PermanentKeyAuthenticationParameters): Promise<AuthenticationResult> {
-        if(!authenticationType.keys.includes(parameter.key)) {
+        if(typeof parameter.key !== "string" || !authenticationType.keys.includes(parameter.key)) {
             return AuthenticationHandler.createErrorResult("Invalid Key", "INVALID_KEY");
         }
 

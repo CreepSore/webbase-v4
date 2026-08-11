@@ -15,7 +15,7 @@ export default class OnceKeyAuthenticator implements IAuthenticator<OnceKeyAuthe
     }
 
     async authenticate(authenticationType: OnceKeyAuthenticationType, parameter: OnceKeyAuthenticationParameters): Promise<AuthenticationResult> {
-        if(!authenticationType.keys.includes(parameter.key)) {
+        if(typeof parameter.key !== "string" || !authenticationType.keys.includes(parameter.key)) {
             return AuthenticationHandler.createErrorResult("Invalid Key", "INVALID_KEY");
         }
 

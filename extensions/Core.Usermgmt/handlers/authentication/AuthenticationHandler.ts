@@ -9,9 +9,9 @@ import AuthenticatorRegistry from "./authenticators/AuthenticatorRegistry";
 
 export default class AuthenticationHandler {
     private _registry: AuthenticatorRegistry;
-    user: HydratedDocument<IUser>;
+    user: HydratedDocument<IUser> | null;
 
-    constructor(user: HydratedDocument<IUser>, registry: AuthenticatorRegistry) {
+    constructor(user: HydratedDocument<IUser> | null, registry: AuthenticatorRegistry) {
         this.user = user;
         this._registry = registry;
     }
@@ -25,12 +25,12 @@ export default class AuthenticationHandler {
         }
 
         if(!this.user.authentication) {
-            return AuthenticationHandler.createErrorResult("Invalid Authentication Type", "INVALID_AUTHENTICATION_TYPE");
+            return Promise.resolve(AuthenticationHandler.createErrorResult("Invalid Authentication Type", "INVALID_AUTHENTICATION_TYPE"));
         }
 
         const authenticationType = this.user.authentication.find(a => a.type === parameter.type);
         if(!authenticationType) {
-            return AuthenticationHandler.createErrorResult("Invalid Authentication Type", "INVALID_AUTHENTICATION_TYPE");
+            return Promise.resolve(AuthenticationHandler.createErrorResult("Invalid Authentication Type", "INVALID_AUTHENTICATION_TYPE"));
         }
 
         return this.authenticateType(authenticationType, parameter);
@@ -69,11 +69,11 @@ export default class AuthenticationHandler {
 
     getAuthenticationTypes(): AuthenticationType["type"][] {
         if(!this.user) {
-            return null;
+            return [];
         }
 
         if(!this.user.authentication || this.user.authentication.length === 0) {
-            return null;
+            return [];
         }
 
         return this.user.authentication.map(a => a.type);
@@ -82,6 +82,10 @@ export default class AuthenticationHandler {
     addOrUpdateAuthenticationType(authenticationType: AuthenticationType, save: false): void;
     addOrUpdateAuthenticationType(authenticationType: AuthenticationType, save: true): Promise<IUser>;
     addOrUpdateAuthenticationType(authenticationType: AuthenticationType, save: boolean): Promise<IUser> | void {
+        if(!this.user) {
+            return;
+        }
+
         this.deleteAuthenticationType(authenticationType.type, false);
         this.user.authentication.push(authenticationType);
 
@@ -93,6 +97,10 @@ export default class AuthenticationHandler {
     deleteAuthenticationType(type: AuthenticationType["type"], save: false): void;
     deleteAuthenticationType(type: AuthenticationType["type"], save: true): Promise<IUser>;
     deleteAuthenticationType(type: AuthenticationType["type"], save: boolean): Promise<IUser> | void {
+        if(!this.user) {
+            return;
+        }
+
         this.user.authentication = this.user.authentication.filter(a => a.type !== type);
 
         if(save) {
@@ -106,7 +114,7 @@ export default class AuthenticationHandler {
             populate: {
                 path: "permissions",
             },
-        });
+        }) as Promise<HydratedDocument<IUser>>;
     }
 
     static getAnonymousUser(): Promise<HydratedDocument<IUser>> {
@@ -115,15 +123,13 @@ export default class AuthenticationHandler {
             populate: {
                 path: "permissions",
             },
-        });
+        }) as Promise<HydratedDocument<IUser>>;
     }
 
-    static createSuccessResult(userId: string = null): AuthenticationResult {
+    static createSuccessResult(userId?: string): AuthenticationResult {
         return {
             success: true,
             additionalInformation: {},
-            error: null,
-            errorCode: null,
             userId,
         };
     }
@@ -134,7 +140,6 @@ export default class AuthenticationHandler {
             error,
             errorCode,
             additionalInformation: {},
-            userId: null,
         };
     }
 
@@ -146,6 +151,12 @@ export default class AuthenticationHandler {
     }
 
     static async fromUsername(username: string, registry: AuthenticatorRegistry): Promise<AuthenticationHandler> {
-        return new AuthenticationHandler(await User.findOne({username}), registry);
+        if(typeof username !== "string") {
+            return new AuthenticationHandler(null, registry);
+        }
+
+        return new AuthenticationHandler(await User.findOne({
+            username: username,
+        }), registry);
     }
 }

@@ -9,7 +9,7 @@ export default class PasswordAuthenticator implements IAuthenticator<PasswordAut
         authenticationType: PasswordAuthenticationType,
         parameter: PasswordAuthenticationParameters,
     ): Promise<AuthenticationResult> {
-        if(!parameter.password) {
+        if(!parameter.password || typeof parameter.password !== "string") {
             return Promise.resolve(AuthenticationHandler.createErrorResult("No password provided", "NO_PASSWORD_PROVIDED"));
         }
 

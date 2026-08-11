@@ -1,8 +1,8 @@
 type AuthenticationResult<T = any> = {
     success: boolean;
-    error: string;
-    errorCode: string;
-    userId: string;
+    error?: string;
+    errorCode?: string;
+    userId?: string | null;
     additionalInformation: T;
 };
 

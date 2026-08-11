@@ -16,7 +16,7 @@ export default function createAuthenticationRouter(authenticatorRegistry: Authen
     });
 
     router.get(Urls.auth.logout, async(req, res) => {
-        req.session.userId = null;
+        delete req.session.userId;
         res.json({success: true});
     });
 

@@ -41,7 +41,7 @@ class CoreUsermgmtWebConfig {
         enabled: false,
         entries: [
             {ip: "127.0.0.1", username: "Root"},
-            {dns: "localhost", username: "Root"},
+            {dns: "localhost", username: "Root", ip: ""},
         ],
     };
 }
@@ -60,7 +60,7 @@ export default class CoreUsermgmtWeb implements IExtension {
 
     config: CoreUsermgmtWebConfig = new CoreUsermgmtWebConfig();
     events: EventEmitter = new EventEmitter();
-    $: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
+    $!: <T extends IExtension>(name: string|Function & { prototype: T }) => T;
 
     constructor() {
         this.config = this.loadConfig(true);
@@ -103,7 +103,7 @@ export default class CoreUsermgmtWeb implements IExtension {
                     ip: al.ip,
                     username: al.username,
                 };
-            }))).filter(Boolean);
+            }))).filter(Boolean) as {ip: string, username: string}[];
         }
 
         const coreWeb = this.$(CoreWeb);
